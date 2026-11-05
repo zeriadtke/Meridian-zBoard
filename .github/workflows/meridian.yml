@@ -62,7 +62,7 @@ jobs:
         id: apk
         continue-on-error: true
         run: |
-          dotnet build ZBoard.csproj -c Release -f net10.0-android -p:AndroidPackageFormats=apk *>&1 | Tee-Object ci-logs/apk.log
+          dotnet build ZBoard.csproj -c Release -f net10.0-android -p:AndroidPackageFormats=apk -v:n *>&1 | Tee-Object ci-logs/apk.log
           $code = $LASTEXITCODE
           if ($code -eq 0) {
             $apk = Get-ChildItem bin/Release/net10.0-android -Filter *-Signed.apk | Select-Object -First 1
