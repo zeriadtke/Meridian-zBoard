@@ -42,8 +42,8 @@ public sealed class MeridianBridge(Context context)
             {
                 switch (value)
                 {
-                    case long l: values.Put(key, new Java.Lang.Long(l)); break;
-                    case double d: values.Put(key, new Java.Lang.Double(d)); break;
+                    case long l: values.Put(key, l); break;
+                    case double d: values.Put(key, d); break;
                 }
             }
 
