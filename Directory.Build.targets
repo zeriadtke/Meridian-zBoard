@@ -21,17 +21,18 @@
     Signierung mit dem gemeinsamen Meridian-Schlüssel (wie Meridian.App.csproj). Pflicht für die Datenübergabe:
     Meridian schützt seinen Provider mit protectionLevel="signature".
     MERIDIAN_KEYSTORE (Pfad), MERIDIAN_KEYSTORE_PASSWORD, optional MERIDIAN_KEY_ALIAS (Standard "zheal") und
-    MERIDIAN_KEY_PASSWORD (Standard = Keystore-Passwort). Gilt für Debug und Release.
+    MERIDIAN_KEY_PASSWORD (Standard = Keystore-Passwort). Gilt für Debug und Release. Passwörter werden wie in
+    Meridian.App.csproj über "env:" gelesen, damit Sonderzeichen nicht von MSBuild verändert werden.
   -->
   <PropertyGroup Condition="'$(MSBuildProjectName)' == 'ZBoard' And '$(MERIDIAN_KEYSTORE)' != '' And '$(MERIDIAN_KEYSTORE_PASSWORD)' != '' And Exists('$(MERIDIAN_KEYSTORE)')">
     <MeridianSigned>true</MeridianSigned>
     <AndroidKeyStore>true</AndroidKeyStore>
     <AndroidSigningKeyStore>$(MERIDIAN_KEYSTORE)</AndroidSigningKeyStore>
-    <AndroidSigningStorePass>$(MERIDIAN_KEYSTORE_PASSWORD)</AndroidSigningStorePass>
+    <AndroidSigningStorePass>env:MERIDIAN_KEYSTORE_PASSWORD</AndroidSigningStorePass>
     <AndroidSigningKeyAlias Condition="'$(MERIDIAN_KEY_ALIAS)' != ''">$(MERIDIAN_KEY_ALIAS)</AndroidSigningKeyAlias>
     <AndroidSigningKeyAlias Condition="'$(MERIDIAN_KEY_ALIAS)' == ''">zheal</AndroidSigningKeyAlias>
-    <AndroidSigningKeyPass Condition="'$(MERIDIAN_KEY_PASSWORD)' != ''">$(MERIDIAN_KEY_PASSWORD)</AndroidSigningKeyPass>
-    <AndroidSigningKeyPass Condition="'$(MERIDIAN_KEY_PASSWORD)' == ''">$(MERIDIAN_KEYSTORE_PASSWORD)</AndroidSigningKeyPass>
+    <AndroidSigningKeyPass Condition="'$(MERIDIAN_KEY_PASSWORD)' != ''">env:MERIDIAN_KEY_PASSWORD</AndroidSigningKeyPass>
+    <AndroidSigningKeyPass Condition="'$(MERIDIAN_KEY_PASSWORD)' == ''">env:MERIDIAN_KEYSTORE_PASSWORD</AndroidSigningKeyPass>
   </PropertyGroup>
 
   <!-- Ohne Meridian-Schlüssel: Testschlüssel von zBoard (auch für Release), damit der Build durchläuft. -->
