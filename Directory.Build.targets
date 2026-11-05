@@ -1,0 +1,50 @@
+<Project>
+  <!--
+    zHeal Meridian: Build-Einstellungen der Meridian-Tastatur. Nicht Teil von zBoard (upstream).
+    MSBuild liest diese Datei NACH ZBoard.csproj, daher überschreiben die Werte hier die von zBoard, ohne dass
+    ZBoard.csproj geändert werden muss (konfliktfreie Merges von upstream). Siehe Meridian/README.md.
+  -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'ZBoard'">
+    <!-- Diese Kennung erwartet die Meridian-App (MeridianKeyboard.PackageName) -->
+    <ApplicationId>de.World_of_Bytes.zHeal.Meridian.Keyboard</ApplicationId>
+    <ApplicationTitle>zHeal Meridian Tastatur</ApplicationTitle>
+    <!--
+      versionCode = 1 000 000 + versionCode von zBoard. So liegt jede Version über der früheren Meridian-Tastatur
+      auf Basis von AnySoftKeyboard (gleiche Kennung) und steigt mit jeder zBoard-Version weiter.
+    -->
+    <ApplicationVersion>$([MSBuild]::Add(1000000, $(ApplicationVersion)))</ApplicationVersion>
+    <ApplicationDisplayVersion>$(ApplicationDisplayVersion)-meridian</ApplicationDisplayVersion>
+    <DefineConstants>$(DefineConstants);MERIDIAN</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+    Signierung mit dem gemeinsamen Meridian-Schlüssel (wie Meridian.App.csproj). Pflicht für die Datenübergabe:
+    Meridian schützt seinen Provider mit protectionLevel="signature".
+    MERIDIAN_KEYSTORE (Pfad), MERIDIAN_KEYSTORE_PASSWORD, optional MERIDIAN_KEY_ALIAS (Standard "zheal") und
+    MERIDIAN_KEY_PASSWORD (Standard = Keystore-Passwort). Gilt für Debug und Release.
+  -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'ZBoard' And '$(MERIDIAN_KEYSTORE)' != '' And '$(MERIDIAN_KEYSTORE_PASSWORD)' != '' And Exists('$(MERIDIAN_KEYSTORE)')">
+    <MeridianSigned>true</MeridianSigned>
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>$(MERIDIAN_KEYSTORE)</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>$(MERIDIAN_KEYSTORE_PASSWORD)</AndroidSigningStorePass>
+    <AndroidSigningKeyAlias Condition="'$(MERIDIAN_KEY_ALIAS)' != ''">$(MERIDIAN_KEY_ALIAS)</AndroidSigningKeyAlias>
+    <AndroidSigningKeyAlias Condition="'$(MERIDIAN_KEY_ALIAS)' == ''">zheal</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass Condition="'$(MERIDIAN_KEY_PASSWORD)' != ''">$(MERIDIAN_KEY_PASSWORD)</AndroidSigningKeyPass>
+    <AndroidSigningKeyPass Condition="'$(MERIDIAN_KEY_PASSWORD)' == ''">$(MERIDIAN_KEYSTORE_PASSWORD)</AndroidSigningKeyPass>
+  </PropertyGroup>
+
+  <!-- Ohne Meridian-Schlüssel: Testschlüssel von zBoard (auch für Release), damit der Build durchläuft. -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'ZBoard' And '$(MeridianSigned)' != 'true'">
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>$(MSBuildThisFileDirectory)signing/zboard-test.keystore</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>zboard-test</AndroidSigningStorePass>
+    <AndroidSigningKeyAlias>zboard-test</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass>zboard-test</AndroidSigningKeyPass>
+  </PropertyGroup>
+
+  <Target Name="MeridianSigningHint" BeforeTargets="Build"
+          Condition="'$(MSBuildProjectName)' == 'ZBoard' And '$(MeridianSigned)' != 'true'">
+    <Warning Text="zHeal Meridian: MERIDIAN_KEYSTORE/MERIDIAN_KEYSTORE_PASSWORD nicht gesetzt – signiert mit dem zBoard-Testschlüssel. Meridian nimmt von dieser APK KEINE Tipp-Daten an (anderer Schlüssel)." />
+  </Target>
+</Project>

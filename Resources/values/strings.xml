@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">zBoard</string>
+  <string name="app_name">zHeal Meridian Tastatur</string>
   <string name="subtype_de">Deutsch</string>
   <string name="subtype_en">English (US)</string>
   <string name="subtype_fr">Français</string>

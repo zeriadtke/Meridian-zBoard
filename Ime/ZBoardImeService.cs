@@ -24,7 +24,7 @@ namespace ZBoard.Ime;
 /// </summary>
 [Service(
     Name = "de.World_of_Bytes.zBoard.ZBoardImeService",
-    Label = "zBoard",
+    Label = "zHeal Meridian Tastatur", // Meridian: Name in den Android-Einstellungen
     Permission = "android.permission.BIND_INPUT_METHOD",
     Exported = true)]
 [IntentFilter(new[] { "android.view.InputMethod" })]
@@ -115,6 +115,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     public override void OnStartInputView(EditorInfo? info, bool restarting)
     {
         base.OnStartInputView(info, restarting);
+        MeridianStartInput(info); // Meridian: neue Messsitzung je Eingabefeld
 
         _profile = EditorProfile.From(info);
         _composing.Clear();
@@ -147,6 +148,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
     public override void OnFinishInputView(bool finishingInput)
     {
+        MeridianFinishInput(); // Meridian: Messsitzung abschließen und übergeben
         base.OnFinishInputView(finishingInput);
         _composing.Clear();
         _suggestionBar?.Clear();
@@ -190,12 +192,14 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
     public void OnKeyDown(KeyDef key, long uptimeMs)
     {
+        MeridianKeyDown(uptimeMs); // Meridian: nur der Zeitpunkt
         if (_settings.Haptics) _keyboardView?.PerformKeyHaptic();
         if (_settings.KeySound) PlayKeySound(key.Action);
     }
 
     public void OnKeyUp(KeyDef key, string? output, long uptimeMs, bool gesture)
     {
+        MeridianKeyUp(key, output, uptimeMs, gesture); // Meridian: nur die Tastenart, nie das Zeichen
     }
 
     void PlayKeySound(KeyAction action)
@@ -464,6 +468,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             {
                 final = corrected;
                 _lastCorrection = new Correction(typed, corrected, separator);
+                MeridianAutoCorrected(); // Meridian: nur das Ereignis
             }
         }
 
@@ -481,6 +486,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         if (ic == null) return;
 
         if (slot.IsLiteral) Engine?.SuppressCorrection(slot.Word);
+        MeridianSuggestionPicked(); // Meridian: nur das Ereignis
 
         string? previous = PreviousWord();
         ic.CommitText(J(slot.Word + " "), 1);

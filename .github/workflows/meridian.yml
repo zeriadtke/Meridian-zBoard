@@ -1,0 +1,125 @@
+name: Meridian Tastatur
+
+# zHeal Meridian: eigener Workflow der Meridian-Tastatur (zBoard-Fork). Läuft auf dem selbst gehosteten
+# Windows-Runner und nur bei Pushes/Merges nach main. Der Workflow build.yml von zBoard (ubuntu-Runner,
+# Emulator-Test, "testversion"-Release) ist für zBoard gedacht und wird in diesem Fork nicht gebraucht – in den
+# Actions-Einstellungen deaktivieren.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: meridian-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # Gemeinsamer Signaturschlüssel mit der Meridian-App (siehe Directory.Build.targets). Pfad/Alias optional als
+  # Repository-Variablen, Passwort als Secret. Ohne Secret wird mit dem zBoard-Testschlüssel signiert.
+  MERIDIAN_KEYSTORE: ${{ vars.MERIDIAN_KEYSTORE || 'C:\keys\zheal-meridian.jks' }}
+  MERIDIAN_KEY_ALIAS: ${{ vars.MERIDIAN_KEY_ALIAS || 'zheal' }}
+  MERIDIAN_KEYSTORE_PASSWORD: ${{ secrets.MERIDIAN_KEYSTORE_PASSWORD }}
+  MERIDIAN_KEY_PASSWORD: ${{ secrets.MERIDIAN_KEY_PASSWORD || secrets.MERIDIAN_KEYSTORE_PASSWORD }}
+
+jobs:
+  build:
+    name: Tests und APK (Windows-Runner)
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Umgebung
+        run: |
+          New-Item -ItemType Directory -Force ci-logs | Out-Null
+          dotnet --info *>&1 | Select-Object -First 30 | Tee-Object ci-logs/env.log
+          dotnet workload list *>&1 | Tee-Object -Append ci-logs/env.log
+
+      - name: Unit-Tests Meridian (Tipp-Dynamik)
+        id: tests
+        continue-on-error: true
+        run: |
+          dotnet test tests/Meridian.Keyboard.Tests --logger "console;verbosity=normal" *>&1 | Tee-Object ci-logs/tests.log
+          exit $LASTEXITCODE
+
+      - name: Unit-Tests zBoard
+        id: zboardtests
+        continue-on-error: true
+        run: |
+          dotnet test tests/ZBoard.Core.Tests *>&1 | Tee-Object ci-logs/zboard-tests.log
+          exit $LASTEXITCODE
+
+      - name: APK bauen (Release, AOT)
+        id: apk
+        continue-on-error: true
+        run: |
+          dotnet build ZBoard.csproj -c Release -f net10.0-android -p:AndroidPackageFormats=apk *>&1 | Tee-Object ci-logs/apk.log
+          $code = $LASTEXITCODE
+          if ($code -eq 0) {
+            $apk = Get-ChildItem bin/Release/net10.0-android -Filter *-Signed.apk | Select-Object -First 1
+            if (-not $apk) { Write-Error "Keine signierte APK gefunden"; exit 1 }
+            if ($env:MERIDIAN_KEYSTORE_PASSWORD) {
+              $dest = Join-Path $env:USERPROFILE "zheal-apks"
+              New-Item -ItemType Directory -Force $dest | Out-Null
+              Copy-Item $apk.FullName (Join-Path $dest "zheal-meridian-keyboard.apk") -Force
+              Write-Host "APK: $dest\zheal-meridian-keyboard.apk"
+            } else {
+              Write-Warning "Ohne MERIDIAN_KEYSTORE_PASSWORD mit dem zBoard-Testschlüssel signiert – Meridian nimmt davon keine Daten an."
+            }
+          }
+          exit $code
+
+      - name: APK für den Download sammeln
+        id: collect
+        if: steps.apk.outcome == 'success'
+        continue-on-error: true
+        run: |
+          $out = "out/apk-upload"
+          Remove-Item -Recurse -Force $out -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force $out | Out-Null
+          $apk = Get-ChildItem bin/Release/net10.0-android -Filter *-Signed.apk | Select-Object -First 1
+          Copy-Item $apk.FullName (Join-Path $out "de.World_of_Bytes.zHeal.Meridian.Keyboard.apk")
+
+      - name: APK hochladen
+        if: steps.collect.outcome == 'success'
+        continue-on-error: true   # Speicherlimit für Artefakte darf die CI nicht blockieren
+        uses: actions/upload-artifact@v5
+        with:
+          name: Meridian-Keyboard-apk
+          path: out/apk-upload/
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Logs in Branch ci-logs veröffentlichen
+        if: always()
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP "kb-cilogs"
+          Remove-Item -Recurse -Force $dir -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $dir | Out-Null
+          if (Test-Path ci-logs) { Copy-Item ci-logs/* $dir }
+          foreach ($f in Get-ChildItem $dir -Filter *.log) {
+            Select-String -Path $f.FullName -Pattern 'error |error:|Failed |FAILED|Exception|warning XA|warning MERIDIAN|zHeal Meridian:' |
+              Select-Object -First 200 | ForEach-Object { $_.Line } | Set-Content ($f.FullName -replace '\.log$', '.errors.txt')
+          }
+          Set-Content (Join-Path $dir "RESULT.txt") @("run=${{ github.run_id }}", "sha=${{ github.sha }}",
+            "tests=${{ steps.tests.outcome }}", "zboardtests=${{ steps.zboardtests.outcome }}", "apk=${{ steps.apk.outcome }}")
+          Push-Location $dir
+          git init -q -b ci-logs
+          git -c user.name=ci -c user.email=ci@localhost add -A
+          git -c user.name=ci -c user.email=ci@localhost commit -q -m "CI-Logs ${{ github.run_id }}"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-logs
+          Pop-Location
+
+      - name: Ergebnis
+        if: always()
+        run: |
+          if ('${{ steps.tests.outcome }}' -eq 'failure' -or '${{ steps.zboardtests.outcome }}' -eq 'failure' -or '${{ steps.apk.outcome }}' -eq 'failure') { exit 1 }

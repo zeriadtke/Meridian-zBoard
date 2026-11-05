@@ -6,15 +6,20 @@
   <!-- Spracheingabe; wird erst beim ersten Tippen auf das Mikrofon erfragt -->
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+  <!-- Meridian: Datenschnittstelle der Meridian-App (nur bei gleicher Signatur nutzbar), siehe Meridian/README.md -->
+  <uses-permission android:name="de.World_of_Bytes.zHeal.Meridian.permission.TYPING_DATA" />
+
   <!-- Paketsichtbarkeit (ab Android 11): Spracherkennungsdienste finden -->
   <queries>
     <intent>
       <action android:name="android.speech.RecognitionService" />
     </intent>
+    <!-- Meridian: nur der Tipp-Provider der Meridian-App -->
+    <provider android:authorities="de.World_of_Bytes.zHeal.Meridian.typing" />
   </queries>
 
   <application
-      android:label="zBoard"
+      android:label="zHeal Meridian Tastatur"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"
