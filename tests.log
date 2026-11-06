@@ -1,0 +1,35 @@
+  Wiederherzustellende Projekte werden ermittelt...
+  "C:\r-meridian-zboard\_work\Meridian-zBoard\Meridian-zBoard\tests\Meridian.Keyboard.Tests\Meridian.Keyboard.Tests.csproj" wiederhergestellt (in 346 ms.).
+C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.RuntimeIdentifierInference.targets(385,5): message NETSDK1057: Sie verwenden eine Vorschauversion von .NET. Weitere Informationen: https://aka.ms/dotnet-support-policy [C:\r-meridian-zboard\_work\Meridian-zBoard\Meridian-zBoard\tests\Meridian.Keyboard.Tests\Meridian.Keyboard.Tests.csproj]
+  Meridian.Keyboard.Tests -> C:\r-meridian-zboard\_work\Meridian-zBoard\Meridian-zBoard\tests\Meridian.Keyboard.Tests\bin\Debug\net10.0\Meridian.Keyboard.Tests.dll
+Testlauf für "C:\r-meridian-zboard\_work\Meridian-zBoard\Meridian-zBoard\tests\Meridian.Keyboard.Tests\bin\Debug\net10.0\Meridian.Keyboard.Tests.dll" (.NETCoreApp,Version=v10.0)
+Insgesamt 1 Testdateien stimmten mit dem angegebenen Muster überein.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.32]   Discovering: Meridian.Keyboard.Tests
+[xUnit.net 00:00:00.37]   Discovered:  Meridian.Keyboard.Tests
+[xUnit.net 00:00:00.37]   Starting:    Meridian.Keyboard.Tests
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 16385, imeOptions: 0, expected: True) [84 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 2, imeOptions: 0, expected: False) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 1, imeOptions: 16777216, expected: False) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 225, imeOptions: 0, expected: False) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 145, imeOptions: 0, expected: False) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 0, imeOptions: 0, expected: False) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 3, imeOptions: 0, expected: False) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 33, imeOptions: 0, expected: True) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 1, imeOptions: 0, expected: True) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 129, imeOptions: 0, expected: False) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingPrivacyTests.MayRecord(inputType: 18, imeOptions: 0, expected: False) [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingTrackerTests.NeuesFeldSchliesstLaufendeSitzungAb [88 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingTrackerTests.LoslassenOhneDrueckenZaehltNicht [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingTrackerTests.OrdnetTastenEinUndUeberspringtGesten [1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingTrackerTests.OhneFreigabeDesFeldesKeineSitzung [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingSessionRecorderTests.ZaehltTastenartenUndAbstaende [91 ms]
+[xUnit.net 00:00:00.51]   Finished:    Meridian.Keyboard.Tests
+  Bestanden Meridian.Keyboard.Tests.TypingSessionRecorderTests.ZuKurzeSitzungWirdVerworfen [< 1 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingSessionRecorderTests.SchluesselEntsprechenDerMeridianSchnittstelle [9 ms]
+  Bestanden Meridian.Keyboard.Tests.TypingSessionRecorderTests.OhneStartWirdNichtsGezaehlt [< 1 ms]
+
+Der Testlauf war erfolgreich.
+Gesamtzahl Tests: 19
+     Bestanden: 19
+ Gesamtzeit: 0,9874 Sekunden
