@@ -131,6 +131,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _symbolsPage = _profile.IsNumeric ? NumpadPage : 0;
 
         StartPanels();
+        RefreshSystemBarPadding();
         SetLanguage(_settings.CurrentLanguage);
         ApplyTheme();
         _keyboardView?.EnterLabel = _profile.EnterLabel;

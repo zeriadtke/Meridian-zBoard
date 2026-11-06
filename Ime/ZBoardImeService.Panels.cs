@@ -55,6 +55,9 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
 
         // Ab Android 15 reicht das Tastaturfenster bis unter die Navigationsleiste: Platz dafür freihalten.
         root.SetOnApplyWindowInsetsListener(new SystemBarInsets());
+        // Ein neu angehängter View bekommt die Insets nicht immer von selbst (z. B. wenn Android die Tastatur
+        // neu aufbaut): beim Anhängen ausdrücklich anfordern.
+        root.AddOnAttachStateChangeListener(new RequestInsetsOnAttach());
         root.SetBackgroundColor(_theme.Background);
 
         _suggestionBar = new SuggestionBarView(this) { ToolbarItems = Toolbar };
@@ -421,9 +424,40 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
     }
 
     /// <summary>Innenabstand für Navigationsleiste und Display-Aussparung (links, rechts, unten).</summary>
+    /// <summary>
+    /// Bei jedem Öffnen der Tastatur den Abstand zur Navigationsleiste prüfen, auch wenn Android keine neuen
+    /// Insets schickt (sonst kann die untere Reihe hinter der Leiste landen).
+    /// </summary>
+    void RefreshSystemBarPadding()
+    {
+        var root = _inputRoot;
+        if (root == null) return;
+        root.RequestApplyInsets();
+        root.Post(() =>
+        {
+            if (root.RootWindowInsets is { } insets) SystemBarInsets.Apply(root, insets);
+        });
+    }
+
+    sealed class RequestInsetsOnAttach : Java.Lang.Object, View.IOnAttachStateChangeListener
+    {
+        public void OnViewAttachedToWindow(View v) => v.RequestApplyInsets();
+
+        public void OnViewDetachedFromWindow(View v)
+        {
+        }
+    }
+
     sealed class SystemBarInsets : Java.Lang.Object, View.IOnApplyWindowInsetsListener
     {
         public WindowInsets OnApplyWindowInsets(View v, WindowInsets insets)
+        {
+            Apply(v, insets);
+            return insets;
+        }
+
+        /// <summary>Innenabstand links, rechts und unten so groß wie Navigationsleiste und Display-Aussparung.</summary>
+        public static void Apply(View v, WindowInsets insets)
         {
             int left, right, bottom;
             if (OperatingSystem.IsAndroidVersionAtLeast(30))
@@ -442,8 +476,6 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
             {
                 v.SetPadding(left, 0, right, bottom);
             }
-
-            return insets;
         }
     }
 }

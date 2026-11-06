@@ -291,6 +291,11 @@ def main():
         plain = plain[-1].strip() if plain else ""
         check("Passwortfeld: Buchstaben und Ziffern", plain == "ab1", f"→ „{plain}“ (angezeigt „{text}“)")
         screenshot(out_dir, "5b-passwort")
+        bounds = re.findall(r"BOUNDS de bottom=(\d+) limit=(\d+) nav=(\d+)", log)
+        if bounds:
+            bottom, limit, nav = map(int, bounds[-1])
+            check("Nach erneutem Öffnen über der Navigationsleiste", bottom <= limit,
+                  f"(Unterkante {bottom}, erlaubt bis {limit})")
 
         # PIN-Feld: Ziffernfeld wie bei Gboard
         shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY} --es password number")
