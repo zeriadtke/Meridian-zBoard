@@ -32,7 +32,8 @@ public sealed class MainActivity : Activity
 
         var content = new LinearLayout(this) { Orientation = Orientation.Vertical };
         content.SetPadding(Dp(24), Dp(24), Dp(24), Dp(24));
-        var scroll = new ScrollView(this) { FitsSystemWindows = true };
+        var scroll = new ScrollView(this);
+        scroll.SetFitsSystemWindows(true);
         scroll.AddView(content);
         SetContentView(scroll);
 

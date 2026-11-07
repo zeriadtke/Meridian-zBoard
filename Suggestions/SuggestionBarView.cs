@@ -204,11 +204,11 @@ public sealed class SuggestionBarView : View
         if (_slots.Any(s => s?.IsEmail == true))
         {
             var present = Enumerable.Range(0, 3).Where(i => _slots[i] != null).ToList();
-            float share = Width / (float)present.Count;
+            float each = Width / (float)present.Count;
             for (int n = 0; n < present.Count; n++)
             {
                 int i = present[n];
-                _targets.Add((new RectF(n * share, 0, (n + 1) * share, Height), $"slot{i}", _slots[i]!.Display, 0));
+                _targets.Add((new RectF(n * each, 0, (n + 1) * each, Height), $"slot{i}", _slots[i]!.Display, 0));
             }
 
             return;
