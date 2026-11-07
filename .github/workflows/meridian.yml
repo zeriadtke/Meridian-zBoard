@@ -78,6 +78,25 @@ jobs:
           }
           exit $code
 
+      # Plugin-App "zBoard DeepL" (eigene App mit Internet, siehe docs/PLUGINS.md). Gleicher Schlüssel wie die
+      # Tastatur, damit zBoard sie als "vom selben Entwickler" anzeigt.
+      - name: Plugin zBoard DeepL bauen
+        id: deepl
+        continue-on-error: true
+        run: |
+          $sign = @("-p:AndroidKeyStore=true")
+          if ($env:MERIDIAN_KEYSTORE_PASSWORD -and (Test-Path $env:MERIDIAN_KEYSTORE)) {
+            $keyPass = if ($env:MERIDIAN_KEY_PASSWORD) { "env:MERIDIAN_KEY_PASSWORD" } else { "env:MERIDIAN_KEYSTORE_PASSWORD" }
+            $sign += "-p:AndroidSigningKeyStore=$($env:MERIDIAN_KEYSTORE)", "-p:AndroidSigningStorePass=env:MERIDIAN_KEYSTORE_PASSWORD",
+                     "-p:AndroidSigningKeyAlias=$($env:MERIDIAN_KEY_ALIAS)", "-p:AndroidSigningKeyPass=$keyPass"
+          } else {
+            $ks = Join-Path $PWD "signing/zboard-test.keystore"
+            $sign += "-p:AndroidSigningKeyStore=$ks", "-p:AndroidSigningStorePass=zboard-test",
+                     "-p:AndroidSigningKeyAlias=zboard-test", "-p:AndroidSigningKeyPass=zboard-test"
+          }
+          dotnet build plugin-apps/DeepL/ZBoard.DeepL.csproj -c Release -f net10.0-android -p:AndroidPackageFormats=apk @sign -v:n *>&1 | Tee-Object ci-logs/deepl.log
+          exit $LASTEXITCODE
+
       - name: APK für den Download sammeln
         id: collect
         if: steps.apk.outcome == 'success'
@@ -88,6 +107,8 @@ jobs:
           New-Item -ItemType Directory -Force $out | Out-Null
           $apk = Get-ChildItem bin/Release/net10.0-android -Filter *-Signed.apk | Select-Object -First 1
           Copy-Item $apk.FullName (Join-Path $out "de.World_of_Bytes.zHeal.Meridian.Keyboard.apk")
+          $plugin = Get-ChildItem plugin-apps/DeepL/bin/Release/net10.0-android -Filter *-Signed.apk -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($plugin) { Copy-Item $plugin.FullName (Join-Path $out "de.World_of_Bytes.zBoard.DeepL.apk") }
 
       - name: APK hochladen
         if: steps.collect.outcome == 'success'
@@ -111,7 +132,7 @@ jobs:
               Select-Object -First 200 | ForEach-Object { $_.Line } | Set-Content ($f.FullName -replace '\.log$', '.errors.txt')
           }
           Set-Content (Join-Path $dir "RESULT.txt") @("run=${{ github.run_id }}", "sha=${{ github.sha }}",
-            "tests=${{ steps.tests.outcome }}", "zboardtests=${{ steps.zboardtests.outcome }}", "apk=${{ steps.apk.outcome }}")
+            "tests=${{ steps.tests.outcome }}", "zboardtests=${{ steps.zboardtests.outcome }}", "apk=${{ steps.apk.outcome }}", "deepl=${{ steps.deepl.outcome }}")
           Push-Location $dir
           git init -q -b ci-logs
           git -c user.name=ci -c user.email=ci@localhost add -A
@@ -122,4 +143,4 @@ jobs:
       - name: Ergebnis
         if: always()
         run: |
-          if ('${{ steps.tests.outcome }}' -eq 'failure' -or '${{ steps.zboardtests.outcome }}' -eq 'failure' -or '${{ steps.apk.outcome }}' -eq 'failure') { exit 1 }
+          if ('${{ steps.tests.outcome }}' -eq 'failure' -or '${{ steps.zboardtests.outcome }}' -eq 'failure' -or '${{ steps.apk.outcome }}' -eq 'failure' -or '${{ steps.deepl.outcome }}' -eq 'failure') { exit 1 }
