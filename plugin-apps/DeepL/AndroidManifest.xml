@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nur dieses Plugin braucht Internet (DeepL-API). zBoard selbst bleibt ohne Internet-Berechtigung. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.INTERNET" />
+
+  <application
+      android:label="zBoard DeepL"
+      android:icon="@mipmap/ic_launcher"
+      android:roundIcon="@mipmap/ic_launcher"
+      android:allowBackup="false"
+      android:supportsRtl="true" />
+</manifest>

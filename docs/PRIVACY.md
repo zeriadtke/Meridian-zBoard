@@ -35,6 +35,13 @@ Erkennungsdienst die Sprache zur Verarbeitung an seinen Anbieter senden. Dafür 
 
 Die Berechtigung für das Mikrofon fragt zBoard erst beim ersten Tippen auf das Mikrofon ab.
 
+## Plugins
+
+zBoard kann um Plugins erweitert werden – eigene Apps wie „zBoard DeepL“, die z. B. Internet zum Übersetzen nutzen.
+zBoard selbst bekommt dadurch keinen Internetzugriff. Ein Plugin erhält nur Text, wenn du es in den Einstellungen
+eingeschaltet hast und in der Leiste eine seiner Aktionen antippst (markierter Text oder Inhalt des Felds, nie aus
+Passwortfeldern). Was das Plugin damit macht, regelt dessen eigene Datenschutzerklärung.
+
 ## Berechtigungen
 
 | Berechtigung | Zweck |
@@ -82,6 +89,13 @@ recognition. If you turn off "Offline recognition only", the recognition service
 provider for processing; that provider's privacy policy applies.
 
 zBoard asks for the microphone permission only when you first tap the microphone.
+
+## Plugins
+
+zBoard can be extended with plugins – separate apps such as “zBoard DeepL” that use e.g. the internet to translate.
+zBoard itself does not gain internet access. A plugin only receives text when you have turned it on in the settings
+and tap one of its actions in the bar (the selected text or the field's content, never from password fields). What
+the plugin does with it is governed by its own privacy policy.
 
 ## Permissions
 

@@ -31,6 +31,10 @@ public sealed class SuggestionBarView : View
     public const string RemoveId = "remove";
     public const string RemoveCancelId = "remove-cancel";
 
+    /// <summary>Präfix der Auswahl-Einträge ("choice:0", "choice:1" …) und das Schließen-Kreuz der Auswahl.</summary>
+    public const string ChoicePrefix = "choice:";
+    public const string ChoiceCloseId = "choice-close";
+
     enum Mode
     {
         Suggestions,
@@ -40,6 +44,9 @@ public sealed class SuggestionBarView : View
 
         /// <summary>Nach langem Druck auf eine gemerkte E-Mail-Adresse: Entfernen bestätigen.</summary>
         Remove,
+
+        /// <summary>Einträge zur Auswahl (Plugin-Aktionen, Rückgängig) und ein Kreuz zum Schließen.</summary>
+        Choices,
     }
 
     readonly float _dp;
@@ -60,6 +67,8 @@ public sealed class SuggestionBarView : View
     int _pressGeneration;
     bool _longPressFired;
     string _removeLabel = string.Empty;
+    IReadOnlyList<string> _choices = [];
+    int _statusIcon = Resource.Drawable.ms_mic;
 
     public SuggestionBarView(Context context) : base(context)
     {
@@ -132,9 +141,18 @@ public sealed class SuggestionBarView : View
         Reset();
     }
 
-    public void SetStatus(string status)
+    /// <summary>Einträge zur Auswahl; Antippen meldet <see cref="ChoicePrefix"/> + Index über <see cref="ToolbarPicked"/>.</summary>
+    public void SetChoices(IReadOnlyList<string> labels)
+    {
+        _choices = labels;
+        _mode = Mode.Choices;
+        Reset();
+    }
+
+    public void SetStatus(string status, int icon = 0)
     {
         _status = status;
+        _statusIcon = icon != 0 ? icon : Resource.Drawable.ms_mic;
         _mode = Mode.Status;
         Reset();
     }
@@ -166,7 +184,10 @@ public sealed class SuggestionBarView : View
                 LayoutEmojiSearch();
                 break;
             case Mode.Status:
-                _targets.Add((new RectF(0, 0, Width, Height), StatusId, _status, Resource.Drawable.ms_mic));
+                _targets.Add((new RectF(0, 0, Width, Height), StatusId, _status, _statusIcon));
+                break;
+            case Mode.Choices:
+                LayoutChoices();
                 break;
             case Mode.Remove:
                 _targets.Add((new RectF(0, 0, Width * 0.7f, Height), RemoveId, "🗑 " + _removeLabel, 0));
@@ -233,6 +254,21 @@ public sealed class SuggestionBarView : View
         }
     }
 
+    void LayoutChoices()
+    {
+        float close = 48 * _dp;
+        if (_choices.Count > 0)
+        {
+            float w = (Width - close) / Math.Min(_choices.Count, 4);
+            for (int i = 0; i < Math.Min(_choices.Count, 4); i++)
+            {
+                _targets.Add((new RectF(i * w, 0, (i + 1) * w, Height), ChoicePrefix + i, _choices[i], 0));
+            }
+        }
+
+        _targets.Add((new RectF(Width - close, 0, Width, Height), ChoiceCloseId, "✕", 0));
+    }
+
     void LayoutEmojiSearch()
     {
         float pillWidth = Width * 0.35f;
@@ -252,7 +288,7 @@ public sealed class SuggestionBarView : View
         var (bounds, id, label, icon) = _targets[index];
         bool pressed = index == _pressed;
 
-        bool pill = id is ClipChipId or SearchPillId or RemoveId;
+        bool pill = id is ClipChipId or SearchPillId or RemoveId || id.StartsWith(ChoicePrefix, StringComparison.Ordinal);
         if (pill)
         {
             _fill.Color = pressed ? Theme.KeyPressed : Theme.Key;

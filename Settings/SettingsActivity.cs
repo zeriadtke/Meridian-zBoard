@@ -50,6 +50,7 @@ public sealed class SettingsActivity : Activity
         new("voice", Resource.Drawable.ms_mic, L.T("Spracheingabe", "Voice typing"), () => null, a => a.BuildVoice()),
         new("clipboard", Resource.Drawable.ms_content_paste, L.T("Zwischenablage", "Clipboard"), () => null, a => a.BuildClipboard()),
         new("dictionary", Resource.Drawable.ms_menu_book, L.T("Wörterbuch", "Dictionary"), () => null, a => a.BuildDictionary()),
+        new("plugins", Resource.Drawable.ms_extension, L.T("Plugins", "Plugins"), () => null, a => a.BuildPlugins()),
         new("test", Resource.Drawable.ms_keyboard, L.T("Tastatur ausprobieren", "Try the keyboard"), () => null, a => a.BuildTest()),
         new("about", Resource.Drawable.ms_info, L.T("Über zBoard", "About zBoard"), () => null, a => a.BuildAbout()),
     ];
@@ -373,6 +374,84 @@ public sealed class SettingsActivity : Activity
             "Learned words stay on the device and are never exported. zBoard learns no words in password, email and "
             + "address fields. It only remembers email addresses entered in email fields – not in incognito windows "
             + "or fields where the app forbids learning."));
+    }
+
+    void BuildPlugins()
+    {
+        Note(L.T("zBoard selbst hat keinen Internetzugriff. Funktionen, die Internet brauchen – etwa Übersetzen mit DeepL –, "
+               + "gibt es als eigene Plugin-Apps; nur deren Installation fragt nach Internet. Ein Plugin bekommt erst Text, "
+               + "wenn du es hier einschaltest und in der Leiste über das Puzzle-Symbol eine Aktion antippst – dann den "
+               + "markierten Text oder, ohne Markierung, den Inhalt des Felds. In Passwortfeldern gibt es keine Plugins.",
+            "zBoard itself has no internet access. Features that need the internet – such as translating with DeepL – come "
+            + "as separate plugin apps; only installing those asks for internet. A plugin only gets text once you turn it "
+            + "on here and tap one of its actions via the puzzle icon in the bar – the selected text or, without a "
+            + "selection, the field's content. Plugins are never offered in password fields."));
+
+        var plugins = Plugins.PluginRegistry.Installed(this);
+        Section(L.T("Installierte Plugins", "Installed plugins"));
+        if (plugins.Count == 0) Note(L.T("Noch kein Plugin installiert.", "No plugins installed yet."));
+
+        foreach (var plugin in plugins)
+        {
+            var details = new List<string> { plugin.Package };
+            details.Add(plugin.HasInternet ? L.T("nutzt Internet", "uses the internet") : L.T("ohne Internet", "no internet"));
+            if (plugin.SameSigner) details.Add(L.T("vom selben Entwickler wie zBoard", "same developer as zBoard"));
+
+            Toggle(plugin.Label, string.Join(" · ", details), _settings.EnabledPlugins.Contains(plugin.Package), (toggle, on) =>
+            {
+                if (!on)
+                {
+                    SetPluginEnabled(plugin.Package, false);
+                    return;
+                }
+
+                if (_settings.EnabledPlugins.Contains(plugin.Package)) return;
+                new AlertDialog.Builder(this)
+                    .SetTitle(L.T($"{plugin.Label} einschalten?", $"Turn on {plugin.Label}?"))!
+                    .SetMessage(plugin.HasInternet
+                        ? L.T("Text, den du an dieses Plugin schickst, kann es ins Internet senden (z. B. an den Übersetzungsdienst). "
+                              + "Schalte nur Plugins ein, denen du vertraust.",
+                            "Text you send to this plugin may be sent to the internet (e.g. to the translation service). "
+                            + "Only turn on plugins you trust.")
+                        : L.T("Das Plugin bekommt nur Text, den du ihm über die Leiste ausdrücklich schickst.",
+                            "The plugin only gets text you explicitly send to it from the bar."))!
+                    .SetPositiveButton(L.T("Einschalten", "Turn on"), (_, _) => SetPluginEnabled(plugin.Package, true))!
+                    .SetNegativeButton(L.T("Abbrechen", "Cancel"), (_, _) => toggle.Checked = false)!
+                    .SetOnCancelListener(new CancelListener(() => toggle.Checked = false))!
+                    .Show();
+            });
+
+            if (PackageManager!.GetLaunchIntentForPackage(plugin.Package) is { } launch)
+            {
+                Row(Resource.Drawable.ms_settings, L.T($"{plugin.Label} einrichten", $"Set up {plugin.Label}"), null, () => StartActivity(launch));
+            }
+        }
+
+        Row(Resource.Drawable.ms_search, L.T("Plugins im Play Store suchen", "Find plugins on the Play Store"), null, () =>
+        {
+            var uri = Android.Net.Uri.Parse("market://search?q=zBoard%20Plugin")!;
+            try
+            {
+                StartActivity(new Intent(Intent.ActionView, uri));
+            }
+            catch (ActivityNotFoundException)
+            {
+                StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse("https://play.google.com/store/search?q=zBoard%20Plugin&c=apps")));
+            }
+        });
+    }
+
+    void SetPluginEnabled(string package, bool enabled)
+    {
+        var set = _settings.EnabledPlugins.ToHashSet(StringComparer.Ordinal);
+        if (enabled) set.Add(package);
+        else set.Remove(package);
+        _settings.EnabledPlugins = set;
+    }
+
+    sealed class CancelListener(Action onCancel) : Java.Lang.Object, IDialogInterfaceOnCancelListener
+    {
+        public void OnCancel(IDialogInterface? dialog) => onCancel();
     }
 
     void BuildTest()
