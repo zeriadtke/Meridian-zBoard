@@ -193,8 +193,21 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
             case SuggestionBarView.SearchPillId:
                 ExitEmojiSearch(backToPanel: true);
                 break;
+            case SuggestionBarView.StatusId when PluginBusy:
+                CancelPlugin();
+                UpdateSuggestions();
+                break;
             case SuggestionBarView.StatusId:
                 StopVoice(cancel: false);
+                break;
+            case "plugins":
+                ShowPluginActions();
+                break;
+            case SuggestionBarView.ChoiceCloseId:
+                CloseChoices();
+                break;
+            case not null when id.StartsWith(SuggestionBarView.ChoicePrefix, StringComparison.Ordinal):
+                if (int.TryParse(id.AsSpan(SuggestionBarView.ChoicePrefix.Length), out int choice)) OnChoicePicked(choice);
                 break;
             case SuggestionBarView.RemoveId:
                 RemovePendingEmail();

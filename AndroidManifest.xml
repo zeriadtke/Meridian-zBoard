@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Bewusst KEINE INTERNET-Berechtigung: zBoard arbeitet vollständig lokal.
+<!-- Bewusst KEINE INTERNET-Berechtigung: zBoard arbeitet vollständig lokal. Funktionen mit Internet kommen als
+     eigene Plugin-Apps (docs/PLUGINS.md); nur deren Installation fragt danach.
      Hinweis: Debug-Builds von .NET for Android fügen INTERNET für den Debugger automatisch hinzu, Release-Builds nicht. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <uses-permission android:name="android.permission.VIBRATE" />
@@ -13,6 +14,10 @@
   <queries>
     <intent>
       <action android:name="android.speech.RecognitionService" />
+    </intent>
+    <!-- Plugins (eigene Apps, z. B. zBoard DeepL), siehe docs/PLUGINS.md -->
+    <intent>
+      <action android:name="de.World_of_Bytes.zBoard.PLUGIN" />
     </intent>
     <!-- Meridian: nur der Tipp-Provider der Meridian-App -->
     <provider android:authorities="de.World_of_Bytes.zHeal.Meridian.typing" />

@@ -139,6 +139,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _keyboardView?.GlideEnabled = _settings.GlideTyping && _profile.AllowSuggestions;
         _keyboardView?.ShowKeyPreview = _settings.KeyPreview;
         StartEmailInput();
+        StartPlugins();
         if (_suggestionBar != null)
         {
             _suggestionBar.Visibility = ViewStates.Visible;
@@ -159,6 +160,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _reselect = null;
         _suggestionBar?.Clear();
         FinishPanels();
+        FinishPlugins();
         StopVoice(cancel: true);
 
         try
