@@ -123,6 +123,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _autoSpaceInserted = false;
         _glideActive = false;
         _swipeAnchor = -1;
+        _reselect = null;
         _selStart = info?.InitialSelStart ?? 0;
         _selEnd = info?.InitialSelEnd ?? 0;
         _shiftManual = false;
@@ -155,6 +156,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         LearnEmailsFromField(); // solange das Feld noch erreichbar ist
         base.OnFinishInputView(finishingInput);
         _composing.Clear();
+        _reselect = null;
         _suggestionBar?.Clear();
         FinishPanels();
         StopVoice(cancel: true);
@@ -191,6 +193,9 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
         if (newSelStart != oldSelStart && _composing.Length == 0) _lastCorrection = null;
         if (_composing.Length == 0) UpdateAutoShift();
+
+        // Wie Gboard: Antippen eines Worts im Text zeigt dessen Vorschläge erneut
+        if (_composing.Length == 0 && (newSelStart != oldSelStart || newSelEnd != oldSelEnd)) OnCursorPlaced(newSelStart, newSelEnd);
     }
 
     // ---------- Tasten ----------
@@ -229,6 +234,8 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             EmojiSearchType(text);
             return;
         }
+
+        MarkEdit();
 
         _lastCorrection = null;
         bool wordChar = text.Length > 0 && (char.IsLetterOrDigit(text, 0) || text == "'" || (text == "-" && _composing.Length > 0));
@@ -269,6 +276,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     public void OnAction(KeyAction action)
     {
         if (_emojiSearchActive && EmojiSearchAction(action)) return;
+        if (action is KeyAction.Space or KeyAction.Delete or KeyAction.Enter) MarkEdit();
 
         switch (action)
         {
@@ -308,6 +316,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
     public void OnCursorMove(int delta)
     {
+        MarkEdit();
         CommitComposing(autocorrect: false, separator: string.Empty);
         var keycode = delta > 0 ? Keycode.DpadRight : Keycode.DpadLeft;
         for (int i = 0; i < Math.Abs(delta); i++) SendDownUpKeyEvents(keycode);
@@ -496,6 +505,14 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             return;
         }
 
+        if (slot.IsReplacement)
+        {
+            PickReplacement(slot);
+            return;
+        }
+
+        MarkEdit();
+
         if (slot.IsLiteral) Engine?.SuppressCorrection(slot.Word);
         MeridianSuggestionPicked(); // Meridian: nur das Ereignis
 
@@ -505,7 +522,19 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _glideActive = false;
         _lastCorrection = null;
         _autoSpaceInserted = true;
-        Learn(previous, slot.Word);
+        if (slot.IsPhrase)
+        {
+            foreach (var word in slot.Word.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                Learn(previous, word);
+                previous = word;
+            }
+        }
+        else
+        {
+            Learn(previous, slot.Word);
+        }
+
         UpdateAutoShift();
         UpdateSuggestions();
     }
@@ -550,6 +579,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         var ic = Ic;
         var engine = Engine;
         if (ic == null || engine == null) return;
+        MarkEdit();
 
         if (_composing.Length > 0) CommitComposing(autocorrect: !_glideActive, separator: string.Empty);
 
@@ -595,6 +625,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         var ic = Ic;
         if (ic == null) return;
 
+        MarkEdit();
         if (_swipeAnchor < 0)
         {
             if (_composing.Length > 0) CommitComposing(autocorrect: false, separator: string.Empty);
@@ -629,6 +660,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     {
         if (_suggestionBar == null || _emojiSearchActive || _voiceActive) return;
         if (!_glideActive && TryShowEmailSuggestions()) return;
+        if (_reselect != null && _composing.Length == 0 && ShowReselect()) return;
         var engine = Engine;
         if (engine == null || !_profile.AllowSuggestions)
         {
@@ -662,7 +694,8 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             _suggestionBar.SetSlots(
                 new SuggestionSlot($"„{typed}“", typed, false, true),
                 new SuggestionSlot(correction, correction, true, false),
-                alternative == null ? null : new SuggestionSlot(alternative, alternative, false, false));
+                PhraseSlot(engine, correction)
+                ?? (alternative == null ? null : new SuggestionSlot(alternative, alternative, false, false)));
             return;
         }
 
@@ -675,7 +708,22 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             left = new SuggestionSlot($"„{typed}“", typed, false, true);
         }
 
-        _suggestionBar.SetSlots(left, Slot(0), Slot(2));
+        // Gelernte Wortfolge zum besten Vorschlag (bzw. zum fertig getippten Wort) rechts anbieten
+        string? head = candidates.Count > 0 ? candidates[0] : result.TypedIsWord ? typed : null;
+        _suggestionBar.SetSlots(left, Slot(0), (head == null ? null : PhraseSlot(engine, head)) ?? Slot(2));
+    }
+
+    /// <summary>
+    /// Wie Gboard: Ganze Wortfolgen vorschlagen, die man oft so schreibt ("freundlichen Grüßen"). Nur aus Gelerntem und
+    /// nur, wenn Lernen und Nächstes-Wort-Vorhersage an sind.
+    /// </summary>
+    SuggestionSlot? PhraseSlot(SuggestionEngine engine, string word)
+    {
+        if (!_settings.NextWordPrediction || !_settings.LearnWords || !_profile.AllowLearning) return null;
+        var continuation = engine.ContinuePhrase(word, maxWords: 2);
+        if (continuation == null) return null;
+        string phrase = word + " " + continuation;
+        return new SuggestionSlot(phrase, phrase, false, false, IsPhrase: true);
     }
 
     /// <summary>Nächstes-Wort-Vorhersage nach einem Leerzeichen.</summary>
@@ -690,7 +738,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         SuggestionSlot? Slot(int i) => i < predictions.Count ? new SuggestionSlot(predictions[i], predictions[i], false, false) : null;
-        _suggestionBar!.SetSlots(Slot(1), Slot(0), Slot(2));
+        _suggestionBar!.SetSlots(Slot(1), Slot(0), PhraseSlot(engine, predictions[0]) ?? Slot(2));
     }
 
     // ---------- Umschalt / Großschreibung ----------

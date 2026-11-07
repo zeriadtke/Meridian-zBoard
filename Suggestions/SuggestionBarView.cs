@@ -10,7 +10,11 @@ namespace ZBoard.Suggestions;
 /// <param name="Emphasized">Fett darstellen (wird bei Leertaste eingefügt).</param>
 /// <param name="IsLiteral">Der Nutzer wählt sein getipptes Wort statt der Korrektur.</param>
 /// <param name="IsEmail">E-Mail-Adresse: ersetzt das angefangene Adress-Stück, ohne Leerzeichen dahinter.</param>
-public sealed record SuggestionSlot(string Display, string Word, bool Emphasized, bool IsLiteral, bool IsEmail = false);
+/// <param name="IsPhrase">Mehrere Wörter aus einer gelernten Wortfolge (Wort plus die nächsten).</param>
+/// <param name="IsReplacement">Ersetzt ein angetipptes Wort im Text statt das Wort in Bearbeitung.</param>
+public sealed record SuggestionSlot(
+    string Display, string Word, bool Emphasized, bool IsLiteral, bool IsEmail = false, bool IsPhrase = false,
+    bool IsReplacement = false);
 
 /// <summary>Eintrag der Werkzeugleiste (Material-Symbol). <paramref name="Trailing"/>: rechts im Kreis (Mikrofon).</summary>
 public sealed record ToolbarItem(string Id, int Icon, bool Trailing = false);
@@ -189,10 +193,14 @@ public sealed class SuggestionBarView : View
             return;
         }
 
-        float w = Width / 3f;
+        // Eine Wortfolge rechts bekommt mehr Platz, damit sie lesbar bleibt
+        float[] share = _slots[2]?.IsPhrase == true ? [0.27f, 0.31f, 0.42f] : [1 / 3f, 1 / 3f, 1 / 3f];
+        float x = 0;
         for (int i = 0; i < 3; i++)
         {
-            if (_slots[i] is { } slot) _targets.Add((new RectF(i * w, 0, (i + 1) * w, Height), $"slot{i}", slot.Display, 0));
+            float w = Width * share[i];
+            if (_slots[i] is { } slot) _targets.Add((new RectF(x, 0, x + w, Height), $"slot{i}", slot.Display, 0));
+            x += w;
         }
     }
 
