@@ -63,6 +63,7 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _suggestionBar = new SuggestionBarView(this) { ToolbarItems = Toolbar };
         _suggestionBar.SuggestionPicked += OnSuggestionPicked;
         _suggestionBar.ToolbarPicked += OnToolbarPicked;
+        _suggestionBar.SuggestionLongPressed += OnSuggestionLongPressed;
         _suggestionBar.EmojiPicked += InsertEmoji;
 
         _keyboardView = new KeyboardView(this) { Listener = this };
@@ -194,6 +195,13 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
                 break;
             case SuggestionBarView.StatusId:
                 StopVoice(cancel: false);
+                break;
+            case SuggestionBarView.RemoveId:
+                RemovePendingEmail();
+                break;
+            case SuggestionBarView.RemoveCancelId:
+                _pendingEmailRemoval = null;
+                UpdateSuggestions();
                 break;
         }
     }

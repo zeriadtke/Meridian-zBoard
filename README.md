@@ -165,6 +165,10 @@ von Google werden nicht übernommen. zBoard hat keine Internet-Berechtigung (Rel
 - **Werkzeugleiste:** erscheint, wenn es nichts vorzuschlagen gibt: 📋 Zwischenablage, 🎤 Spracheingabe,
   ✋ Einhandmodus (rechts → links → aus), ⚙ Einstellungen. Eben kopierter Text erscheint dort 90 Sekunden lang
   als Vorschlag.
+- **E-Mail-Adressen:** In E-Mail-Feldern schlägt die Leiste gemerkte Adressen vor – schon im leeren Feld und passend
+  zum Angefangenen, nach „@“ auch bekannte Anbieter (gmail.com, web.de, gmx.de …). Gemerkt wird, was beim Verlassen
+  des Felds oder bei Enter als gültige Adresse darin steht (nicht inkognito). Langer Druck auf eine Adresse in der
+  Leiste entfernt sie; alle löschen unter Einstellungen → Wörterbuch.
 - **Zwischenablage:** Verlauf der letzten Stunde, Anheften (📌) hält Einträge dauerhaft. Nur Angeheftetes wird
   gespeichert; als vertraulich markierte Inhalte (z. B. aus Passwort-Managern) und Kopien aus Passwortfeldern
   werden nie übernommen.

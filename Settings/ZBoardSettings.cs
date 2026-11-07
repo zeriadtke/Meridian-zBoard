@@ -91,6 +91,13 @@ public sealed class ZBoardSettings
         set => PutBool("learnWords", value);
     }
 
+    /// <summary>In E-Mail-Feldern eingegebene Adressen merken und wieder vorschlagen (nur auf dem Gerät).</summary>
+    public bool RememberEmails
+    {
+        get => _prefs.GetBoolean("rememberEmails", true);
+        set => PutBool("rememberEmails", value);
+    }
+
     public bool GlideTyping
     {
         get => _prefs.GetBoolean("glideTyping", true);

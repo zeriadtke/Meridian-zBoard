@@ -9,7 +9,8 @@ namespace ZBoard.Suggestions;
 /// <param name="Word">Wort, das beim Antippen eingefügt wird.</param>
 /// <param name="Emphasized">Fett darstellen (wird bei Leertaste eingefügt).</param>
 /// <param name="IsLiteral">Der Nutzer wählt sein getipptes Wort statt der Korrektur.</param>
-public sealed record SuggestionSlot(string Display, string Word, bool Emphasized, bool IsLiteral);
+/// <param name="IsEmail">E-Mail-Adresse: ersetzt das angefangene Adress-Stück, ohne Leerzeichen dahinter.</param>
+public sealed record SuggestionSlot(string Display, string Word, bool Emphasized, bool IsLiteral, bool IsEmail = false);
 
 /// <summary>Eintrag der Werkzeugleiste (Material-Symbol). <paramref name="Trailing"/>: rechts im Kreis (Mikrofon).</summary>
 public sealed record ToolbarItem(string Id, int Icon, bool Trailing = false);
@@ -23,6 +24,8 @@ public sealed class SuggestionBarView : View
     public const string ClipChipId = "clip-chip";
     public const string SearchPillId = "emoji-search";
     public const string StatusId = "status";
+    public const string RemoveId = "remove";
+    public const string RemoveCancelId = "remove-cancel";
 
     enum Mode
     {
@@ -30,6 +33,9 @@ public sealed class SuggestionBarView : View
         Toolbar,
         EmojiSearch,
         Status,
+
+        /// <summary>Nach langem Druck auf eine gemerkte E-Mail-Adresse: Entfernen bestätigen.</summary>
+        Remove,
     }
 
     readonly float _dp;
@@ -47,6 +53,9 @@ public sealed class SuggestionBarView : View
     string _status = string.Empty;
     int _pressed = -1;
     long _downTime;
+    int _pressGeneration;
+    bool _longPressFired;
+    string _removeLabel = string.Empty;
 
     public SuggestionBarView(Context context) : base(context)
     {
@@ -58,6 +67,9 @@ public sealed class SuggestionBarView : View
 
     /// <summary>Vorschlag angetippt (Slot, Touch-Down-Zeit, Touch-Up-Zeit in Uptime-ms).</summary>
     public event Action<SuggestionSlot, long, long>? SuggestionPicked;
+
+    /// <summary>Langer Druck auf einen Vorschlag (nur E-Mail-Adressen, die sich entfernen lassen).</summary>
+    public event Action<SuggestionSlot>? SuggestionLongPressed;
 
     /// <summary>Werkzeug, Kopier-Vorschlag, Suchfeld oder Statuszeile angetippt (siehe Konstanten).</summary>
     public event Action<string>? ToolbarPicked;
@@ -108,6 +120,14 @@ public sealed class SuggestionBarView : View
         Reset();
     }
 
+    /// <summary>Fragt, ob <paramref name="label"/> entfernt werden soll: links Entfernen, rechts Abbrechen.</summary>
+    public void SetRemoveConfirm(string label)
+    {
+        _removeLabel = label;
+        _mode = Mode.Remove;
+        Reset();
+    }
+
     public void SetStatus(string status)
     {
         _status = status;
@@ -144,6 +164,10 @@ public sealed class SuggestionBarView : View
             case Mode.Status:
                 _targets.Add((new RectF(0, 0, Width, Height), StatusId, _status, Resource.Drawable.ms_mic));
                 break;
+            case Mode.Remove:
+                _targets.Add((new RectF(0, 0, Width * 0.7f, Height), RemoveId, "🗑 " + _removeLabel, 0));
+                _targets.Add((new RectF(Width * 0.7f, 0, Width, Height), RemoveCancelId, Localization.L.T("Abbrechen", "Cancel"), 0));
+                break;
         }
 
         for (int i = 0; i < _targets.Count; i++) DrawTarget(canvas, i);
@@ -151,6 +175,20 @@ public sealed class SuggestionBarView : View
 
     void LayoutSuggestions()
     {
+        // E-Mail-Adressen sind lang: die vorhandenen Vorschläge teilen sich die ganze Breite (eine Adresse = volle Breite)
+        if (_slots.Any(s => s?.IsEmail == true))
+        {
+            var present = Enumerable.Range(0, 3).Where(i => _slots[i] != null).ToList();
+            float share = Width / (float)present.Count;
+            for (int n = 0; n < present.Count; n++)
+            {
+                int i = present[n];
+                _targets.Add((new RectF(n * share, 0, (n + 1) * share, Height), $"slot{i}", _slots[i]!.Display, 0));
+            }
+
+            return;
+        }
+
         float w = Width / 3f;
         for (int i = 0; i < 3; i++)
         {
@@ -206,7 +244,7 @@ public sealed class SuggestionBarView : View
         var (bounds, id, label, icon) = _targets[index];
         bool pressed = index == _pressed;
 
-        bool pill = id is ClipChipId or SearchPillId;
+        bool pill = id is ClipChipId or SearchPillId or RemoveId;
         if (pill)
         {
             _fill.Color = pressed ? Theme.KeyPressed : Theme.Key;
@@ -280,6 +318,9 @@ public sealed class SuggestionBarView : View
             case MotionEventActions.Down:
                 _pressed = index;
                 _downTime = e.EventTime;
+                _longPressFired = false;
+                int generation = ++_pressGeneration;
+                if (index >= 0 && _mode == Mode.Suggestions) PostDelayed(() => OnLongPress(generation, index), ViewConfiguration.LongPressTimeout);
                 Invalidate();
                 break;
 
@@ -295,17 +336,31 @@ public sealed class SuggestionBarView : View
             case MotionEventActions.Up:
                 int picked = _pressed;
                 _pressed = -1;
+                _pressGeneration++;
                 Invalidate();
-                if (picked >= 0 && picked == index) Dispatch(_targets[picked].Id, e.EventTime);
+                if (picked >= 0 && picked == index && !_longPressFired) Dispatch(_targets[picked].Id, e.EventTime);
                 break;
 
             case MotionEventActions.Cancel:
+                _pressGeneration++;
                 _pressed = -1;
                 Invalidate();
                 break;
         }
 
         return true;
+    }
+
+    void OnLongPress(int generation, int index)
+    {
+        if (generation != _pressGeneration || _pressed != index || index >= _targets.Count) return;
+        string id = _targets[index].Id;
+        if (!id.StartsWith("slot") || _slots[id[^1] - '0'] is not { IsEmail: true } slot) return;
+        if (slot.Display != slot.Word) return; // Anbieter-Ergänzung ("@gmail.com"), nichts Gemerktes
+        _longPressFired = true;
+        _pressed = -1;
+        PerformHapticFeedback(FeedbackConstants.LongPress);
+        SuggestionLongPressed?.Invoke(slot);
     }
 
     void Dispatch(string id, long upTime)
