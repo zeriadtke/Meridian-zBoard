@@ -350,10 +350,29 @@ public sealed class SettingsActivity : Activity
                 .SetNegativeButton(L.T("Abbrechen", "Cancel"), (_, _) => { })!
                 .Show();
         });
+        Toggle(L.T("E-Mail-Adressen merken", "Remember email addresses"),
+            L.T("In E-Mail-Feldern eingegebene Adressen wieder vorschlagen", "Suggest addresses you entered in email fields"),
+            _settings.RememberEmails, (_, v) => _settings.RememberEmails = v);
+        Row(Resource.Drawable.ms_menu_book, L.T("Gemerkte E-Mail-Adressen löschen", "Delete saved email addresses"), null, () =>
+        {
+            int count = ZBoardImeService.EmailCount(this);
+            new AlertDialog.Builder(this)
+                .SetTitle(L.T("E-Mail-Adressen löschen?", "Delete email addresses?"))!
+                .SetMessage(L.T($"{count} gemerkte Adresse(n) werden entfernt.", $"{count} saved address(es) will be removed."))!
+                .SetPositiveButton(L.T("Löschen", "Delete"), (_, _) =>
+                {
+                    ZBoardImeService.ClearEmails(this);
+                    Toast.MakeText(this, L.T("E-Mail-Adressen gelöscht.", "Email addresses deleted."), ToastLength.Short)!.Show();
+                })!
+                .SetNegativeButton(L.T("Abbrechen", "Cancel"), (_, _) => { })!
+                .Show();
+        });
         Note(L.T("Gelerntes bleibt auf dem Gerät und wird nie exportiert. In Passwort-, E-Mail- und Adressfeldern lernt "
-               + "zBoard nichts.",
-            "Learned words stay on the device and are never exported. zBoard learns nothing in password, email and "
-            + "address fields."));
+               + "zBoard keine Wörter. E-Mail-Adressen merkt es sich nur, wenn sie in einem E-Mail-Feld stehen – nicht in "
+               + "Inkognito-Fenstern und Feldern, in denen die App das Lernen untersagt.",
+            "Learned words stay on the device and are never exported. zBoard learns no words in password, email and "
+            + "address fields. It only remembers email addresses entered in email fields – not in incognito windows "
+            + "or fields where the app forbids learning."));
     }
 
     void BuildTest()

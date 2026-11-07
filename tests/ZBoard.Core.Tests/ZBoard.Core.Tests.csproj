@@ -20,6 +20,7 @@
     <Compile Include="../../Ime/TextBoundaries.cs" Link="Core/TextBoundaries.cs" />
     <Compile Include="../../Emoji/EmojiCatalog.cs" Link="Core/EmojiCatalog.cs" />
     <Compile Include="../../Clipboard/ClipboardHistory.cs" Link="Core/ClipboardHistory.cs" />
+    <Compile Include="../../Suggestions/EmailMemory.cs" Link="Core/EmailMemory.cs" />
   </ItemGroup>
 
   <ItemGroup>

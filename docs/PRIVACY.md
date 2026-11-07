@@ -15,6 +15,10 @@ Die App hat keine Internet-Berechtigung und kann deshalb selbst nichts ins Inter
   geschützten App-Speicher auf deinem Gerät. In Passwort-, E-Mail-, Adress- und Zahlenfeldern sowie in Feldern, in
   denen die App das Lernen untersagt (Inkognito-Modus), lernt zBoard nichts. Du kannst das Lernen ausschalten und
   alles Gelernte in den Einstellungen unter „Wörterbuch“ löschen.
+- **E-Mail-Adressen**, die du in E-Mail-Feldern eingibst, damit zBoard sie dort wieder vorschlagen kann (höchstens 50,
+  im geschützten App-Speicher). Nicht in Inkognito-Fenstern und Feldern, in denen die App das Lernen untersagt.
+  Einzelne Adressen entfernst du per langem Druck in der Vorschlagsleiste, alle unter „Wörterbuch“; dort lässt sich
+  das Merken auch ausschalten.
 - **Zwischenablage-Verlauf**: Kopierte Texte werden eine Stunde lang nur im Arbeitsspeicher gehalten. Gespeichert
   werden nur Einträge, die du selbst anheftest. Als vertraulich markierte Inhalte (z. B. aus Passwort-Managern)
   übernimmt zBoard nie. Der Verlauf lässt sich in den Einstellungen ausschalten.
@@ -61,6 +65,9 @@ The app has no internet permission, so it cannot send anything to the internet i
   on your device. zBoard learns nothing in password, email, address and number fields, or in fields where the app
   disallows learning (incognito mode). You can turn learning off and delete everything learned under
   "Dictionary" in the settings.
+- **Email addresses** you enter in email fields, so zBoard can suggest them there again (at most 50, in the app's
+  private storage). Not in incognito windows or fields where the app disallows learning. Remove a single address by
+  long-pressing it in the suggestion bar, or all of them under "Dictionary", where you can also turn this off.
 - **Clipboard history**: copied text is kept in memory only, for one hour. Only items you pin are saved.
   zBoard never takes content marked as sensitive (e.g. from password managers). You can turn the history off.
 - **Recently used emoji** and your **settings**.
