@@ -188,6 +188,33 @@ public sealed class SuggestionEngine
             .ToList();
     }
 
+    /// <summary>Ab so vielen Verwendungen einer Wortfolge schlägt zBoard sie als Ganzes vor.</summary>
+    public const int PhraseThreshold = 2;
+
+    /// <summary>
+    /// Wie Gboard ganze Wortfolgen anbieten: die gelernten Wörter, die verlässlich auf <paramref name="word"/> folgen
+    /// ("Mit freundlichen" → "Grüßen"), höchstens <paramref name="maxWords"/>. Nur aus Gelerntem; null, wenn keine
+    /// Folge oft genug und eindeutig genug war (das häufigste Folgewort muss mindestens die Hälfte ausmachen).
+    /// </summary>
+    public string? ContinuePhrase(string word, int maxWords = 3)
+    {
+        var parts = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { word };
+        string current = word;
+        while (parts.Count < maxWords)
+        {
+            var followers = _history.Followers(current);
+            if (followers.Count == 0) break;
+            var (next, count) = followers[0];
+            int total = followers.Sum(f => f.Count);
+            if (count < PhraseThreshold || count * 2 < total || !seen.Add(next)) break;
+            parts.Add(next);
+            current = next;
+        }
+
+        return parts.Count == 0 ? null : string.Join(" ", parts);
+    }
+
     /// <summary>Schreibweisen aus dem Wörterbuch, sonst das (gelernte) Wort selbst.</summary>
     IReadOnlyList<string> FormsOf(string word)
     {
