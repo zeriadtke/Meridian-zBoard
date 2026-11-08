@@ -45,8 +45,13 @@ public sealed class MainActivity : Activity
             + "sent to DeepL when you tap a translation via the puzzle icon in zBoard."), 15));
 
         content.AddView(Heading(T("1. API-Schlüssel", "1. API key")));
-        content.AddView(Text(T("Kostenlos bei DeepL erhältlich (DeepL API Free).",
-            "Available for free from DeepL (DeepL API Free)."), 14));
+        content.AddView(Text(T(
+            "Den Schlüssel gibt es nur mit einem eigenen API-Konto (kostenlos: „DeepL API Free“) – ein normales "
+            + "DeepL-Konto hat keinen. Bei DeepL abmelden, unter „API-Tarif wählen“ registrieren, dann im Konto unter "
+            + "„API-Schlüssel“ kopieren. Free-Schlüssel enden auf „:fx“.",
+            "The key requires a separate API account (free: “DeepL API Free”) – a regular DeepL account has none. Log "
+            + "out of DeepL, sign up via “Choose an API plan”, then copy it from your account under “API keys”. Free "
+            + "keys end in “:fx”."), 14));
         _key = new EditText(this)
         {
             Text = _settings.ApiKey,
@@ -54,7 +59,9 @@ public sealed class MainActivity : Activity
             InputType = InputTypes.ClassText | InputTypes.TextVariationPassword,
         };
         content.AddView(_key);
-        content.AddView(Button(T("Schlüssel bei DeepL holen", "Get a key from DeepL"), () =>
+        content.AddView(Button(T("API-Tarif wählen", "Choose an API plan"), () =>
+            StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse("https://www.deepl.com/pro-api")))));
+        content.AddView(Button(T("Meine API-Schlüssel", "My API keys"), () =>
             StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse("https://www.deepl.com/your-account/keys")))));
 
         content.AddView(Heading(T("2. Zielsprachen", "2. Target languages")));
