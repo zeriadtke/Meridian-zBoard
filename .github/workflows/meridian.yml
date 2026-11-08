@@ -120,6 +120,26 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
+      # Feste Download-Links fürs Handy (ohne GitHub-Login, Artefakte brauchen einen):
+      # https://github.com/<repo>/raw/apk/<datei>.apk – der Branch enthält immer nur den letzten Build.
+      - name: APKs in Branch apk veröffentlichen
+        if: steps.collect.outcome == 'success'
+        continue-on-error: true
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP "kb-apk"
+          Remove-Item -Recurse -Force $dir -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $dir | Out-Null
+          Copy-Item out/apk-upload/* $dir
+          Set-Content (Join-Path $dir "README.md") @("Letzter Build von main (Lauf ${{ github.run_id }}, Commit ${{ github.sha }}).", "",
+            "- [Tastatur](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zHeal.Meridian.Keyboard.apk)",
+            "- [zBoard DeepL](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zBoard.DeepL.apk)")
+          Push-Location $dir
+          git init -q -b apk
+          git -c user.name=ci -c user.email=ci@localhost add -A
+          git -c user.name=ci -c user.email=ci@localhost commit -q -m "APKs ${{ github.run_id }}"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" apk
+          Pop-Location
+
       - name: Logs in Branch ci-logs veröffentlichen
         if: always()
         run: |
