@@ -82,9 +82,12 @@ public sealed class EditorProfile
 
         bool email = cls == TypeClassText && variation is TextVariationEmail or TextVariationWebEmail;
         // Manche Formulare markieren E-Mail-Felder nicht: einzeiliges, normales Textfeld mit "mail" im Hinweis oder Namen
-        if (!email && cls == TypeClassText && variation == 0 && (type & TextFlagMultiLine) == 0 && info != null)
+        // Suchfelder ("In E-Mails suchen") sind keine E-Mail-Felder – dort soll zBoard normal lernen.
+        if (!email && cls == TypeClassText && variation == 0 && (type & TextFlagMultiLine) == 0 && info != null
+            && (options & ImeMaskAction) != ActionSearch)
         {
-            email = MentionsMail(info.HintText?.ToString()) || MentionsMail(info.FieldName);
+            string? hint = info.HintText?.ToString();
+            email = (MentionsMail(hint) && !MentionsSearch(hint)) || MentionsMail(info.FieldName);
         }
 
         bool password =
@@ -113,6 +116,11 @@ public sealed class EditorProfile
         text != null && text.Length <= 60
         && (text.Contains("mail", StringComparison.OrdinalIgnoreCase) || text.Contains("courriel", StringComparison.OrdinalIgnoreCase)
             || text.Contains("correo", StringComparison.OrdinalIgnoreCase));
+
+    static bool MentionsSearch(string? text) =>
+        text != null && (text.Contains("such", StringComparison.OrdinalIgnoreCase)
+                         || text.Contains("search", StringComparison.OrdinalIgnoreCase)
+                         || text.Contains("find", StringComparison.OrdinalIgnoreCase));
 
     /// <summary>Beschriftung der Enter-Taste je nach Feldaktion.</summary>
     public string EnterLabel => !HasEnterAction ? "⏎" : Action switch

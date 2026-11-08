@@ -384,7 +384,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             ic.DeleteSurroundingText(c.Corrected.Length + c.Separator.Length, 0);
             ic.CommitText(J(c.Original), 1);
             Engine?.SuppressCorrection(c.Original);
-            Learn(null, c.Original);
+            Learn(null, c.Original, accepted: true);
             _lastCorrection = null;
             return;
         }
@@ -534,16 +534,16 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
         else
         {
-            Learn(previous, slot.Word);
+            Learn(previous, slot.Word, accepted: slot.IsLiteral);
         }
 
         UpdateAutoShift();
         UpdateSuggestions();
     }
 
-    void Learn(string? previous, string word)
+    void Learn(string? previous, string word, bool accepted = false)
     {
-        if (_settings.LearnWords && _profile.AllowLearning) Engine?.History.Learn(previous, word);
+        if (_settings.LearnWords && _profile.AllowLearning) Engine?.History.Learn(previous, word, accepted);
     }
 
     /// <summary>

@@ -65,3 +65,36 @@ public class PhraseTests
         Assert.Null(Engine(h).ContinuePhrase("ja"));
     }
 }
+
+public class AcceptedWordTests
+{
+    [Fact]
+    public void LiteralPick_MakesWordKnownImmediately()
+    {
+        var h = new UserHistory();
+        h.Learn(null, "kacke");
+        Assert.False(h.IsKnown("kacke"));
+
+        var g = new UserHistory();
+        g.Learn(null, "kacke", accepted: true);
+        Assert.True(g.IsKnown("kacke"));
+        Assert.Equal("kacke", g.LearnedForm("kacke"));
+    }
+
+    [Fact]
+    public void AcceptedWord_IsNoLongerOfferedInQuotes()
+    {
+        var dictionary = new WordDictionary();
+        dictionary.Add("lacks", 500);
+        dictionary.Add("macie", 50);
+        dictionary.BuildTopLists();
+        var history = new UserHistory();
+        var engine = new SuggestionEngine(dictionary, ZBoard.Suggestions.KeyProximity.FromLayout(ZBoard.Keyboard.Layouts.Alphabet("en", false)), null, history);
+
+        Assert.False(engine.Suggest("kacke").TypedIsWord);
+        history.Learn(null, "kacke", accepted: true);
+        var result = engine.Suggest("kacke");
+        Assert.True(result.TypedIsWord);
+        Assert.Null(result.AutoCorrection);
+    }
+}

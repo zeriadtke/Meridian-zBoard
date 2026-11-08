@@ -29,7 +29,11 @@ public sealed class UserHistory
     }
 
     /// <summary>Merkt sich <paramref name="word"/> und, falls vorhanden, die Folge <paramref name="previous"/> → <paramref name="word"/>.</summary>
-    public void Learn(string? previous, string word)
+    /// <param name="accepted">
+    /// Der Nutzer hat das Wort ausdrücklich gewählt (links in der Leiste angetippt, Autokorrektur rückgängig gemacht):
+    /// wie bei Gboard sofort bekannt, also nicht mehr in Anführungszeichen und nicht mehr korrigiert.
+    /// </param>
+    public void Learn(string? previous, string word, bool accepted = false)
     {
         if (!IsLearnable(word)) return;
 
@@ -37,9 +41,12 @@ public sealed class UserHistory
         {
             var key = word.ToLowerInvariant();
             // Kleinschreibung gewinnt: "Hallo" am Satzanfang soll ein späteres "hallo" nicht überschreiben.
-            _words[key] = _words.TryGetValue(key, out var entry)
-                ? (char.IsLower(word[0]) ? word : entry.Form, entry.Count + 1)
-                : (word, 1);
+            var learned = _words.TryGetValue(key, out var entry)
+                ? (Form: char.IsLower(word[0]) ? word : entry.Form, Count: entry.Count + 1)
+                : (Form: word, Count: 1);
+            if (accepted) learned.Count = Math.Max(learned.Count, KnownThreshold);
+
+            _words[key] = learned;
 
             if (previous != null && IsLearnable(previous))
             {
