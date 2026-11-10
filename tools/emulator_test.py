@@ -15,6 +15,7 @@ import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
+import zlib
 
 PACKAGE = "de.World_of_Bytes.zBoard"
 IME = f"{PACKAGE}/.ZBoardImeService"
@@ -180,6 +181,56 @@ def screenshot(out_dir, name):
     return path
 
 
+def read_png(path):
+    """Liest einen Screenshot (8 Bit RGB/RGBA, ohne Interlacing) ohne Zusatzpakete: (Breite, Höhe, Bytes/Pixel, Zeilen)."""
+    with open(path, "rb") as f:
+        data = f.read()
+    pos, idat, width = 8, b"", 0
+    while pos < len(data):
+        length = int.from_bytes(data[pos:pos + 4], "big")
+        kind, body = data[pos + 4:pos + 8], data[pos + 8:pos + 8 + length]
+        if kind == b"IHDR":
+            width, height = int.from_bytes(body[0:4], "big"), int.from_bytes(body[4:8], "big")
+            bpp = {2: 3, 6: 4}[body[9]]
+        elif kind == b"IDAT":
+            idat += body
+        pos += 12 + length
+    raw, stride, rows, prev = zlib.decompress(idat), width * bpp, [], bytearray(width * bpp)
+    for y in range(height):
+        start = y * (stride + 1)
+        kind, line = raw[start], bytearray(raw[start + 1:start + 1 + stride])
+        for i in range(stride):
+            a = line[i - bpp] if i >= bpp else 0
+            b, c = prev[i], prev[i - bpp] if i >= bpp else 0
+            if kind == 1:
+                line[i] = (line[i] + a) & 255
+            elif kind == 2:
+                line[i] = (line[i] + b) & 255
+            elif kind == 3:
+                line[i] = (line[i] + (a + b) // 2) & 255
+            elif kind == 4:
+                p_ = a + b - c
+                pa, pb, pc = abs(p_ - a), abs(p_ - b), abs(p_ - c)
+                line[i] = (line[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
+        rows.append(line)
+        prev = line
+    return width, height, bpp, rows
+
+
+def bar_ink(path, keys):
+    """Anteil der Pixel im Streifen der Vorschlagsleiste (über der obersten Tastenreihe), die sich deutlich vom
+    Hintergrund abheben. Leer gezeichnete oder übermalte Leiste → 0."""
+    density = int(re.findall(r"(\d+)", shell("wm density"))[-1]) / 160
+    q, a = keys.get("q") or keys["Q"], keys.get("a") or keys["A"]
+    keyboard_top = q[1] - (a[1] - q[1]) / 2
+    top, bottom = int(keyboard_top - 44 * density), int(keyboard_top - 10 * density)
+    width, _, bpp, rows = read_png(path)
+    pixels = [tuple(rows[y][x * bpp:x * bpp + 3]) for y in range(top, bottom, 2) for x in range(0, width, 2)]
+    background = max(set(pixels), key=pixels.count)
+    ink = sum(1 for p in pixels if sum(abs(u - v) for u, v in zip(p, background)) > 120)
+    return ink / len(pixels)
+
+
 def crashes():
     log = adb("logcat", "-d", "-b", "crash", check=False)
     return [line for line in log.splitlines() if PACKAGE in line or "FATAL" in line]
@@ -275,7 +326,8 @@ def main():
         text = field_text()
         check("Suchleiste: Wortvorschläge trotz NO_SUGGESTIONS", text == "hau" and last.strip("|") != "",
               f"→ Feld „{text}“, Leiste „{last}“")
-        screenshot(out_dir, "5-suchleiste")
+        ink = bar_ink(screenshot(out_dir, "5-suchleiste"), keys)
+        check("Vorschlagsleiste sichtbar (Screenshot)", ink > 0.002, f"({ink:.2%} Schrift im Leistenbereich)")
 
         # Passwortfeld: Buchstaben und Ziffern müssen ankommen (Android zeigt sie maskiert)
         shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY} --es password text")

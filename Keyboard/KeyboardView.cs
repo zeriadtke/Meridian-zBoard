@@ -81,6 +81,13 @@ public sealed class KeyboardView : View
 
     sealed class Popup(List<string> items, RectF bounds, float cellWidth, List<string>? values = null)
     {
+        /// <summary>
+        /// Taste mit nur einem Zusatzzeichen (meist die Ziffer der oberen Reihe): wie bei Gboard ein runder
+        /// Kreis über der Taste statt einer Leiste; die Taste selbst wird währenddessen ausgegraut.
+        /// </summary>
+        public bool Round { get; init; }
+        public PlacedKey? Source { get; init; }
+
         /// <summary>Bei der Sprachauswahl: Sprachcodes zu den angezeigten Namen.</summary>
         public List<string>? Values { get; } = values;
         public List<string> Items { get; } = items;
@@ -94,6 +101,7 @@ public sealed class KeyboardView : View
     readonly Paint _fill = new(PaintFlags.AntiAlias);
     readonly Paint _text = new(PaintFlags.AntiAlias);
     readonly Paint _hint = new(PaintFlags.AntiAlias);
+    readonly Paint _shadow = new(PaintFlags.AntiAlias);
     readonly Paint _trail = new(PaintFlags.AntiAlias);
     readonly Android.Graphics.Path _trailPath = new();
     readonly Handler _handler = new(Looper.MainLooper!);
@@ -298,7 +306,10 @@ public sealed class KeyboardView : View
     protected override void OnDraw(Canvas canvas)
     {
         base.OnDraw(canvas);
-        canvas.DrawColor(Theme.Background);
+        // Nur die eigene Fläche füllen: Seit der runde Zahlen-Popup über den Rand zeichnen darf (ClipChildren = false
+        // bei den Eltern), reicht der Zeichenbereich bis über die Vorschlagsleiste – DrawColor würde sie übermalen.
+        _fill.Color = Theme.Background;
+        canvas.DrawRect(0, 0, Width, Height, _fill);
 #if DEBUG || ZBOARD_TESTHOOKS
         LogKeyPositions();
 #endif
@@ -306,6 +317,13 @@ public sealed class KeyboardView : View
         float radius = 7 * _dp;
         foreach (var pk in _keys)
         {
+            if (_popup is { Round: true } round && round.Source == pk)
+            {
+                // Wie Gboard: Unter dem runden Popup verschwindet die Tastenfläche, die Beschriftung bleibt blass stehen.
+                DrawKeyLabel(canvas, pk, faded: true);
+                continue;
+            }
+
             bool pressed = _press is { Gliding: false } current && current.Key == pk && _popup == null;
             _fill.Color = pressed ? Theme.KeyPressed : KeyColor(pk);
             // Wie Gboard: Ebenen- und Enter-Taste als Pille
@@ -348,8 +366,9 @@ public sealed class KeyboardView : View
         _ => 0,
     };
 
-    void DrawKeyLabel(Canvas canvas, PlacedKey pk)
+    void DrawKeyLabel(Canvas canvas, PlacedKey pk, bool faded = false)
     {
+        const int FadedAlpha = 90;
         var key = pk.Key;
         var b = pk.Bounds;
 
@@ -383,6 +402,8 @@ public sealed class KeyboardView : View
             _ => Theme.Text,
         };
 
+        if (faded) _text.Alpha = FadedAlpha;
+
         float baseline = b.CenterY() - (_text.Descent() + _text.Ascent()) / 2;
         canvas.DrawText(label, b.CenterX(), baseline, _text);
 
@@ -392,6 +413,7 @@ public sealed class KeyboardView : View
         {
             _hint.TextSize = 10 * _dp;
             _hint.Color = Theme.HintText;
+            if (faded) _hint.Alpha = FadedAlpha;
             canvas.DrawText(digit, b.Right - 7 * _dp, b.Top + 12 * _dp, _hint);
         }
     }
@@ -446,6 +468,12 @@ public sealed class KeyboardView : View
     void DrawPopup(Canvas canvas, float radius)
     {
         var popup = _popup!;
+        if (popup.Round)
+        {
+            DrawRoundPopup(canvas, popup);
+            return;
+        }
+
         _fill.Color = Theme.Popup;
         canvas.DrawRoundRect(popup.Bounds, radius, radius, _fill);
 
@@ -469,6 +497,57 @@ public sealed class KeyboardView : View
             float baseline = cell.CenterY() - (_text.Descent() + _text.Ascent()) / 2;
             canvas.DrawText(popup.Items[i], cell.CenterX(), baseline, _text);
         }
+    }
+
+    /// <summary>
+    /// Gboard-Kreis für ein einzelnes Zusatzzeichen: heller Kreis mit leichtem Schatten,
+    /// darin ein Kreis in der Akzentfarbe mit dem Zeichen.
+    /// </summary>
+    void DrawRoundPopup(Canvas canvas, Popup popup)
+    {
+        var b = popup.Bounds;
+        float outer = b.Width() / 2;
+        float inner = outer * 0.64f;
+
+        // Schatten auf Hardware-Canvas erst ab Android 9; davor bleibt er einfach weg.
+        _shadow.Color = Theme.Popup;
+        _shadow.SetShadowLayer(4 * _dp, 0, 1.5f * _dp, Color.Argb(70, 0, 0, 0));
+        canvas.DrawCircle(b.CenterX(), b.CenterY(), outer, _shadow);
+
+        _fill.Color = Theme.Accent;
+        canvas.DrawCircle(b.CenterX(), b.CenterY(), inner, _fill);
+
+        _text.TextSize = inner * 1.2f;
+        _text.Color = Theme.AccentText;
+        float baseline = b.CenterY() - (_text.Descent() + _text.Ascent()) / 2;
+        canvas.DrawText(popup.Items[0], b.CenterX(), baseline, _text);
+    }
+
+    /// <summary>
+    /// Obergrenze (in eigenen Koordinaten), bis zu der Popups über den View hinaus zeichnen dürfen:
+    /// Die Eltern schneiden ihre Kinder nicht ab (ClipChildren = false), also reicht der Platz bis zum
+    /// oberen Rand des äußersten solchen Elternteils – bei zBoard über die Vorschlagsleiste.
+    /// </summary>
+    float OverflowTop()
+    {
+        View v = this;
+        float offset = 0;
+        while (v.Parent is ViewGroup { ClipChildren: false } parent)
+        {
+            offset += v.Top;
+            v = parent;
+        }
+
+        return -offset;
+    }
+
+    /// <summary>Neu zeichnen, auch den Bereich außerhalb des Views (Popup über der Vorschlagsleiste).</summary>
+    void InvalidateWithOverflow()
+    {
+        Invalidate();
+        View v = this;
+        while (v.Parent is ViewGroup { ClipChildren: false } parent) v = parent;
+        if (v != this) v.Invalidate();
     }
 
 #if DEBUG || ZBOARD_TESTHOOKS
@@ -769,7 +848,7 @@ public sealed class KeyboardView : View
         }
 
         Listener?.OnKeyUp(key, output, time, gesture);
-        Invalidate();
+        InvalidateWithOverflow();
     }
 
     void CancelPress()
@@ -778,7 +857,7 @@ public sealed class KeyboardView : View
         _handler.RemoveCallbacks(_repeatRunnable);
         _press = null;
         _popup = null;
-        Invalidate();
+        InvalidateWithOverflow();
     }
 
     void OnLongPress()
@@ -795,6 +874,13 @@ public sealed class KeyboardView : View
 
         var b = p.Key.Bounds;
         var items = p.Key.Key.Alternates.Select(Shifted).ToList();
+
+        if (items.Count == 1)
+        {
+            ShowRoundPopup(p, items);
+            return;
+        }
+
         float cell = Math.Max(b.Width(), 36 * _dp);
         float total = cell * items.Count;
         float left = Math.Max(4 * _dp, Math.Min(b.CenterX() - cell / 2, Width - 4 * _dp - total));
@@ -805,6 +891,23 @@ public sealed class KeyboardView : View
         _popup.Selected = PopupIndexAt(b.CenterX());
         PerformKeyHaptic();
         Invalidate();
+    }
+
+    /// <summary>Runder Popup wie bei Gboard, mittig über der Taste und knapp darüber.</summary>
+    void ShowRoundPopup(Press p, List<string> items)
+    {
+        var b = p.Key.Bounds;
+        float size = Math.Clamp(b.Width() * 2f, 60 * _dp, b.Height() * 1.6f);
+        float cx = Math.Clamp(b.CenterX(), size / 2 + 2 * _dp, Width - size / 2 - 2 * _dp);
+        float top = Math.Max(OverflowTop() + 2 * _dp, b.Top - size - 6 * _dp);
+
+        _popup = new Popup(items, new RectF(cx - size / 2, top, cx + size / 2, top + size), size)
+        {
+            Round = true,
+            Source = p.Key,
+        };
+        PerformKeyHaptic();
+        InvalidateWithOverflow();
     }
 
     /// <summary>Sprachauswahl über der Leertaste; Finger zur gewünschten Sprache schieben und loslassen.</summary>

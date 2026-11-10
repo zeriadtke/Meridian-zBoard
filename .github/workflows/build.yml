@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Optional: Store-Version an dieses bestehende Release hängen (z. B. v0.10.0)'
+        required: false
+        default: ''
   # Store-Version: auf GitHub ein Release veröffentlichen (Tag z. B. v0.9) → signiertes .aab/.apk hängt danach am Release
   release:
     types: [published]
@@ -50,6 +55,18 @@ jobs:
         with:
           name: zboard-debug-apk
           path: bin/Debug/net10.0-android/*-Signed.apk
+          if-no-files-found: error
+
+      # Plugin-App "zBoard DeepL" (eigene App mit Internet, siehe docs/PLUGINS.md), wie zBoard mit dem
+      # Testschlüssel signiert, damit zBoard sie als "vom selben Entwickler" anzeigt.
+      - name: Plugin zBoard DeepL bauen (Debug-APK)
+        run: dotnet build plugin-apps/DeepL/ZBoard.DeepL.csproj -c Debug -f net10.0-android -p:EmbedAssembliesIntoApk=true
+
+      - name: Plugin-APK bereitstellen
+        uses: actions/upload-artifact@v5
+        with:
+          name: zboard-deepl-debug-apk
+          path: plugin-apps/DeepL/bin/Debug/net10.0-android/*-Signed.apk
           if-no-files-found: error
 
   # Release-Build (AOT, getrimmt) mit Testhaken und Testschlüssel: so nah an der Store-Version wie möglich,
@@ -208,12 +225,29 @@ jobs:
           -p:AndroidSigningKeyAlias="$KEY_ALIAS"
           -p:AndroidSigningKeyPass="$KEY_PASS"
 
+      # Plugin-App "zBoard DeepL" mit demselben Upload-Schlüssel, damit zBoard sie als "vom selben Entwickler" anzeigt
+      - name: Plugin zBoard DeepL bauen (.aab und .apk)
+        env:
+          STORE_PASS: ${{ secrets.ZBOARD_UPLOAD_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ZBOARD_UPLOAD_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ZBOARD_UPLOAD_KEY_PASSWORD }}
+        run: >
+          dotnet publish plugin-apps/DeepL/ZBoard.DeepL.csproj -c Release -f net10.0-android -o store-deepl
+          -p:AndroidKeyStore=true
+          -p:AndroidSigningKeyStore="$RUNNER_TEMP/upload.keystore"
+          -p:AndroidSigningStorePass="$STORE_PASS"
+          -p:AndroidSigningKeyAlias="$KEY_ALIAS"
+          -p:AndroidSigningKeyPass="$KEY_PASS"
+
       - name: Dateien benennen
         run: |
           VERSION=$(grep -oP '(?<=<ApplicationDisplayVersion>)[^<]+' ZBoard.csproj)
+          DEEPL_VERSION=$(grep -oP '(?<=<ApplicationDisplayVersion>)[^<]+' plugin-apps/DeepL/ZBoard.DeepL.csproj)
           mkdir out
           cp store/*-Signed.aab "out/zboard-$VERSION.aab"
           cp store/*-Signed.apk "out/zboard-$VERSION.apk"
+          cp store-deepl/*-Signed.aab "out/zboard-deepl-$DEEPL_VERSION.aab"
+          cp store-deepl/*-Signed.apk "out/zboard-deepl-$DEEPL_VERSION.apk"
           ls -l out
 
       - name: Bereitstellen
@@ -223,7 +257,8 @@ jobs:
           path: out/
 
       - name: An das GitHub-Release hängen
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || inputs.release_tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" out/* --repo "${{ github.repository }}" --clobber
+          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        run: gh release upload "$TAG" out/* --repo "${{ github.repository }}" --clobber
