@@ -11,8 +11,8 @@
 
     <ApplicationId>de.World_of_Bytes.zBoard</ApplicationId>
     <ApplicationTitle>zBoard</ApplicationTitle>
-    <ApplicationVersion>13</ApplicationVersion>
-    <ApplicationDisplayVersion>0.10.1</ApplicationDisplayVersion>
+    <ApplicationVersion>14</ApplicationVersion>
+    <ApplicationDisplayVersion>0.10.2</ApplicationDisplayVersion>
   </PropertyGroup>
 
   <!-- Testprojekt und Werkzeuge gehören nicht in die App -->

@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="../../Keyboard/KeyboardLayout.cs" Link="Core/KeyboardLayout.cs" />
     <Compile Include="../../Keyboard/Layouts.cs" Link="Core/Layouts.cs" />
+    <Compile Include="../../Keyboard/PopupGrid.cs" Link="Core/PopupGrid.cs" />
     <Compile Include="../../Suggestions/WordDictionary.cs" Link="Core/WordDictionary.cs" />
     <Compile Include="../../Suggestions/KeyProximity.cs" Link="Core/KeyProximity.cs" />
     <Compile Include="../../Suggestions/SuggestionEngine.cs" Link="Core/SuggestionEngine.cs" />
