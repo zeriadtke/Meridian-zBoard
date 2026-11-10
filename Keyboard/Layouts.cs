@@ -85,6 +85,10 @@ public static class Layouts
         page == 2 ? SymbolsPage2(showLanguageKey) : SymbolsPage1(showLanguageKey);
 
     // ---------- Buchstabenreihen ----------
+    //
+    // Zusatzzeichen (langer Druck) je Sprache in der Reihenfolge von Gboard, die der Android-Open-Source-Tastatur
+    // folgt (AOSP LatinIME, KeyboardTextsTable, Apache 2.0): Das erste Zeichen steht direkt über der Taste und ist
+    // vorausgewählt. Die Ziffer der oberen Reihe steht dort, wo AOSP sie mit „%“ markiert, sonst vorne.
 
     /// <summary>
     /// Deutsch wie bei Gboard: 10 Tasten je Reihe, Umlaute und ß per langem Druck (zuerst angeboten).
@@ -94,13 +98,13 @@ public static class Layouts
     {
         List<KeyDef> top =
         [
-            Char("q", "1"), Char("w", "2"), Char("e", "3", "é", "è", "ê", "ë", "ē"), Char("r", "4"), Char("t", "5"),
-            Char("z", "6"), Char("u", "ü", "7", "ú", "ù", "û", "ū"), Char("i", "8", "í", "ì", "î", "ï"),
-            Char("o", "ö", "9", "ó", "ò", "ô", "õ", "ø", "œ"), Char("p", "0"),
+            Char("q", "1"), Char("w", "2"), Char("e", "3", "é", "è", "ê", "ë", "ė", "ē"), Char("r", "4"), Char("t", "5"),
+            Char("z", "6"), Char("u", "ü", "7", "û", "ù", "ú", "ū"), Char("i", "8"),
+            Char("o", "ö", "9", "ô", "ò", "ó", "õ", "œ", "ø", "ō"), Char("p", "0"),
         ];
         List<KeyDef> middle =
         [
-            Char("a", "ä", "à", "á", "â", "ã", "å", "æ", "ā"), Char("s", "ß", "ś", "š"), Char("d"), Char("f"), Char("g"),
+            Char("a", "ä", "â", "à", "á", "æ", "ã", "å", "ā"), Char("s", "ß", "ś", "š"), Char("d"), Char("f"), Char("g"),
             Char("h"), Char("j"), Char("k"), Char("l"),
         ];
         float shiftWidth = 1.5f;
@@ -118,7 +122,7 @@ public static class Layouts
             new KeyRow(middle, Indent: umlautKeys ? 0f : 0.5f),
             new KeyRow(
             [
-                Special(KeyAction.Shift, shiftWidth), Char("y", "ý", "ÿ"), Char("x"), Char("c", "ç", "ć", "č"), Char("v"),
+                Special(KeyAction.Shift, shiftWidth), Char("y"), Char("x"), Char("c"), Char("v"),
                 Char("b"), Char("n", "ñ", "ń"), Char("m"), Special(KeyAction.Delete, shiftWidth),
             ]),
         ];
@@ -128,13 +132,14 @@ public static class Layouts
     [
         new KeyRow(
         [
-            Char("q", "1"), Char("w", "2"), Char("e", "3", "é", "è", "ê", "ë"), Char("r", "4"), Char("t", "5"),
-            Char("y", "6"), Char("u", "7", "ú", "ü", "û"), Char("i", "8", "í", "ï", "î"), Char("o", "9", "ó", "ö", "ô", "ø"),
+            Char("q", "1"), Char("w", "2"), Char("e", "3", "é", "è", "ê", "ë", "ē"), Char("r", "4"), Char("t", "5"),
+            Char("y", "6"), Char("u", "7", "ú", "û", "ü", "ù", "ū"), Char("i", "8", "í", "î", "ï", "ī", "ì"),
+            Char("o", "9", "ó", "ô", "ö", "ò", "œ", "ø", "ō", "õ"),
             Char("p", "0"),
         ]),
         new KeyRow(
         [
-            Char("a", "á", "à", "â", "ä", "æ"), Char("s", "ß"), Char("d"), Char("f"), Char("g"), Char("h"), Char("j"),
+            Char("a", "à", "á", "â", "ä", "æ", "ã", "å", "ā"), Char("s", "ß"), Char("d"), Char("f"), Char("g"), Char("h"), Char("j"),
             Char("k"), Char("l"),
         ], Indent: 0.5f),
         new KeyRow(
@@ -148,9 +153,10 @@ public static class Layouts
     [
         new KeyRow(
         [
-            Char("a", "1", "à", "â", "æ", "á", "ä"), Char("z", "2"), Char("e", "3", "é", "è", "ê", "ë"), Char("r", "4"),
-            Char("t", "5"), Char("y", "6", "ÿ"), Char("u", "7", "ù", "û", "ü"), Char("i", "8", "î", "ï"),
-            Char("o", "9", "ô", "œ", "ö"), Char("p", "0"),
+            Char("a", "à", "â", "1", "æ", "á", "ä", "ã", "å", "ā", "ª"), Char("z", "2"),
+            Char("e", "é", "è", "ê", "ë", "3", "ę", "ė", "ē"), Char("r", "4"), Char("t", "5"), Char("y", "6", "ÿ"),
+            Char("u", "ù", "û", "7", "ü", "ú", "ū"), Char("i", "î", "8", "ï", "ì", "í", "į", "ī"),
+            Char("o", "ô", "œ", "9", "ö", "ò", "ó", "õ", "ø", "ō", "º"), Char("p", "0"),
         ]),
         new KeyRow(
         [
@@ -158,8 +164,8 @@ public static class Layouts
         ]),
         new KeyRow(
         [
-            Special(KeyAction.Shift, 1.5f), Char("w"), Char("x"), Char("c", "ç"), Char("v"), Char("b"), Char("n", "ñ"),
-            Char("'", "’", "\""), Special(KeyAction.Delete, 1.5f),
+            Special(KeyAction.Shift, 1.5f), Char("w"), Char("x"), Char("c", "ç", "ć", "č"), Char("v"), Char("b"),
+            Char("n"), Char("'", "’", "\""), Special(KeyAction.Delete, 1.5f),
         ]),
     ];
 
@@ -167,19 +173,20 @@ public static class Layouts
     [
         new KeyRow(
         [
-            Char("q", "1"), Char("w", "2"), Char("e", "3", "é", "è", "ë"), Char("r", "4"), Char("t", "5"),
-            Char("y", "6"), Char("u", "7", "ú", "ü", "ù"), Char("i", "8", "í", "ï"), Char("o", "9", "ó", "ò", "º"),
+            Char("q", "1"), Char("w", "2"), Char("e", "3", "é", "è", "ë", "ê", "ę", "ė", "ē"), Char("r", "4"), Char("t", "5"),
+            Char("y", "6"), Char("u", "7", "ú", "ü", "ù", "û", "ū"), Char("i", "8", "í", "ï", "ì", "î", "į", "ī"),
+            Char("o", "9", "ó", "ò", "ö", "ô", "õ", "ø", "œ", "ō", "º"),
             Char("p", "0"),
         ]),
         new KeyRow(
         [
-            Char("a", "á", "à", "ª"), Char("s"), Char("d"), Char("f"), Char("g"), Char("h"), Char("j"), Char("k"),
+            Char("a", "á", "à", "ä", "â", "ã", "å", "ą", "æ", "ā", "ª"), Char("s"), Char("d"), Char("f"), Char("g"), Char("h"), Char("j"), Char("k"),
             Char("l"), Char("ñ"),
         ]),
         new KeyRow(
         [
-            Special(KeyAction.Shift, 1.5f), Char("z"), Char("x"), Char("c", "ç"), Char("v"), Char("b"), Char("n"),
-            Char("m"), Special(KeyAction.Delete, 1.5f),
+            Special(KeyAction.Shift, 1.5f), Char("z"), Char("x"), Char("c", "ç", "ć", "č"), Char("v"), Char("b"),
+            Char("n", "ñ", "ń"), Char("m"), Special(KeyAction.Delete, 1.5f),
         ]),
     ];
 
@@ -187,13 +194,15 @@ public static class Layouts
     [
         new KeyRow(
         [
-            Char("q", "1"), Char("w", "2"), Char("e", "3", "è", "é"), Char("r", "4"), Char("t", "5"),
-            Char("y", "6"), Char("u", "7", "ù", "ú"), Char("i", "8", "ì", "í"), Char("o", "9", "ò", "ó"),
+            Char("q", "1"), Char("w", "2"), Char("e", "3", "è", "é", "ê", "ë", "ę", "ė", "ē"), Char("r", "4"), Char("t", "5"),
+            Char("y", "6"), Char("u", "7", "ù", "ú", "û", "ü", "ū"), Char("i", "8", "ì", "í", "î", "ï", "į", "ī"),
+            Char("o", "9", "ò", "ó", "ô", "ö", "õ", "œ", "ø", "ō", "º"),
             Char("p", "0"),
         ]),
         new KeyRow(
         [
-            Char("a", "à", "á"), Char("s"), Char("d"), Char("f"), Char("g"), Char("h"), Char("j"), Char("k"), Char("l"),
+            Char("a", "à", "á", "â", "ä", "æ", "ã", "å", "ā", "ª"), Char("s"), Char("d"), Char("f"), Char("g"), Char("h"),
+            Char("j"), Char("k"), Char("l"),
         ], Indent: 0.5f),
         new KeyRow(
         [

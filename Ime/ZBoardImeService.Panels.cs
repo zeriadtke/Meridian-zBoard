@@ -84,7 +84,17 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
 
         root.AddView(_suggestionBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, (int)(48 * dp)));
         root.AddView(_panelHost, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent));
-        return root;
+
+        // Durchsichtiger Platz über der Tastatur für Popups, Tastatur unten (siehe ZBoardImeService.Window.cs)
+        var frame = new PopupSpaceFrame(this);
+        frame.SetClipChildren(false);
+        frame.AddView(root, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent,
+            ViewGroup.LayoutParams.WrapContent, GravityFlags.Bottom));
+        // Darüber eine durchsichtige Ebene, auf der die Popups gezeichnet werden (fängt keine Berührungen ab)
+        var layer = new PopupLayerView(this, _keyboardView);
+        frame.AddView(layer, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent));
+        _keyboardView.PopupLayer = layer;
+        return frame;
     }
 
     /// <summary>Beim Öffnen der Tastatur: Einstellungen übernehmen, Panels schließen.</summary>
@@ -112,6 +122,7 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _panelHost?.SetBackgroundColor(theme.Background);
         _emojiPanel?.Theme = theme;
         _clipboardPanel?.ApplyTheme(theme);
+        ApplyNavigationBarStyle();
     }
 
     void ShowKeyboardPanel()

@@ -217,18 +217,33 @@ def read_png(path):
     return width, height, bpp, rows
 
 
+def ink(path, top, bottom):
+    """Anteil der Pixel zwischen top und bottom, die sich deutlich von der häufigsten Farbe abheben."""
+    width, _, bpp, rows = read_png(path)
+    top, bottom = max(0, int(top)), min(len(rows), int(bottom))
+    pixels = [tuple(rows[y][x * bpp:x * bpp + 3]) for y in range(top, bottom, 2) for x in range(0, width, 2)]
+    background = max(set(pixels), key=pixels.count)
+    return sum(1 for p in pixels if sum(abs(u - v) for u, v in zip(p, background)) > 120) / len(pixels)
+
+
+def keyboard_top(keys):
+    density = int(re.findall(r"(\d+)", shell("wm density"))[-1]) / 160
+    q, a = keys.get("q") or keys["Q"], keys.get("a") or keys["A"]
+    return q[1] - (a[1] - q[1]) / 2, density
+
+
+def app_ink(path, keys):
+    """Schrift in der App über der Tastatur (Testfeld mit getipptem Text). Das Tastaturfenster ist so hoch wie der
+    Bildschirm (Platz für Popups); wäre es dort nicht durchsichtig, wäre die App verdeckt → 0."""
+    top, density = keyboard_top(keys)
+    return ink(path, 0, top - 60 * density)
+
+
 def bar_ink(path, keys):
     """Anteil der Pixel im Streifen der Vorschlagsleiste (über der obersten Tastenreihe), die sich deutlich vom
     Hintergrund abheben. Leer gezeichnete oder übermalte Leiste → 0."""
-    density = int(re.findall(r"(\d+)", shell("wm density"))[-1]) / 160
-    q, a = keys.get("q") or keys["Q"], keys.get("a") or keys["A"]
-    keyboard_top = q[1] - (a[1] - q[1]) / 2
-    top, bottom = int(keyboard_top - 44 * density), int(keyboard_top - 10 * density)
-    width, _, bpp, rows = read_png(path)
-    pixels = [tuple(rows[y][x * bpp:x * bpp + 3]) for y in range(top, bottom, 2) for x in range(0, width, 2)]
-    background = max(set(pixels), key=pixels.count)
-    ink = sum(1 for p in pixels if sum(abs(u - v) for u, v in zip(p, background)) > 120)
-    return ink / len(pixels)
+    top, density = keyboard_top(keys)
+    return ink(path, top - 44 * density, top - 10 * density)
 
 
 def crashes():
@@ -276,6 +291,8 @@ def main():
             bottom, limit, nav = map(int, bounds[-1])
             check("Tastatur über der Navigationsleiste", bottom <= limit,
                   f"(Unterkante {bottom}, erlaubt bis {limit}, Leiste {nav} px)")
+            # Fenster in voller Höhe (Platz für Popups): die Tastatur muss trotzdem unten sitzen
+            check("Tastatur sitzt unten am Bildschirm", bottom >= limit - 150, f"(Unterkante {bottom}, unten {limit})")
         else:
             check("Tastatur über der Navigationsleiste", False, "(keine Lageangabe im Log)")
 
@@ -295,12 +312,68 @@ def main():
         tap(keys["Space"])
         text = field_text()
         check("Wischeingabe (g-u-t)", text.endswith("gut "), f"→ „{text}“")
-        screenshot(out_dir, "2-getippt")
+        visible = app_ink(screenshot(out_dir, "2-getippt"), keys)
+        check("App über der Tastatur sichtbar (Fenster dort durchsichtig)", visible > 0.002, f"({visible:.2%} Schrift)")
 
         tap(kb.wait_for("de")["Delete"])
         time.sleep(0.5)
         text = field_text()
         check("Löschen", text.endswith("gut"), f"→ „{text}“")
+
+        # Wie Gboard: Das häufigste Zusatzzeichen ist vorausgewählt – langer Druck auf o ohne Bewegung ergibt ö
+        o = kb.wait_for("de")["o"]
+        holding = subprocess.Popen(["adb", "shell", f"input swipe {o[0]} {o[1]} {o[0]} {o[1]} 2500"])
+        time.sleep(1.4)
+        popup_shot = screenshot(out_dir, "2b-popup-o")  # Popup sichtbar, solange der Finger liegt
+        holding.wait(timeout=30)
+        time.sleep(0.5)
+        text = field_text()
+        check("Langer Druck auf o → ö (vorausgewählt)", text.endswith("gutö"), f"→ „{text}“")
+        # Wo liegt der Popup? Pro Streifen (8 dp) Anteil der Pixel, die sich vom Bild ohne Popup unterscheiden
+        top, density = keyboard_top(keys)
+        width, _, bpp, before = read_png(os.path.join(out_dir, "2-getippt.png"))
+        _, _, _, during = read_png(popup_shot)
+        x_from, x_to = max(0, int(o[0] - 5 * 40 * density)), min(width, int(o[0] + 40 * density))
+        profile = []
+        for y in range(int(top - 200 * density), int(top + 30 * density), int(8 * density)):
+            diff = sum(1 for x in range(x_from, x_to, 3)
+                       if sum(abs(a - b) for a, b in zip(before[y][x * bpp:x * bpp + 3], during[y][x * bpp:x * bpp + 3])) > 60)
+            profile.append((int((y - top) / density), diff * 3 * 100 // (x_to - x_from)))
+        print("  Popup-Profil (relativ zur Tastatur-Oberkante):", " ".join(f"{d:+d}dp:{p}%" for d, p in profile))
+        # Zweite Zeile des Popups (9 Zeichen auf o) liegt über der Vorschlagsleiste (48 dp)
+        above_bar = max((p for d, p in profile if d < -50), default=0)
+        check("Popup ragt über die Vorschlagsleiste (obere Zeile sichtbar)", above_bar >= 5, f"({above_bar}% Popup-Pixel oberhalb)")
+        tap(kb.wait_for("de")["Delete"])
+        time.sleep(0.5)
+
+        # Über der Tastatur ist das Fenster durchsichtig und darf Berührungen nicht schlucken: Antippen des
+        # Feldanfangs in der App setzt den Cursor dorthin, der nächste Buchstabe landet vorne.
+        tap(kb.wait_for("de")["Space"])  # Wort abschließen, damit nichts mehr „in Arbeit“ ist
+        time.sleep(0.5)
+        edit = next(n for n in ui_nodes() if n.get("class") == "android.widget.EditText")
+        x1, y1, x2, y2 = map(int, re.findall(r"\d+", edit.get("bounds")))
+        tap((x1 + 8, y1 + 400))  # unterhalb der Statusleiste (Testfeld reicht bis an den oberen Rand)
+        time.sleep(0.8)
+        tap(kb.wait_for("de")["x"])
+        time.sleep(0.5)
+        text = field_text()
+        check("App über der Tastatur antippbar (Cursor an den Anfang)", text[:1].lower() == "x", f"→ „{text}“")
+        if text[:1].lower() != "x":
+            log = adb("logcat", "-d", "-s", "zBoardTest:I", check=False)
+            insets = re.findall(r"INSETS .*", log)
+            print("  Insets laut zBoard:", insets[-3:] if insets else "keine")
+            print("  Cursor laut App (letzte):", re.findall(r"SEL .*", log)[-4:])
+            print("  Antippen bei:", (x1 + 8, y1 + 400), "Feld:", (x1, y1, x2, y2))
+            windows = shell("dumpsys window windows", check=False)
+            for block in windows.split("Window #"):
+                if "ty=INPUT_METHOD" in block:
+                    print("  IME-Fenster:", " | ".join(l.strip() for l in block.splitlines()
+                          if re.search(r"(?i)touchable|givencontent|givenvisible|mFrame|mAttrs|fl=|pfl=", l))[:2500])
+            touch = shell("dumpsys input", check=False)
+            print("  Input:", " | ".join(l.strip() for l in touch.splitlines()
+                  if re.search(r"(?i)InputMethod|zboard|testfeld|TypingTest", l))[:2500])
+        tap(kb.wait_for("de")["Delete"])
+        time.sleep(0.5)
 
         tap(kb.wait_for("de")["ToSymbols"])
         symbols = kb.wait_for("symbols1", timeout=15)
