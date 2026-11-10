@@ -8,10 +8,11 @@
 [![Build](https://github.com/World-of-Bytes/zBoard/actions/workflows/build.yml/badge.svg)](https://github.com/World-of-Bytes/zBoard/actions/workflows/build.yml)
 
 zBoard ist eine freie Android-Tastatur, die sich in Bedienung und Funktionsumfang an Gboard orientiert:
-Wortvorschläge, Autokorrektur, Wischeingabe, Nächstes-Wort-Vorhersage, Emoji, Zwischenablage und Spracheingabe
-für Deutsch, Englisch, Französisch, Spanisch und Italienisch.
+Wortvorschläge, Autokorrektur, Wischeingabe, Nächstes-Wort-Vorhersage, Wortfolgen, E-Mail-Vorschläge, Emoji,
+Zwischenablage und Spracheingabe für Deutsch, Englisch, Französisch, Spanisch und Italienisch.
 Anders als Gboard arbeitet zBoard vollständig offline und ohne Internetberechtigung; was es aus deinen Eingaben
-lernt, bleibt auf dem Gerät. Geschrieben ist zBoard in C# mit .NET 10 for Android.
+lernt, bleibt auf dem Gerät. Funktionen, die Internet brauchen (etwa Übersetzen mit DeepL), kommen als eigene
+Plugin-Apps dazu – nur wer sie installiert, gibt ihnen Internetzugriff. Geschrieben ist zBoard in C# mit .NET 10 for Android.
 
 Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, noch nicht veröffentlicht.
 
@@ -20,13 +21,16 @@ Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, 
 | | Gboard | zBoard |
 | --- | --- | --- |
 | Lizenz | proprietär, Quellcode nicht öffentlich | BSD 2-Clause (Code), Wortlisten CC BY-SA 4.0 / CC BY 3.0 |
-| Internetzugriff | ja (u. a. GIFs, Übersetzen, Synchronisation) | keine Internetberechtigung |
+| Internetzugriff | ja (u. a. GIFs, Übersetzen, Synchronisation) | keine Internetberechtigung; Internet-Funktionen nur über eigene Plugin-Apps |
 | Lernen aus Eingaben | ja, Modelle werden per Federated Learning mit Google-Servern verbessert | ja, ausschließlich auf dem Gerät, abschaltbar und löschbar |
 | Sprachen | sehr viele Sprachen und Layouts | Deutsch (QWERTZ), Englisch, Spanisch, Italienisch (QWERTY), Französisch (AZERTY) |
 | Tippen, Umschalt, Symbole, langer Druck für Sonderzeichen | ✓ | ✓ |
 | Wortvorschläge und Autokorrektur | ✓ | ✓ 120 000 deutsche, 100 000 englische Wörter; Tastennachbarn, Vertauschungen, Umlaute |
 | Großschreibung deutscher Substantive | ✓ | ✓ |
 | Nächstes-Wort-Vorhersage | ✓ | ✓ mitgelieferte Wortpaare plus eigene Wortfolgen |
+| Ganze Wortfolgen vorschlagen („freundlichen Grüßen“) | ✓ | ✓ aus Gelerntem |
+| Vorschläge für ein angetipptes Wort im Text | ✓ | ✓ Antippen ersetzt das ganze Wort |
+| E-Mail-Adressen vorschlagen | ✓ | ✓ gemerkte Adressen und bekannte Anbieter nach „@“ |
 | Wischeingabe (Glide Typing) | ✓ | ✓ |
 | Cursor per Leertaste, Wort-Löschen per Wischen | ✓ | ✓ |
 | Tastenvorschau, Vibration, Ton | ✓ | ✓ |
@@ -36,7 +40,8 @@ Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, 
 | GIFs und Sticker | ✓ | bewusst nicht (bräuchte Internetzugriff) |
 | Spracheingabe | ✓ | ✓ über die Spracherkennung des Systems, standardmäßig nur offline |
 | Einhandmodus, Höhe, Zahlenreihe | ✓ | ✓ |
-| Übersetzen, Google-Dienste | ✓ | nicht geplant |
+| Übersetzen | ✓ | ✓ über die Plugin-App „zBoard DeepL“ (eigener DeepL-API-Schlüssel) |
+| Google-Dienste | ✓ | nicht geplant |
 
 ## Bauen und installieren
 
@@ -67,7 +72,7 @@ Die Oberfläche ist zweisprachig: Deutsch, wenn das System auf Deutsch steht, so
 
 ## Tests
 
-Die Logik ohne Android (Wörterbuch, Autokorrektur, Vorhersage, Lernen, Wischeingabe, Emoji, Zwischenablage, Layouts) hat eigene Unit-Tests:
+Die Logik ohne Android (Wörterbuch, Autokorrektur, Vorhersage, Wortfolgen, Lernen, E-Mail-Adressen, Wischeingabe, Emoji, Zwischenablage, Layouts) hat eigene Unit-Tests:
 
 ```bash
 dotnet test tests/ZBoard.Core.Tests
@@ -81,7 +86,7 @@ dotnet test tests/ZBoard.Core.Tests
 | `Keyboard/` | Layout-Modell, alle Layouts, `KeyboardView` (Zeichnen und Touch), Farben |
 | `Emoji/` | `EmojiCatalog` (Daten, Suche, Hauttöne), `EmojiPanelView` |
 | `Clipboard/` | `ClipboardHistory`, `ClipboardPanelView` |
-| `Suggestions/` | `WordDictionary` (sortiertes Array), `SuggestionEngine`, `GlideDecoder`, `BigramModel`, `UserHistory`, `KeyProximity`, `SuggestionBarView` |
+| `Suggestions/` | `WordDictionary` (sortiertes Array), `SuggestionEngine`, `GlideDecoder`, `BigramModel`, `UserHistory`, `EmailMemory`, `KeyProximity`, `SuggestionBarView` |
 | `Settings/` | `SettingsActivity` (Startbildschirm), `ZBoardSettings` |
 | `Assets/dict/` | Wortlisten und Wortpaare pro Sprache |
 | `Assets/emoji/` | Emoji nach Kategorien, Namen und Suchbegriffe pro Sprache |
@@ -159,7 +164,7 @@ Vorschlagsleiste auflöst. Echte Wischspuren auf dem Gerät werden die Werte noc
 Funktionen und Bedienung orientieren sich an Gboard. Name, Logo, Icons, Farben, Code und Wörterbuchdaten
 von Google werden nicht übernommen. zBoard hat keine Internet-Berechtigung (Release-Build).
 
-## Emoji, Zwischenablage, Spracheingabe
+## Emoji, Zwischenablage, Plugins und weitere Funktionen
 
 - **Emoji:** Taste ☺ links neben dem Komma. Unten Kategorien, 🕘 zuletzt verwendet, 🔍 Suche. Bei der Suche schreibt
   die Tastatur in das Suchfeld der Leiste („Daumen“, „gut“, „lachen“); Treffer erscheinen daneben. Langer Druck auf

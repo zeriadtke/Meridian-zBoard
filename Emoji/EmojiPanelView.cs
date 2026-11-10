@@ -135,7 +135,9 @@ public sealed class EmojiPanelView : View
     protected override void OnDraw(Canvas canvas)
     {
         base.OnDraw(canvas);
-        canvas.DrawColor(Theme.Background);
+        // Nur die eigene Fläche füllen: Die Eltern schneiden nicht ab (Zahlen-Popup), DrawColor würde die Leiste übermalen.
+        _fill.Color = Theme.Background;
+        canvas.DrawRect(0, 0, Width, Height, _fill);
         DrawGrid(canvas);
         DrawBar(canvas);
         if (_variants != null) DrawVariants(canvas);
