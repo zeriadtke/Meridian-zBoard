@@ -1,4 +1,4 @@
-# zHealth Meridian Tastatur
+# Meridian Tastatur
 
 > **Umbenennung zHeal → zHealth (November 2026):** App-Kennung, Berechtigung und ContentProvider heißen jetzt
 > `de.World_of_Bytes.zHealth.Meridian.*`. Für Android ist das eine neue App – alte Installationen deinstallieren.
@@ -65,7 +65,7 @@ Geänderte zBoard-Dateien (jede Stelle mit `Meridian:` markiert):
 | --- | --- |
 | `Ime/ZBoardImeService.cs` | Name des Dienstes, sechs einzeilige Aufrufe (Sitzung, Taste gedrückt/losgelassen, Autokorrektur, Vorschlag) |
 | `AndroidManifest.xml` | Berechtigung `…permission.TYPING_DATA`, Paketsichtbarkeit des Providers, App-Name |
-| `Settings/SettingsActivity.cs`, `Resources/values/strings.xml` | App-Name „zHealth Meridian Tastatur“ |
+| `Settings/SettingsActivity.cs`, `Resources/values/strings.xml` | App-Name „Meridian Tastatur“ |
 
 Die Einstellungen der Tastatur selbst heißen weiter „zBoard“.
 
