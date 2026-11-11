@@ -384,6 +384,7 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
     void InitClipboard()
     {
         _clipboard = ClipboardHistory.DeserializePinned(_settings.PinnedClips);
+        _seenDataGeneration = Volatile.Read(ref s_dataGeneration);
         _clipboardManager = GetSystemService(ClipboardService) as ClipboardManager;
         if (_clipboardManager != null) _clipboardManager.PrimaryClipChanged += OnPrimaryClipChanged;
     }

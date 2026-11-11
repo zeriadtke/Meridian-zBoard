@@ -53,4 +53,39 @@ public static class PluginContract
 
     /// <summary>Längster Text, den zBoard an ein Plugin schickt.</summary>
     public const int MaxTextLength = 5000;
+
+    // ---------- Synchronisation (Plugins mit Meta-Daten MetaSync = true) ----------
+    // Das Plugin ist nur der Transport zum Cloud-Speicher: zBoard stellt die Datei bereit, führt Daten zusammen und
+    // übergibt die Datei über einen eigenen Content-Provider mit befristeter Lese- bzw. Schreibberechtigung (KeyUri).
+    // Synchronisations-Plugins erscheinen nicht in der Leiste.
+
+    /// <summary>Meta-Daten am Dienst (boolean, true): das Plugin kann synchronisieren.</summary>
+    public const string MetaSync = "de.World_of_Bytes.zBoard.plugin.SYNC";
+
+    /// <summary>Ist ein Speicher eingerichtet? Antwort: <see cref="KeySyncReady"/>, <see cref="KeySyncTarget"/>.</summary>
+    public const int MsgSyncStatus = 10;
+
+    /// <summary>Datei aus der Cloud in <see cref="KeyUri"/> schreiben. Antwort: <see cref="KeySyncFound"/> oder <see cref="KeyError"/>.</summary>
+    public const int MsgSyncDownload = 11;
+
+    /// <summary>Datei aus <see cref="KeyUri"/> in die Cloud laden (ersetzt die vorige). Antwort: leer oder <see cref="KeyError"/>.</summary>
+    public const int MsgSyncUpload = 12;
+
+    /// <summary>string: content://-URI der Datei, nur für die Dauer der Anfrage freigegeben.</summary>
+    public const string KeyUri = "uri";
+
+    /// <summary>bool: Speicher eingerichtet und angemeldet.</summary>
+    public const string KeySyncReady = "syncReady";
+
+    /// <summary>string: Anzeige für den Nutzer, z. B. "Dropbox" oder "HiDrive (patrick)".</summary>
+    public const string KeySyncTarget = "syncTarget";
+
+    /// <summary>bool: in der Cloud lag schon eine Datei (sonst ist dies das erste Gerät).</summary>
+    public const string KeySyncFound = "syncFound";
+
+    /// <summary>Name der Datei im Cloud-Speicher.</summary>
+    public const string SyncFileName = "zboard-sync.zip";
+
+    /// <summary>Größte Datei, die Plugin und zBoard austauschen.</summary>
+    public const long MaxSyncBytes = 64L * 1024 * 1024;
 }

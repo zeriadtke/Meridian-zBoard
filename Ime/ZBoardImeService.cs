@@ -48,7 +48,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     EditorProfile _profile = EditorProfile.From(null);
 
     string _language = "de";
-    Task<SuggestionEngine>? _engineTask;
+    Task<MultilingualEngine>? _engineTask;  // alle Sprachen der Eingabe, Layoutsprache zuerst
     ShiftState _shift;
     bool _shiftManual;
     long _lastShiftTapMs;
@@ -57,6 +57,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     long _lastSpaceMs;
     bool _autoSpaceInserted;    // Leerzeichen kam von einem Vorschlag
     Correction? _lastCorrection;
+    string? _restoredWord;      // per Rücktaste wiederhergestelltes Original; das nächste Leerzeichen übernimmt und lernt es
     SuggestionResult _currentSuggestions = SuggestionResult.Empty;
 
     bool _glideActive;                          // das Wort in Bearbeitung kam aus der Wischeingabe
@@ -68,7 +69,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     int _swipeChars;
     Android.Media.AudioManager? _audio;
 
-    SuggestionEngine? Engine => _engineTask is { IsCompletedSuccessfully: true } t ? t.Result : null;
+    MultilingualEngine? Engine => _engineTask is { IsCompletedSuccessfully: true } t ? t.Result : null;
 
     IInputConnection? Ic => CurrentInputConnection;
 
@@ -120,6 +121,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _profile = EditorProfile.From(info);
         _composing.Clear();
         _lastCorrection = null;
+        _restoredWord = null;
         _autoSpaceInserted = false;
         _glideActive = false;
         _swipeAnchor = -1;
@@ -131,6 +133,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         // Wie Gboard: Zahlen-, PIN-, Telefon- und Datumsfelder bekommen ein Ziffernfeld statt Buchstaben
         _symbolsPage = _profile.IsNumeric ? NumpadPage : 0;
 
+        ReloadRestoredData();
         StartPanels();
         RefreshSystemBarPadding();
         UpdatePopupSpace(); // Platz für Popups über der Tastatur (falls Android das Fenster neu aufgebaut hat)
@@ -149,7 +152,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         UpdateAutoShift();
-
+        Sync.SyncManager.SyncIfDue(this); // holt Neues von anderen Geräten (höchstens alle 15 Minuten)
     }
 
     public override void OnFinishInputView(bool finishingInput)
@@ -173,6 +176,8 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         {
             // Gelerntes geht schlimmstenfalls seit dem letzten Speichern verloren; Tippen bleibt unbeeinträchtigt.
         }
+
+        Sync.SyncManager.SyncIfDue(this);
     }
 
     public override void OnUpdateSelection(
@@ -193,11 +198,17 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         {
             _composing.Clear();
             _glideActive = false;
+            _restoredWord = null;
             Ic?.FinishComposingText();
             UpdateSuggestions();
         }
 
-        if (newSelStart != oldSelStart && _composing.Length == 0) _lastCorrection = null;
+        // Die eigene Autokorrektur bewegt den Cursor auch; nur wenn er danach woanders steht, ist "Rückgängig" vorbei.
+        if (newSelStart != oldSelStart && _composing.Length == 0 && _lastCorrection is { } c
+            && (newSelStart != newSelEnd || !CursorFollows(c)))
+        {
+            _lastCorrection = null;
+        }
         if (_composing.Length == 0) UpdateAutoShift();
 
         // Wie Gboard: Antippen eines Worts im Text zeigt dessen Vorschläge erneut
@@ -381,15 +392,18 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             return;
         }
 
-        // Löschen direkt nach einer Autokorrektur stellt das ursprüngliche Wort wieder her.
-        if (_lastCorrection is { } c && _composing.Length == 0
-            && TextBeforeCursor(c.Corrected.Length + c.Separator.Length) == c.Corrected + c.Separator)
+        // Wie Gboard: Löschen direkt nach einer Autokorrektur stellt das getippte Wort wieder her ("brechen " → "umbrechen").
+        // Es bleibt in Bearbeitung; erst das nächste Leerzeichen übernimmt es unverändert und merkt es sich.
+        if (_lastCorrection is { } c && _composing.Length == 0 && CursorFollows(c))
         {
             ic.DeleteSurroundingText(c.Corrected.Length + c.Separator.Length, 0);
-            ic.CommitText(J(c.Original), 1);
+            _composing.Append(c.Original);
+            ic.SetComposingText(J(c.Original), 1);
             Engine?.SuppressCorrection(c.Original);
-            Learn(null, c.Original, accepted: true);
+            _restoredWord = c.Original;
             _lastCorrection = null;
+            UpdateSuggestions();
+            UpdateAutoShift();
             return;
         }
 
@@ -400,7 +414,11 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             int remove = _composing.Length >= 2 && char.IsSurrogatePair(_composing[^2], _composing[^1]) ? 2 : 1;
             _composing.Length -= remove;
             ic.SetComposingText(J(_composing.ToString()), 1);
-            if (_composing.Length == 0) ic.FinishComposingText();
+            if (_composing.Length == 0)
+            {
+                ic.FinishComposingText();
+                _restoredWord = null;
+            }
             UpdateSuggestions();
         }
         else
@@ -481,8 +499,10 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
         string typed = _composing.ToString();
         string final = typed;
+        bool restored = typed == _restoredWord; // wiederhergestelltes Original: nicht korrigieren, sondern lernen
+        _restoredWord = null;
 
-        if (autocorrect && _settings.AutoCorrect && _profile.AllowAutocorrect)
+        if (autocorrect && !restored && _settings.AutoCorrect && _profile.AllowAutocorrect)
         {
             var result = Engine?.Suggest(typed);
             if (result?.AutoCorrection is { } corrected && corrected != typed)
@@ -498,8 +518,12 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _composing.Clear();
         _glideActive = false;
         _currentSuggestions = SuggestionResult.Empty;
-        Learn(previous, final);
+        Learn(previous, final, accepted: restored);
     }
+
+    /// <summary>Steht der Cursor direkt hinter dem autokorrigierten Wort samt Trennzeichen?</summary>
+    bool CursorFollows(Correction c) =>
+        TextBeforeCursor(c.Corrected.Length + c.Separator.Length) == c.Corrected + c.Separator;
 
     void OnSuggestionPicked(SuggestionSlot slot, long downUptime, long upUptime)
     {
@@ -547,7 +571,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
     void Learn(string? previous, string word, bool accepted = false)
     {
-        if (_settings.LearnWords && _profile.AllowLearning) Engine?.History.Learn(previous, word, accepted);
+        if (_settings.LearnWords && _profile.AllowLearning) Engine?.Learn(previous, word, accepted);
     }
 
     /// <summary>
@@ -723,7 +747,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     /// Wie Gboard: Ganze Wortfolgen vorschlagen, die man oft so schreibt ("freundlichen Grüßen"). Nur aus Gelerntem und
     /// nur, wenn Lernen und Nächstes-Wort-Vorhersage an sind.
     /// </summary>
-    SuggestionSlot? PhraseSlot(SuggestionEngine engine, string word)
+    SuggestionSlot? PhraseSlot(MultilingualEngine engine, string word)
     {
         if (!_settings.NextWordPrediction || !_settings.LearnWords || !_profile.AllowLearning) return null;
         var continuation = engine.ContinuePhrase(word, maxWords: 2);
@@ -733,7 +757,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     }
 
     /// <summary>Nächstes-Wort-Vorhersage nach einem Leerzeichen.</summary>
-    void ShowPredictions(SuggestionEngine engine)
+    void ShowPredictions(MultilingualEngine engine)
     {
         string? previous = _settings.NextWordPrediction ? PreviousWord() : null;
         IReadOnlyList<string> predictions = previous == null ? [] : engine.Predict(previous);
@@ -766,14 +790,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             return;
         }
 
-        string before = TextBeforeCursor(3);
-        bool capitalize = before.Length == 0 || before.EndsWith('\n');
-        if (!capitalize && before.Length >= 2 && char.IsWhiteSpace(before[^1]))
-        {
-            string trimmed = before.TrimEnd();
-            capitalize = trimmed.Length == 0 || trimmed[^1] is '.' or '!' or '?';
-        }
-
+        bool capitalize = TextBoundaries.IsSentenceStart(TextBeforeCursor(8));
         SetShift(capitalize ? ShiftState.OneShot : ShiftState.Off, manual: false);
     }
 
@@ -789,11 +806,40 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     {
         _language = language;
         _settings.CurrentLanguage = language;
-        _engineTask = Engines.GetOrAdd(language, lang => Task.Run(() => LoadEngine(lang)));
+        var languages = InputLanguages();
+        var tasks = languages.Select(l => Engines.GetOrAdd(l, lang => Task.Run(() => LoadEngine(lang)))).ToArray();
+        _engineTask = CombineEngines(languages, tasks);
         _engineTask.ContinueWith(
             _ => new Handler(Looper.MainLooper!).Post(UpdateSuggestions),
             TaskContinuationOptions.OnlyOnRanToCompletion);
         ApplyLayout();
+    }
+
+    /// <summary>
+    /// Sprachen, deren Wörterbücher gerade gelten: wie bei Gboard bei mehrsprachiger Eingabe alle aktiven (höchstens drei),
+    /// die des Layouts zuerst; sonst nur diese.
+    /// </summary>
+    IReadOnlyList<string> InputLanguages() =>
+        MultilingualEngine.ActiveLanguages(_language, _settings.Languages, _settings.MultilingualTyping);
+
+    /// <summary>Fasst die geladenen Sprachen zusammen; fehlt ein Wörterbuch, geht es ohne diese Sprache weiter.</summary>
+    static async Task<MultilingualEngine> CombineEngines(IReadOnlyList<string> languages, Task<SuggestionEngine>[] tasks)
+    {
+        var loaded = new List<(string Language, SuggestionEngine Engine)>(tasks.Length);
+        for (int i = 0; i < tasks.Length; i++)
+        {
+            try
+            {
+                loaded.Add((languages[i], await tasks[i].ConfigureAwait(false)));
+            }
+            catch (Exception e) when (i > 0)
+            {
+                Android.Util.Log.Warn("zBoard", $"Wörterbuch {languages[i]} nicht geladen: {e.Message}");
+                Engines.TryRemove(languages[i], out _);
+            }
+        }
+
+        return new MultilingualEngine(loaded);
     }
 
     SuggestionEngine LoadEngine(string language)
@@ -801,7 +847,8 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         WordDictionary dictionary;
         using (var stream = Assets!.Open($"dict/{language}.txt"))
         {
-            dictionary = WordDictionary.Load(stream);
+            // Gemeinsamer Maßstab, damit sich die Sprachen bei mehrsprachiger Eingabe vergleichen lassen
+            dictionary = WordDictionary.Load(stream, WordDictionary.ReferenceTotal);
         }
 
         var bigrams = BigramModel.Empty;
@@ -861,7 +908,11 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
         _keyboardView.ShowDigitHints = !numberRow;
         _keyboardView.SetLayout(layout);
-        _keyboardView.SpaceLabel = Layouts.LanguageNames.TryGetValue(_language, out var name) ? name : _language;
+        var inputLanguages = InputLanguages();
+        _keyboardView.CurrentLanguage = _language;
+        _keyboardView.SpaceLabel = inputLanguages.Count > 1
+            ? MultilingualEngine.SpaceLabel(inputLanguages) // wie Gboard: "DE · EN"
+            : Layouts.LanguageNames.TryGetValue(_language, out var name) ? name : _language;
         _keyboardView.Shift = _symbolsPage == 0 ? _shift : ShiftState.Off;
     }
 

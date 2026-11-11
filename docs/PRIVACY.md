@@ -26,6 +26,22 @@ Die App hat keine Internet-Berechtigung und kann deshalb selbst nichts ins Inter
 
 Beim Deinstallieren der App löscht Android alle diese Daten.
 
+## Sichern und wiederherstellen
+
+Unter „Sichern & wiederherstellen“ kannst du selbst eine Sicherungsdatei erstellen (Einstellungen, gelernte Wörter,
+E-Mail-Adressen, angeheftete Zwischenablage – jeweils abwählbar). Den Speicherort wählst du in der Dateiauswahl des
+Systems; landet die Datei in einem Cloud-Speicher, gelten dessen Bedingungen. zBoard überträgt dabei nichts an World
+of Bytes oder Dritte. Die Datei ist nicht verschlüsselt – bewahre sie entsprechend sorgfältig auf.
+
+## Synchronisation (Plugin „zBoard Sync“)
+
+Installierst du die separate App „zBoard Sync“ und schaltest die Synchronisation ein, übergibt zBoard deine
+Einstellungen, gelernten Wörter und E-Mail-Adressen an diese App. Sie speichert sie als Datei in dem Cloud-Speicher,
+den du gewählt hast (Google Drive, OneDrive, Dropbox oder ein WebDAV-Server wie HiDrive); es gilt dessen
+Datenschutzerklärung. World of Bytes erhält nichts. Die Anmeldedaten bleiben verschlüsselt auf deinem Gerät; Abmelden
+in zBoard Sync löscht sie. Um die Daten aus der Cloud zu entfernen, lösche dort die Datei `zboard-sync.zip` (bei
+Google Drive: Drive-Einstellungen → Apps verwalten → zBoard Sync → Ausgeblendete App-Daten löschen).
+
 ## Spracheingabe
 
 Wenn du auf das Mikrofon tippst, nutzt zBoard die Spracherkennung, die auf deinem Gerät installiert ist
@@ -80,6 +96,21 @@ The app has no internet permission, so it cannot send anything to the internet i
 - **Recently used emoji** and your **settings**.
 
 Android deletes all of this data when you uninstall the app.
+
+## Backup and restore
+
+Under "Backup & restore" you can create a backup file yourself (settings, learned words, email addresses, pinned
+clipboard items – each optional). You choose where it is saved in the system file picker; if it ends up in a cloud
+storage service, that service's terms apply. zBoard sends nothing to World of Bytes or third parties. The file is not
+encrypted, so keep it somewhere safe.
+
+## Sync (plugin "zBoard Sync")
+
+If you install the separate app "zBoard Sync" and turn on sync, zBoard hands your settings, learned words and email
+addresses to that app, which stores them as a file in the cloud storage you chose (Google Drive, OneDrive, Dropbox or
+a WebDAV server such as HiDrive). That provider's privacy policy applies. World of Bytes receives nothing. The sign-in
+data stays encrypted on your device; signing out in zBoard Sync deletes it. To remove the data from the cloud, delete
+the file `zboard-sync.zip` there (for Google Drive: Drive settings → Manage apps → zBoard Sync → Delete hidden data).
 
 ## Voice typing
 

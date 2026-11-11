@@ -18,10 +18,13 @@
     <Compile Include="../../Suggestions/BigramModel.cs" Link="Core/BigramModel.cs" />
     <Compile Include="../../Suggestions/UserHistory.cs" Link="Core/UserHistory.cs" />
     <Compile Include="../../Suggestions/GlideDecoder.cs" Link="Core/GlideDecoder.cs" />
+    <Compile Include="../../Suggestions/MultilingualEngine.cs" Link="Core/MultilingualEngine.cs" />
     <Compile Include="../../Ime/TextBoundaries.cs" Link="Core/TextBoundaries.cs" />
     <Compile Include="../../Emoji/EmojiCatalog.cs" Link="Core/EmojiCatalog.cs" />
     <Compile Include="../../Clipboard/ClipboardHistory.cs" Link="Core/ClipboardHistory.cs" />
     <Compile Include="../../Suggestions/EmailMemory.cs" Link="Core/EmailMemory.cs" />
+    <Compile Include="../../Backup/BackupArchive.cs" Link="Core/BackupArchive.cs" />
+    <Compile Include="../../Backup/BackupMerge.cs" Link="Core/BackupMerge.cs" />
   </ItemGroup>
 
   <ItemGroup>

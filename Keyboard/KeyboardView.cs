@@ -187,6 +187,9 @@ public sealed class KeyboardView : View
     /// <summary>Aktivierte Sprachen (Code, Name) für die Auswahl per langem Druck auf die Leertaste.</summary>
     public IReadOnlyList<(string Code, string Name)> Languages { get; set; } = [];
 
+    /// <summary>Sprache des angezeigten Layouts; in der Auswahl über der Leertaste vorausgewählt.</summary>
+    public string CurrentLanguage { get; set; } = string.Empty;
+
     /// <summary>Wischeingabe über die Buchstaben.</summary>
     public bool GlideEnabled { get; set; } = true;
 
@@ -1055,7 +1058,7 @@ public sealed class KeyboardView : View
 
         _popup = new Popup(names, new RectF(left, top, left + total, top + height), cell,
             [.. Languages.Select(l => l.Code)]);
-        _popup.Selected = Math.Max(0, Languages.ToList().FindIndex(l => l.Name == SpaceLabel));
+        _popup.Selected = Math.Max(0, Languages.ToList().FindIndex(l => l.Code == CurrentLanguage));
         PerformKeyHaptic();
         Invalidate();
     }

@@ -1,118 +1,131 @@
-> **zHeal Meridian Tastatur:** Dieser Fork von zBoard misst zusätzlich die Tipp-Dynamik (nur Zeiten und Tastenarten,
-> nie Zeichen) für die App zHeal Meridian. Alles dazu in [Meridian/README.md](Meridian/README.md).
+> **zHeal Meridian keyboard:** This fork of zBoard additionally measures typing dynamics (only timings and key types,
+> never characters) for the zHeal Meridian app. Details (German) in [Meridian/README.md](Meridian/README.md).
 
-<img src="docs/logo/zboard-logo.svg" alt="zBoard-Logo" width="128" align="right">
+<img src="docs/logo/zboard-logo.svg" alt="zBoard logo" width="128" align="right">
 
 # zBoard
 
+🇬🇧 **English** | 🇩🇪 [Deutsch](README.de.md)
+
 [![Build](https://github.com/World-of-Bytes/zBoard/actions/workflows/build.yml/badge.svg)](https://github.com/World-of-Bytes/zBoard/actions/workflows/build.yml)
 
-zBoard ist eine freie Android-Tastatur, die sich in Bedienung und Funktionsumfang an Gboard orientiert:
-Wortvorschläge, Autokorrektur, Wischeingabe, Nächstes-Wort-Vorhersage, Wortfolgen, E-Mail-Vorschläge, Emoji,
-Zwischenablage und Spracheingabe für Deutsch, Englisch, Französisch, Spanisch und Italienisch.
-Anders als Gboard arbeitet zBoard vollständig offline und ohne Internetberechtigung; was es aus deinen Eingaben
-lernt, bleibt auf dem Gerät. Funktionen, die Internet brauchen (etwa Übersetzen mit DeepL), kommen als eigene
-Plugin-Apps dazu – nur wer sie installiert, gibt ihnen Internetzugriff. Geschrieben ist zBoard in C# mit .NET 10 for Android.
+zBoard is a free Android keyboard modelled on Gboard in look, feel and features:
+word suggestions, autocorrect, glide typing, next-word prediction, phrase suggestions, email suggestions, emoji,
+clipboard and voice typing for German, English, French, Spanish and Italian.
+Unlike Gboard, zBoard works completely offline and has no internet permission; whatever it learns from your typing
+stays on your device. Features that need the internet (such as translating with DeepL) come as separate
+plugin apps – only people who install them give them internet access. zBoard is written in C# with .NET 10 for Android.
 
-Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, noch nicht veröffentlicht.
+Status: **all five milestones done** – testing on real devices, not yet published.
 
-## zBoard im Vergleich zu Gboard
+## zBoard compared with Gboard
 
 | | Gboard | zBoard |
 | --- | --- | --- |
-| Lizenz | proprietär, Quellcode nicht öffentlich | BSD 2-Clause (Code), Wortlisten CC BY-SA 4.0 / CC BY 3.0 |
-| Internetzugriff | ja (u. a. GIFs, Übersetzen, Synchronisation) | keine Internetberechtigung; Internet-Funktionen nur über eigene Plugin-Apps |
-| Lernen aus Eingaben | ja, Modelle werden per Federated Learning mit Google-Servern verbessert | ja, ausschließlich auf dem Gerät, abschaltbar und löschbar |
-| Sprachen | sehr viele Sprachen und Layouts | Deutsch (QWERTZ), Englisch, Spanisch, Italienisch (QWERTY), Französisch (AZERTY) |
-| Tippen, Umschalt, Symbole, langer Druck für Sonderzeichen | ✓ | ✓ |
-| Wortvorschläge und Autokorrektur | ✓ | ✓ 120 000 deutsche, 100 000 englische Wörter; Tastennachbarn, Vertauschungen, Umlaute |
-| Großschreibung deutscher Substantive | ✓ | ✓ |
-| Nächstes-Wort-Vorhersage | ✓ | ✓ mitgelieferte Wortpaare plus eigene Wortfolgen |
-| Ganze Wortfolgen vorschlagen („freundlichen Grüßen“) | ✓ | ✓ aus Gelerntem |
-| Vorschläge für ein angetipptes Wort im Text | ✓ | ✓ Antippen ersetzt das ganze Wort |
-| E-Mail-Adressen vorschlagen | ✓ | ✓ gemerkte Adressen und bekannte Anbieter nach „@“ |
-| Wischeingabe (Glide Typing) | ✓ | ✓ |
-| Cursor per Leertaste, Wort-Löschen per Wischen | ✓ | ✓ |
-| Tastenvorschau, Vibration, Ton | ✓ | ✓ |
-| Designs | ✓ | hell, dunkel, Material You (Farben aus dem Hintergrundbild) |
-| Emoji-Tastatur | ✓ | ✓ mit Kategorien, Hauttönen, „Zuletzt verwendet“ und Suche in allen fünf Sprachen |
-| Zwischenablage-Verlauf | ✓ | ✓ eine Stunde, Anheften, vertrauliche Inhalte ausgenommen |
-| GIFs und Sticker | ✓ | bewusst nicht (bräuchte Internetzugriff) |
-| Spracheingabe | ✓ | ✓ über die Spracherkennung des Systems, standardmäßig nur offline |
-| Einhandmodus, Höhe, Zahlenreihe | ✓ | ✓ |
-| Übersetzen | ✓ | ✓ über die Plugin-App „zBoard DeepL“ (eigener DeepL-API-Schlüssel) |
-| Google-Dienste | ✓ | nicht geplant |
+| License | proprietary, source code not public | BSD 2-Clause (code), word lists CC BY-SA 4.0 / CC BY 3.0 |
+| Internet access | yes (GIFs, translation, sync and more) | no internet permission; online features only via separate plugin apps |
+| Learning from your typing | yes, models are improved with Google's servers via federated learning | yes, only on the device, can be turned off and deleted |
+| Languages | a great many languages and layouts | German (QWERTZ), English, Spanish, Italian (QWERTY), French (AZERTY) |
+| Typing, shift, symbols, long press for accented characters | ✓ | ✓ in Gboard's order, most frequent character preselected |
+| Word suggestions and autocorrect | ✓ | ✓ 120,000 German, 100,000 English words; neighbouring keys, swapped letters, umlauts |
+| Multilingual typing (several dictionaries at once, “DE · EN” on the space bar) | ✓ | ✓ up to three languages, language of the previous word preferred |
+| Capitalisation at the start of a sentence | ✓ | ✓ also in apps that don't ask for it |
+| Capitalising German nouns | ✓ | ✓ |
+| Next-word prediction | ✓ | ✓ bundled word pairs plus your own word sequences |
+| Suggesting whole phrases ("freundlichen Grüßen") | ✓ | ✓ from what it has learned |
+| Suggestions for a word you tap in the text | ✓ | ✓ tapping replaces the whole word |
+| Suggesting email addresses | ✓ | ✓ remembered addresses and common providers after "@" |
+| Glide typing | ✓ | ✓ |
+| Cursor control via space bar, deleting words by swiping | ✓ | ✓ |
+| Key preview, vibration, sound | ✓ | ✓ |
+| Themes | ✓ | light, dark, Material You (colours from the wallpaper) |
+| Emoji keyboard | ✓ | ✓ with categories, skin tones, "recently used" and search in all five languages |
+| Clipboard history | ✓ | ✓ one hour, pinning, sensitive content excluded |
+| Backup & restore (settings, learned words, email addresses, pinned clips) | partly: learned words only via sync with the Google account, personal dictionary export; no settings backup | ✓ as a ZIP file you store wherever you like, no account needed |
+| GIFs and stickers | ✓ | deliberately not (would need internet access) |
+| Voice typing | ✓ | ✓ via the system's speech recognition, offline only by default |
+| One-handed mode, height, number row | ✓ | ✓ |
+| Translation | ✓ | ✓ via the plugin app "zBoard DeepL" (your own DeepL API key) |
+| Sync between devices | learned words via the Google account | ✓ via the plugin app "zBoard Sync": settings, learned words, email addresses via Google Drive, OneDrive, Dropbox or WebDAV (HiDrive, Nextcloud …) |
+| Google services | ✓ | not planned |
 
-## Bauen und installieren
+## Build and install
 
-Voraussetzungen: .NET 10 SDK, Android-Workload, Android SDK (bringen Visual Studio 2026 oder Rider mit).
+Requirements: .NET 10 SDK, Android workload, Android SDK (included with Visual Studio 2026 or Rider).
 
 ```bash
 dotnet workload install android
-dotnet build -t:Run -f net10.0-android          # baut und installiert auf dem verbundenen Gerät/Emulator
+dotnet build -t:Run -f net10.0-android          # builds and installs on the connected device/emulator
 ```
 
-Danach die App **zBoard** öffnen, auf der Startseite „Aktivieren“ und „Auswählen“ antippen und unter
-„Tastatur ausprobieren“ lostippen. Paketname: `de.World_of_Bytes.zBoard`.
+Then open the **zBoard** app, tap "Enable" and "Select" on the start page and start typing under
+"Try the keyboard". Package name: `de.World_of_Bytes.zBoard`.
 
-Die Oberfläche ist zweisprachig: Deutsch, wenn das System auf Deutsch steht, sonst Englisch
-(`Localization/L.cs`, Texte direkt im Code als `L.T("Deutsch", "English")`).
+The user interface is bilingual: German if the system language is German, English otherwise
+(`Localization/L.cs`, texts written directly in the code as `L.T("Deutsch", "English")`).
 
-## Testversion und Veröffentlichung
+## Test version and releases
 
-- Jeder Push auf `main` baut eine Debug- und eine Release-Version (AOT), testet beide im Emulator und veröffentlicht
-  die Release-Version mit dem öffentlichen Testschlüssel als
-  [Testversion](https://github.com/World-of-Bytes/zBoard/releases/download/testversion/zboard-test.apk).
-- **Store-Version:** Auf GitHub ein Release veröffentlichen (Tag `v<Version>`). GitHub Actions baut dann mit dem
-  Upload-Schlüssel aus den Repository-Secrets `zboard-<Version>.aab` (für Google Play) und `zboard-<Version>.apk`
-  und hängt beide an das Release. Einrichtung des Schlüssels: [signing/README.md](signing/README.md).
-- Texte, Grafiken und Angaben für den Play-Store-Eintrag: [docs/store](docs/store/listing.md),
-  Datenschutzerklärung: [docs/PRIVACY.md](docs/PRIVACY.md).
-- Version: `ApplicationDisplayVersion` und `ApplicationVersion` (bei jedem Store-Upload um 1 erhöhen) in `ZBoard.csproj`.
+- Every push to `main` builds a debug and a release version (AOT), tests both in the emulator and publishes the
+  release version, signed with the public test key, as the
+  [test version](https://github.com/World-of-Bytes/zBoard/releases/download/testversion/zboard-test.apk).
+- **Store version:** publish a release on GitHub (tag `v<version>`). GitHub Actions then builds
+  `zboard-<version>.aab` (for Google Play) and `zboard-<version>.apk` with the upload key from the repository secrets,
+  plus the DeepL plugin, and attaches them to the release. Setting up the key: [signing/README.md](signing/README.md).
+- Texts, graphics and details for the Play Store listing: [docs/store](docs/store/listing.md),
+  privacy policy: [docs/PRIVACY.md](docs/PRIVACY.md).
+- Version: `ApplicationDisplayVersion` and `ApplicationVersion` (increase by 1 for every store upload) in `ZBoard.csproj`.
 
 ## Tests
 
-Die Logik ohne Android (Wörterbuch, Autokorrektur, Vorhersage, Wortfolgen, Lernen, E-Mail-Adressen, Wischeingabe, Emoji, Zwischenablage, Layouts) hat eigene Unit-Tests:
+The logic that does not depend on Android (dictionary, autocorrect, prediction, phrases, learning, email addresses,
+glide typing, emoji, clipboard, layouts, accented-character popup, backups) has its own unit tests:
 
 ```bash
 dotnet test tests/ZBoard.Core.Tests
 ```
 
-## Aufbau
+The emulator test (`tools/emulator_test.py`, run by GitHub Actions) checks typing, autocorrect, glide typing, the
+popups, the suggestion bar and the layout on a real Android system, partly by measuring screenshots.
 
-| Ordner | Inhalt |
+## Structure
+
+| Folder | Contents |
 | --- | --- |
-| `Ime/` | `ZBoardImeService` (Herzstück), `EditorProfile` (Eigenschaften des Eingabefelds), `TextBoundaries` |
-| `Keyboard/` | Layout-Modell, alle Layouts, `KeyboardView` (Zeichnen und Touch), Farben |
-| `Emoji/` | `EmojiCatalog` (Daten, Suche, Hauttöne), `EmojiPanelView` |
+| `Ime/` | `ZBoardImeService` (the heart of it), `EditorProfile` (properties of the input field), `TextBoundaries` |
+| `Keyboard/` | layout model, all layouts, `KeyboardView` (drawing and touch), `PopupGrid` (popup layout), colours |
+| `Emoji/` | `EmojiCatalog` (data, search, skin tones), `EmojiPanelView` |
 | `Clipboard/` | `ClipboardHistory`, `ClipboardPanelView` |
-| `Suggestions/` | `WordDictionary` (sortiertes Array), `SuggestionEngine`, `GlideDecoder`, `BigramModel`, `UserHistory`, `EmailMemory`, `KeyProximity`, `SuggestionBarView` |
-| `Settings/` | `SettingsActivity` (Startbildschirm), `ZBoardSettings` |
-| `Assets/dict/` | Wortlisten und Wortpaare pro Sprache |
-| `Assets/emoji/` | Emoji nach Kategorien, Namen und Suchbegriffe pro Sprache |
-| `Plugins/` | `PluginContract` (Schnittstelle), `PluginRegistry` (installierte Plugins), `PluginClient` (Messenger) |
-| `plugin-apps/DeepL/` | Plugin-App „zBoard DeepL“ (eigene App mit Internet-Berechtigung) |
-| `tools/` | `build_dictionaries.py` (Wortlisten), `build_emoji.py` (Emoji-Daten) |
-| `tests/` | Unit-Tests der plattformunabhängigen Logik |
+| `Suggestions/` | `WordDictionary` (sorted array), `SuggestionEngine`, `GlideDecoder`, `BigramModel`, `UserHistory`, `EmailMemory`, `KeyProximity`, `SuggestionBarView` |
+| `Settings/` | `SettingsActivity` (start screen), `ZBoardSettings` |
+| `Backup/` | `BackupArchive` (backup file: writing, reading, validation) |
+| `Assets/dict/` | word lists and word pairs per language |
+| `Assets/emoji/` | emoji by category, names and search terms per language |
+| `Plugins/` | `PluginContract` (interface), `PluginRegistry` (installed plugins), `PluginClient` (messenger) |
+| `plugin-apps/DeepL/` | plugin app "zBoard DeepL" (a separate app with internet permission) |
+| `Sync/` | `SyncManager` (sync through a plugin), `SyncFileProvider` (hands the file to the plugin) |
+| `plugin-apps/Sync/` | plugin app "zBoard Sync" (Google Drive, OneDrive, Dropbox, WebDAV); provider setup in its README |
+| `tools/` | `build_dictionaries.py` (word lists), `build_emoji.py` (emoji data), `emulator_test.py` |
+| `tests/` | unit tests for the platform-independent logic |
 
-## Wörterbücher
+## Dictionaries
 
-Mitgeliefert: **Deutsch** mit 120 000 Wörtern, **Englisch** mit 100 000 Wörtern, jeweils nach Häufigkeit
-aus Film- und Serienuntertiteln (OpenSubtitles 2018). Format: eine Schreibweise pro Zeile, `wort<TAB>häufigkeit`.
-Typische Tippfehler aus den Untertiteln („nciht“, „waht“) filtert das Skript heraus.
+Bundled: **German** with 120,000 words and **English** with 100,000 words, each ranked by frequency in film and TV
+subtitles (OpenSubtitles 2018). Format: one spelling per line, `word<TAB>frequency`.
+The script filters out typical typos from the subtitles ("nciht", "waht").
 
-Für die Vorhersage: je 5 000 häufigste Wortpaare (`de.bigrams.txt`, `en.bigrams.txt`) aus dem Google Books
-Ngram Corpus, Format `erstes<TAB>zweites<TAB>häufigkeit`. Den Rest lernt zBoard aus deinen Eingaben
-(`files/learning/<sprache>.tsv` im app-privaten Speicher).
+For prediction: the 5,000 most frequent word pairs each (`de.bigrams.txt`, `en.bigrams.txt`) from the Google Books
+Ngram Corpus, format `first<TAB>second<TAB>frequency`. zBoard learns the rest from your typing
+(`files/learning/<language>.tsv` in the app's private storage).
 
-Großschreibung im Deutschen:
+Capitalisation in German:
 
-- Reine Substantive stehen nur großgeschrieben in der Liste. zBoard schreibt „haus“ beim Leerzeichen
-  automatisch als „Haus“ (Löschen direkt danach macht das rückgängig).
-- Mehrdeutige Wörter („frage/Frage“, „essen/Essen“) stehen in beiden Schreibweisen. zBoard lässt das
-  Getippte stehen und bietet die andere Form in der Vorschlagsleiste an.
+- Pure nouns appear in the list only capitalised. zBoard automatically writes "haus" as "Haus" when you press space
+  (deleting right afterwards undoes it).
+- Ambiguous words ("frage/Frage", "essen/Essen") appear in both spellings. zBoard keeps what you typed and offers the
+  other form in the suggestion bar.
 
-### Wörterbücher neu erzeugen
+### Regenerating the dictionaries
 
 ```bash
 git clone --depth 1 --filter=blob:none --sparse https://github.com/hermitdave/FrequencyWords
@@ -130,67 +143,88 @@ python3 tools/build_dictionaries.py \
   --bigrams-en google-books-ngram-frequency/ngrams/2grams_english.csv
 ```
 
-Die Wortpaare kommen aus `git clone --depth 1 https://github.com/orgtre/google-books-ngram-frequency`.
+The word pairs come from `git clone --depth 1 https://github.com/orgtre/google-books-ngram-frequency`.
 
-Fehler in der Großschreibung lassen sich über die Handlisten oben im Skript korrigieren
+Capitalisation errors can be corrected with the hand-maintained lists at the top of the script
 (`DE_FORCE_LOWER`, `DE_FORCE_NOUN`, `DE_FORCE_BOTH`).
 
-## Lizenz
+## License
 
-Der Code steht unter der **BSD 2-Clause License** (`LICENSE`). Die Wortlisten in `Assets/dict/` stehen unter
-**CC BY-SA 4.0**, die Wortpaare unter **CC BY 3.0**; Quellen und Pflichten in `THIRD_PARTY_NOTICES.md`. Die App nennt die Quellen unter „Über zBoard“.
+The code is licensed under the **BSD 2-Clause License** (`LICENSE`). The word lists in `Assets/dict/` are licensed
+under **CC BY-SA 4.0**, the word pairs under **CC BY 3.0**; sources and obligations in `THIRD_PARTY_NOTICES.md`.
+The app credits the sources under "About zBoard".
 
-## Wischeingabe
+## Glide typing
 
-`GlideDecoder` vergleicht die gewischte Spur mit der Idealspur jedes Wortes, dessen erster und letzter Buchstabe
-nahe am Spuranfang und -ende liegen: Beide Linien werden auf 40 gleichmäßig verteilte Punkte gebracht, die
-mittlere Abweichung bestimmt zusammen mit der Worthäufigkeit, dem Satzkontext und gelernten Wörtern die Reihenfolge.
+`GlideDecoder` compares the swiped path with the ideal path of every word whose first and last letters lie close to
+the start and end of the path: both lines are resampled to 40 evenly spaced points, and the mean deviation – together
+with word frequency, sentence context and learned words – determines the ranking.
 
-Die Parameter sind mit simulierten Wischspuren auf dem deutschen Wörterbuch abgestimmt
-(je 100 Wörter, Treffer auf Platz 1 / unter den ersten 3):
+The parameters were tuned with simulated swipe paths on the German dictionary
+(100 words each, hit at rank 1 / within the top 3):
 
-| Wörter | saubere Spur | ungenaue Spur |
+| Words | clean path | sloppy path |
 | --- | --- | --- |
-| häufig (Top 400) | 99 % / 100 % | 84 % / 99 % |
-| mittel (Rang 400–5 000) | 94 % / 100 % | 79 % / 95 % |
-| selten (Rang 5 000–30 000) | 78 % / 98 % | 68 % / 92 % |
+| frequent (top 400) | 99 % / 100 % | 84 % / 99 % |
+| medium (rank 400–5,000) | 94 % / 100 % | 79 % / 95 % |
+| rare (rank 5,000–30,000) | 78 % / 98 % | 68 % / 92 % |
 
-„Ungenau“ heißt: Anfang und Ende bis zu einer halben Taste daneben, Ecken mit Abweichung. Viele verbleibende
-Verwechslungen sind echte Doppeldeutigkeiten („bist/biest“, „fast/fest“), die auch Gboard nur über die
-Vorschlagsleiste auflöst. Echte Wischspuren auf dem Gerät werden die Werte noch verschieben.
+"Sloppy" means: start and end up to half a key off, corners with deviation. Many of the remaining mix-ups are genuine
+ambiguities ("bist/biest", "fast/fest") that Gboard, too, only resolves via the suggestion bar. Real swipe paths on a
+device will shift these numbers.
 
-## Bewusste Abgrenzung zu Gboard
+## Deliberate differences from Gboard
 
-Funktionen und Bedienung orientieren sich an Gboard. Name, Logo, Icons, Farben, Code und Wörterbuchdaten
-von Google werden nicht übernommen. zBoard hat keine Internet-Berechtigung (Release-Build).
+Features and handling are modelled on Gboard. Google's name, logo, icons, colours, code and dictionary data are not
+used. zBoard has no internet permission (release build).
 
-## Emoji, Zwischenablage, Plugins und weitere Funktionen
+## Emoji, clipboard, plugins and other features
 
-- **Emoji:** Taste ☺ links neben dem Komma. Unten Kategorien, 🕘 zuletzt verwendet, 🔍 Suche. Bei der Suche schreibt
-  die Tastatur in das Suchfeld der Leiste („Daumen“, „gut“, „lachen“); Treffer erscheinen daneben. Langer Druck auf
-  Personen-Emoji zeigt die Hauttöne. Emoji, die die Schrift des Geräts nicht kennt, werden ausgeblendet.
-- **Werkzeugleiste:** erscheint, wenn es nichts vorzuschlagen gibt: 📋 Zwischenablage, 🎤 Spracheingabe,
-  ✋ Einhandmodus (rechts → links → aus), ⚙ Einstellungen. Eben kopierter Text erscheint dort 90 Sekunden lang
-  als Vorschlag.
-- **Plugins:** Funktionen mit Internet als eigene Apps, z. B. **zBoard DeepL** zum Übersetzen
-  (`plugin-apps/DeepL`). zBoard selbst bleibt ohne Internet; einschalten unter Einstellungen → Plugins, benutzen über
-  das Puzzle-Symbol in der Leiste. Schnittstelle für eigene Plugins: [docs/PLUGINS.md](docs/PLUGINS.md).
-- **Wortfolgen:** Was du mehrfach in derselben Reihenfolge schreibst („freundlichen Grüßen“), schlägt die Leiste
-  rechts als Ganzes vor – schon beim Tippen des ersten Worts und nach dem Leerzeichen. Nur aus Gelerntem.
-- **Wort antippen:** Tippst du im Text auf ein Wort, zeigt die Leiste dafür erneut Vorschläge und Korrekturen;
-  Antippen ersetzt das ganze Wort.
-- **E-Mail-Adressen:** In E-Mail-Feldern schlägt die Leiste gemerkte Adressen vor – schon im leeren Feld und passend
-  zum Angefangenen, nach „@“ auch bekannte Anbieter (gmail.com, web.de, gmx.de …). Gemerkt wird, was beim Verlassen
-  des Felds oder bei Enter als gültige Adresse darin steht (nicht inkognito). Langer Druck auf eine Adresse in der
-  Leiste entfernt sie; alle löschen unter Einstellungen → Wörterbuch.
-- **Zwischenablage:** Verlauf der letzten Stunde, Anheften (📌) hält Einträge dauerhaft. Nur Angeheftetes wird
-  gespeichert; als vertraulich markierte Inhalte (z. B. aus Passwort-Managern) und Kopien aus Passwortfeldern
-  werden nie übernommen.
-- **Spracheingabe:** nutzt die Spracherkennung des Systems. Standardmäßig nur, wenn das Gerät offline erkennen kann
-  (ab Android 12, je nach Hersteller); sonst ginge die Sprache an den Anbieter des Erkennungsdienstes. Die
-  Mikrofon-Berechtigung fragt die zBoard-App beim ersten Tippen auf 🎤 ab.
+- **Emoji:** the ☺ key left of the comma. Categories at the bottom, 🕘 recently used, 🔍 search. While searching, the
+  keyboard types into the search field in the bar ("thumbs", "good", "laugh"); matches appear next to it. Long-pressing
+  people emoji shows the skin tones. Emoji the device's font does not know are hidden.
+- **Toolbar:** appears when there is nothing to suggest: 📋 clipboard, 🎤 voice typing,
+  ✋ one-handed mode (right → left → off), ⚙ settings. Text you have just copied appears there as a suggestion for
+  90 seconds.
+- **Accented characters:** long-press a letter. As in Gboard, the characters appear in a grid above your finger,
+  with the most frequent one (ö on o, ä on a, é on e in French …) preselected.
+- **Plugins:** online features as separate apps, e.g. **zBoard DeepL** for translating (`plugin-apps/DeepL`).
+  zBoard itself stays offline; turn plugins on under Settings → Plugins and use them via the puzzle icon in the bar.
+  Interface for your own plugins: [docs/PLUGINS.md](docs/PLUGINS.md).
+- **Phrases:** what you write repeatedly in the same order ("freundlichen Grüßen") is suggested as a whole on the right
+  of the bar – while typing the first word and after the space. Only from what it has learned.
+- **Tapping a word:** if you tap a word in the text, the bar shows suggestions and corrections for it again;
+  tapping one replaces the whole word.
+- **Email addresses:** in email fields the bar suggests remembered addresses – even in an empty field and matching what
+  you have started, and after "@" also common providers (gmail.com, web.de, gmx.de …). zBoard remembers what is in the
+  field as a valid address when you leave it or press Enter (not in incognito mode). Long-pressing an address in the
+  bar removes it; delete all of them under Settings → Dictionary. Many apps don't mark their email field (only a
+  “Email address” label above it): in single-line form fields zBoard therefore also suggests remembered addresses as soon
+  as the field holds a single word of at least three letters that starts one of them, and remembers an address when the
+  field ends up containing exactly one valid address.
+- **Clipboard:** history of the last hour, pinning (📌) keeps items permanently. Only pinned items are saved;
+  content marked as sensitive (e.g. from password managers) and copies from password fields are never taken.
+- **Backup & restore:** Settings → Backup & restore saves your settings, learned words and phrases, remembered email
+  addresses and pinned clipboard items (each optional) to a ZIP file; the system file picker decides where it goes
+  (Downloads, a cloud storage app …). Restoring shows what the backup contains and replaces exactly those parts – on
+  the same or a new device. The file is not encrypted; zBoard itself still needs no internet permission.
+- **Sync:** with the plugin app **zBoard Sync** (`plugin-apps/Sync`) zBoard keeps settings, learned words and email
+  addresses in sync between devices – via Google Drive, OneDrive, Dropbox or WebDAV (HiDrive, Nextcloud …). Turn it on
+  under Settings → Backup & restore. Learned data is united, for settings the most recently changed side wins;
+  device-specific things (current language, emoji history, clipboard, plugins) stay on the device. Syncing happens when
+  the keyboard opens and closes, at most every 15 minutes.
+- **Multilingual typing:** Like Gboard, zBoard uses the dictionaries of all active languages at once (up to three); the
+  space bar then shows e.g. “DE · EN”. An English word in a German sentence is not “corrected”, typos are corrected into
+  the matching language, and what you write is learned in the language the word belongs to. If the previous word clearly
+  belongs to one language, its suggestions come first. Switching languages (long-press the space bar) then only picks the
+  layout. Can be turned off under Settings → Languages. To make languages comparable, zBoard scales the frequencies of all
+  word lists to the same total (`WordDictionary.ReferenceTotal`); rare entries of another language (typos from the
+  subtitles such as “teh”) don't prevent a correction.
+- **Voice typing:** uses the system's speech recognition. By default only if the device can recognise speech offline
+  (Android 12 and later, depending on the manufacturer); otherwise your speech would go to the provider of the
+  recognition service. The zBoard app asks for the microphone permission the first time you tap 🎤.
 
-### Emoji-Daten neu erzeugen
+### Regenerating the emoji data
 
 ```bash
 git clone --depth 1 https://github.com/muan/unicode-emoji-json
@@ -199,13 +233,13 @@ git -C cldr sparse-checkout set --no-cone /common/annotations /common/annotation
 python3 tools/build_emoji.py --emoji-json unicode-emoji-json/data-by-group.json --cldr cldr
 ```
 
-Das Logo und das App-Symbol (Farben von World of Bytes) erzeugt `python3 tools/build_logo.py`.
+The logo and the app icon (World of Bytes colours) are generated by `python3 tools/build_logo.py`.
 
-Weitere Sprachen für die Wörterbücher: `--extra fr:fr_full.txt:2grams_french.csv` (siehe `tools/build_dictionaries.py --help`).
+More dictionary languages: `--extra fr:fr_full.txt:2grams_french.csv` (see `tools/build_dictionaries.py --help`).
 
-## Nächste Schritte
+## Next steps
 
-- Test auf echten Geräten: Tippgefühl, Wischerkennung mit echten Spuren, Ladezeit und Speicher der Wörterbücher,
-  Spracheingabe auf Geräten mit und ohne Offline-Erkennung
-- F-Droid-Metadaten
-- Weitere Sprachen für die Oberfläche (Französisch, Spanisch, Italienisch)
+- Testing on real devices: typing feel, glide recognition with real paths, loading time and memory of the
+  dictionaries, voice typing on devices with and without offline recognition
+- F-Droid metadata
+- More user-interface languages (French, Spanish, Italian)
