@@ -24,7 +24,7 @@ namespace ZBoard.Ime;
 /// </summary>
 [Service(
     Name = "de.World_of_Bytes.zBoard.ZBoardImeService",
-    Label = "zHealth Meridian Tastatur", // Meridian: Name in den Android-Einstellungen
+    Label = "Meridian Tastatur", // Meridian: Name in den Android-Einstellungen
     Permission = "android.permission.BIND_INPUT_METHOD",
     Exported = true)]
 [IntentFilter(new[] { "android.view.InputMethod" })]

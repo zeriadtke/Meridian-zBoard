@@ -23,7 +23,7 @@ namespace ZBoard.Settings;
 /// </summary>
 [Activity(
     Name = "de.World_of_Bytes.zBoard.SettingsActivity",
-    Label = "zHealth Meridian Tastatur", // Meridian: Name im App-Menü
+    Label = "Meridian Tastatur", // Meridian: Name im App-Menü
     MainLauncher = true,
     Exported = true,
     Theme = "@android:style/Theme.DeviceDefault.NoActionBar")]
