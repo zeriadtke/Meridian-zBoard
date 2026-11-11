@@ -1,5 +1,5 @@
-> **zHeal Meridian keyboard:** This fork of zBoard additionally measures typing dynamics (only timings and key types,
-> never characters) for the zHeal Meridian app. Details (German) in [Meridian/README.md](Meridian/README.md).
+> **zHealth Meridian keyboard:** This fork of zBoard additionally measures typing dynamics (only timings and key types,
+> never characters) for the zHealth Meridian app. Details (German) in [Meridian/README.md](Meridian/README.md).
 
 <img src="docs/logo/zboard-logo.svg" alt="zBoard logo" width="128" align="right">
 

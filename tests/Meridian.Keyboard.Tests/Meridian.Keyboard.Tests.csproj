@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- zHeal Meridian: testet die Messung der Tipp-Dynamik ohne Android-Gerät: dotnet test tests/Meridian.Keyboard.Tests -->
+  <!-- zHealth Meridian: testet die Messung der Tipp-Dynamik ohne Android-Gerät: dotnet test tests/Meridian.Keyboard.Tests -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>

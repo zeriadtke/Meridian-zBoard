@@ -8,7 +8,7 @@
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
   <!-- Meridian: Datenschnittstelle der Meridian-App (nur bei gleicher Signatur nutzbar), siehe Meridian/README.md -->
-  <uses-permission android:name="de.World_of_Bytes.zHeal.Meridian.permission.TYPING_DATA" />
+  <uses-permission android:name="de.World_of_Bytes.zHealth.Meridian.permission.TYPING_DATA" />
 
   <!-- Paketsichtbarkeit (ab Android 11): Spracherkennungsdienste finden -->
   <queries>
@@ -20,11 +20,11 @@
       <action android:name="de.World_of_Bytes.zBoard.PLUGIN" />
     </intent>
     <!-- Meridian: nur der Tipp-Provider der Meridian-App -->
-    <provider android:authorities="de.World_of_Bytes.zHeal.Meridian.typing" />
+    <provider android:authorities="de.World_of_Bytes.zHealth.Meridian.typing" />
   </queries>
 
   <application
-      android:label="zHeal Meridian Tastatur"
+      android:label="zHealth Meridian Tastatur"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"

@@ -1,6 +1,6 @@
 name: Meridian Tastatur
 
-# zHeal Meridian: eigener Workflow der Meridian-Tastatur (zBoard-Fork). Läuft auf dem selbst gehosteten
+# zHealth Meridian: eigener Workflow der Meridian-Tastatur (zBoard-Fork). Läuft auf dem selbst gehosteten
 # Windows-Runner und nur bei Pushes/Merges nach main. Der Workflow build.yml von zBoard (ubuntu-Runner,
 # Emulator-Test, "testversion"-Release) ist für zBoard gedacht und wird in diesem Fork nicht gebraucht – in den
 # Actions-Einstellungen deaktivieren.
@@ -22,8 +22,8 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   # Gemeinsamer Signaturschlüssel mit der Meridian-App (siehe Directory.Build.targets). Pfad/Alias optional als
   # Repository-Variablen, Passwort als Secret. Ohne Secret wird mit dem zBoard-Testschlüssel signiert.
-  MERIDIAN_KEYSTORE: ${{ vars.MERIDIAN_KEYSTORE || 'C:\keys\zheal-meridian.jks' }}
-  MERIDIAN_KEY_ALIAS: ${{ vars.MERIDIAN_KEY_ALIAS || 'zheal' }}
+  MERIDIAN_KEYSTORE: ${{ vars.MERIDIAN_KEYSTORE || 'C:\keys\zhealth-meridian.jks' }}
+  MERIDIAN_KEY_ALIAS: ${{ vars.MERIDIAN_KEY_ALIAS || 'zhealth' }}
   MERIDIAN_KEYSTORE_PASSWORD: ${{ secrets.MERIDIAN_KEYSTORE_PASSWORD }}
   MERIDIAN_KEY_PASSWORD: ${{ secrets.MERIDIAN_KEY_PASSWORD || secrets.MERIDIAN_KEYSTORE_PASSWORD }}
 
@@ -68,10 +68,10 @@ jobs:
             $apk = Get-ChildItem bin/Release/net10.0-android -Filter *-Signed.apk | Select-Object -First 1
             if (-not $apk) { Write-Error "Keine signierte APK gefunden"; exit 1 }
             if ($env:MERIDIAN_KEYSTORE_PASSWORD) {
-              $dest = Join-Path $env:USERPROFILE "zheal-apks"
+              $dest = Join-Path $env:USERPROFILE "zhealth-apks"
               New-Item -ItemType Directory -Force $dest | Out-Null
-              Copy-Item $apk.FullName (Join-Path $dest "zheal-meridian-keyboard.apk") -Force
-              Write-Host "APK: $dest\zheal-meridian-keyboard.apk"
+              Copy-Item $apk.FullName (Join-Path $dest "zhealth-meridian-keyboard.apk") -Force
+              Write-Host "APK: $dest\zhealth-meridian-keyboard.apk"
             } else {
               Write-Warning "Ohne MERIDIAN_KEYSTORE_PASSWORD mit dem zBoard-Testschlüssel signiert – Meridian nimmt davon keine Daten an."
             }
@@ -106,7 +106,7 @@ jobs:
           Remove-Item -Recurse -Force $out -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force $out | Out-Null
           $apk = Get-ChildItem bin/Release/net10.0-android -Filter *-Signed.apk | Select-Object -First 1
-          Copy-Item $apk.FullName (Join-Path $out "de.World_of_Bytes.zHeal.Meridian.Keyboard.apk")
+          Copy-Item $apk.FullName (Join-Path $out "de.World_of_Bytes.zHealth.Meridian.Keyboard.apk")
           $plugin = Get-ChildItem plugin-apps/DeepL/bin/Release/net10.0-android -Filter *-Signed.apk -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($plugin) { Copy-Item $plugin.FullName (Join-Path $out "de.World_of_Bytes.zBoard.DeepL.apk") }
 
@@ -131,7 +131,7 @@ jobs:
           New-Item -ItemType Directory -Path $dir | Out-Null
           Copy-Item out/apk-upload/* $dir
           Set-Content (Join-Path $dir "README.md") @("Letzter Build von main (Lauf ${{ github.run_id }}, Commit ${{ github.sha }}).", "",
-            "- [Tastatur](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zHeal.Meridian.Keyboard.apk)",
+            "- [Tastatur](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zHealth.Meridian.Keyboard.apk)",
             "- [zBoard DeepL](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zBoard.DeepL.apk)")
           Push-Location $dir
           git init -q -b apk
@@ -148,7 +148,7 @@ jobs:
           New-Item -ItemType Directory -Path $dir | Out-Null
           if (Test-Path ci-logs) { Copy-Item ci-logs/* $dir }
           foreach ($f in Get-ChildItem $dir -Filter *.log) {
-            Select-String -Path $f.FullName -Pattern 'error |error:|Failed |FAILED|Exception|warning XA|warning MERIDIAN|zHeal Meridian:' |
+            Select-String -Path $f.FullName -Pattern 'error |error:|Failed |FAILED|Exception|warning XA|warning MERIDIAN|zHealth Meridian:' |
               Select-Object -First 200 | ForEach-Object { $_.Line } | Set-Content ($f.FullName -replace '\.log$', '.errors.txt')
           }
           Set-Content (Join-Path $dir "RESULT.txt") @("run=${{ github.run_id }}", "sha=${{ github.sha }}",

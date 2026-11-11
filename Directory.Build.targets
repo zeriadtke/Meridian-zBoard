@@ -1,16 +1,17 @@
 <Project>
   <!--
-    zHeal Meridian: Build-Einstellungen der Meridian-Tastatur. Nicht Teil von zBoard (upstream).
+    zHealth Meridian: Build-Einstellungen der Meridian-Tastatur. Nicht Teil von zBoard (upstream).
     MSBuild liest diese Datei NACH ZBoard.csproj, daher überschreiben die Werte hier die von zBoard, ohne dass
     ZBoard.csproj geändert werden muss (konfliktfreie Merges von upstream). Siehe Meridian/README.md.
   -->
   <PropertyGroup Condition="'$(MSBuildProjectName)' == 'ZBoard'">
     <!-- Diese Kennung erwartet die Meridian-App (MeridianKeyboard.PackageName) -->
-    <ApplicationId>de.World_of_Bytes.zHeal.Meridian.Keyboard</ApplicationId>
-    <ApplicationTitle>zHeal Meridian Tastatur</ApplicationTitle>
+    <ApplicationId>de.World_of_Bytes.zHealth.Meridian.Keyboard</ApplicationId>
+    <ApplicationTitle>zHealth Meridian Tastatur</ApplicationTitle>
     <!--
       versionCode = 1 000 000 + versionCode von zBoard. So liegt jede Version über der früheren Meridian-Tastatur
-      auf Basis von AnySoftKeyboard (gleiche Kennung) und steigt mit jeder zBoard-Version weiter.
+      auf Basis von AnySoftKeyboard und steigt mit jeder zBoard-Version weiter. Seit der Umbenennung von zHeal in
+      zHealth (November 2026) ist die Kennung neu; für Android ist das eine neue App.
     -->
     <ApplicationVersion>$([MSBuild]::Add(1000000, $(ApplicationVersion)))</ApplicationVersion>
     <ApplicationDisplayVersion>$(ApplicationDisplayVersion)-meridian</ApplicationDisplayVersion>
@@ -20,7 +21,7 @@
   <!--
     Signierung mit dem gemeinsamen Meridian-Schlüssel (wie Meridian.App.csproj). Pflicht für die Datenübergabe:
     Meridian schützt seinen Provider mit protectionLevel="signature".
-    MERIDIAN_KEYSTORE (Pfad), MERIDIAN_KEYSTORE_PASSWORD, optional MERIDIAN_KEY_ALIAS (Standard "zheal") und
+    MERIDIAN_KEYSTORE (Pfad), MERIDIAN_KEYSTORE_PASSWORD, optional MERIDIAN_KEY_ALIAS (Standard "zhealth") und
     MERIDIAN_KEY_PASSWORD (Standard = Keystore-Passwort). Gilt für Debug und Release. Passwörter werden wie in
     Meridian.App.csproj über "env:" gelesen, damit Sonderzeichen nicht von MSBuild verändert werden.
   -->
@@ -30,7 +31,7 @@
     <AndroidSigningKeyStore>$(MERIDIAN_KEYSTORE)</AndroidSigningKeyStore>
     <AndroidSigningStorePass>env:MERIDIAN_KEYSTORE_PASSWORD</AndroidSigningStorePass>
     <AndroidSigningKeyAlias Condition="'$(MERIDIAN_KEY_ALIAS)' != ''">$(MERIDIAN_KEY_ALIAS)</AndroidSigningKeyAlias>
-    <AndroidSigningKeyAlias Condition="'$(MERIDIAN_KEY_ALIAS)' == ''">zheal</AndroidSigningKeyAlias>
+    <AndroidSigningKeyAlias Condition="'$(MERIDIAN_KEY_ALIAS)' == ''">zhealth</AndroidSigningKeyAlias>
     <AndroidSigningKeyPass Condition="'$(MERIDIAN_KEY_PASSWORD)' != ''">env:MERIDIAN_KEY_PASSWORD</AndroidSigningKeyPass>
     <AndroidSigningKeyPass Condition="'$(MERIDIAN_KEY_PASSWORD)' == ''">env:MERIDIAN_KEYSTORE_PASSWORD</AndroidSigningKeyPass>
   </PropertyGroup>
@@ -46,6 +47,6 @@
 
   <Target Name="MeridianSigningHint" BeforeTargets="Build"
           Condition="'$(MSBuildProjectName)' == 'ZBoard' And '$(MeridianSigned)' != 'true'">
-    <Warning Text="zHeal Meridian: MERIDIAN_KEYSTORE/MERIDIAN_KEYSTORE_PASSWORD nicht gesetzt – signiert mit dem zBoard-Testschlüssel. Meridian nimmt von dieser APK KEINE Tipp-Daten an (anderer Schlüssel)." />
+    <Warning Text="zHealth Meridian: MERIDIAN_KEYSTORE/MERIDIAN_KEYSTORE_PASSWORD nicht gesetzt – signiert mit dem zBoard-Testschlüssel. Meridian nimmt von dieser APK KEINE Tipp-Daten an (anderer Schlüssel)." />
   </Target>
 </Project>

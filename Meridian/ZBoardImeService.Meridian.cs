@@ -1,4 +1,4 @@
-// zHeal Meridian – Tipp-Dynamik. Nicht Teil von zBoard (upstream), siehe Meridian/README.md.
+// zHealth Meridian – Tipp-Dynamik. Nicht Teil von zBoard (upstream), siehe Meridian/README.md.
 using Android.OS;
 using Android.Views.InputMethods;
 using ZBoard.Keyboard;
@@ -8,7 +8,7 @@ using ZBoard.Meridian.Typing;
 namespace ZBoard.Ime;
 
 /// <summary>
-/// Messung der Tipp-Dynamik für zHeal Meridian. Alles Meridian-Spezifische des Dienstes liegt in dieser Datei;
+/// Messung der Tipp-Dynamik für zHealth Meridian. Alles Meridian-Spezifische des Dienstes liegt in dieser Datei;
 /// in ZBoardImeService.cs stehen nur einzelne, mit "Meridian:" markierte Aufrufe. So bleiben Merges von zBoard
 /// (upstream) konfliktarm.
 /// <para>
