@@ -14,6 +14,28 @@ public sealed record SuggestionResult(
     public static readonly SuggestionResult Empty = new(string.Empty, [], null, false);
 }
 
+/// <summary>Bewertete Vorschläge einer Sprache, bevor über die Autokorrektur entschieden wird.</summary>
+/// <param name="Typed">Das getippte Wort.</param>
+/// <param name="Candidates">Vorschläge in passender Groß-/Kleinschreibung mit Bewertung, bester zuerst.</param>
+/// <param name="Correction">Beste Tippfehler-Korrektur (Wörterbuchschreibweise) mit Bewertung, oder null.</param>
+/// <param name="NounForm">Großgeschriebene Form, wenn das Getippte ein klein geschriebenes reines Substantiv ist ("haus" → "Haus").</param>
+/// <param name="TypedIsWord">Das getippte Wort ist bekannt (Wörterbuch oder selbst gelernt).</param>
+/// <param name="CorrectionSuppressed">Der Nutzer hat eine Korrektur dieses Worts rückgängig gemacht.</param>
+/// <param name="TypedFrequency">Häufigkeit des getippten Worts im Wörterbuch (0, wenn unbekannt).</param>
+/// <param name="TypedLearned">Das getippte Wort wurde oft genug selbst geschrieben.</param>
+public sealed record SuggestionAnalysis(
+    string Typed,
+    IReadOnlyList<(string Word, double Score)> Candidates,
+    (string Word, double Score)? Correction,
+    string? NounForm,
+    bool TypedIsWord,
+    bool CorrectionSuppressed,
+    int TypedFrequency = 0,
+    bool TypedLearned = false)
+{
+    public static readonly SuggestionAnalysis Empty = new(string.Empty, [], null, null, false, false);
+}
+
 /// <summary>
 /// Vorschläge, Autokorrektur und Nächstes-Wort-Vorhersage.
 /// Quellen: Wörterbuch, mitgelieferte Wortpaare und das, was zBoard aus den eigenen Eingaben gelernt hat.
@@ -56,8 +78,39 @@ public sealed class SuggestionEngine
     {
         if (string.IsNullOrWhiteSpace(typed)) return SuggestionResult.Empty;
 
+        var analysis = Analyze(typed, previousWord, max: max);
+        var candidates = analysis.Candidates.Take(max).Select(c => c.Word).ToList();
+
+        string? autoCorrection = null;
+        if (!analysis.CorrectionSuppressed)
+        {
+            if (!analysis.TypedIsWord && analysis.Correction is { } correction && typed.Length >= 2)
+            {
+                autoCorrection = MatchCase(correction.Word, typed);
+            }
+            else if (analysis.NounForm is { } noun)
+            {
+                autoCorrection = noun; // "haus" → "Haus"
+            }
+        }
+
+        if (autoCorrection == typed) autoCorrection = null;
+        return new SuggestionResult(typed, candidates, autoCorrection, analysis.TypedIsWord);
+    }
+
+    /// <summary>
+    /// Bewertete Vorschläge und Korrekturen für <paramref name="typed"/>, ohne sich schon zu entscheiden. Grundlage für
+    /// <see cref="Suggest"/> und für die mehrsprachige Eingabe, die mehrere Sprachen gegeneinander abwägt.
+    /// </summary>
+    /// <param name="proximity">Tastennachbarn des tatsächlich angezeigten Layouts (sonst das eigene der Sprache).</param>
+    public SuggestionAnalysis Analyze(string typed, string? previousWord = null, KeyProximity? proximity = null, int max = 8)
+    {
+        if (string.IsNullOrWhiteSpace(typed)) return SuggestionAnalysis.Empty;
+        proximity ??= _proximity;
+
         var lower = typed.ToLowerInvariant();
-        bool typedIsWord = _dictionary.Contains(lower) || _history.IsKnown(lower);
+        bool learned = _history.IsKnown(lower);
+        bool typedIsWord = _dictionary.Contains(lower) || learned;
         var scores = new Dictionary<string, double>(StringComparer.Ordinal);
 
         void Offer(string word, double score)
@@ -90,7 +143,7 @@ public sealed class SuggestionEngine
         double bestCorrectionScore = 0;
         if (maxDistance > 0 && !lower.Any(char.IsDigit))
         {
-            foreach (var (word, freq, distance) in _dictionary.FindSimilar(lower, maxDistance, _proximity.SubstitutionCost))
+            foreach (var (word, freq, distance) in _dictionary.FindSimilar(lower, maxDistance, proximity.SubstitutionCost))
             {
                 if (distance <= 0) continue;
                 double score = freq / Math.Pow(DistancePenaltyBase, distance);
@@ -116,35 +169,54 @@ public sealed class SuggestionEngine
             }
         }
 
-        // Alle Schreibweisen der besten Wörter anbieten ("frage" und "Frage")
+        // Alle Schreibweisen der besten Wörter anbieten ("frage" und "Frage"); OrderByDescending ist stabil.
         var candidates = scores
             .OrderByDescending(s => s.Value)
-            .SelectMany(s => FormsOf(s.Key))
-            .Select(form => MatchCase(form, typed))
-            .Distinct(StringComparer.Ordinal)
+            .SelectMany(s => FormsOf(s.Key).Select(form => (Word: MatchCase(form, typed), Score: s.Value)))
+            .DistinctBy(c => c.Word, StringComparer.Ordinal)
             .Take(max)
             .ToList();
 
-        string? autoCorrection = null;
-        if (!_noCorrection.Contains(lower))
+        string? nounForm = null;
+        if (_dictionary.Contains(lower) && IsLowerCase(typed) && NounOnly(lower) is { } noun
+            && _history.LearnedForm(lower) != lower) // bewusst klein geschrieben und gelernt
         {
-            if (!typedIsWord && bestCorrection != null && lower.Length >= 2)
-            {
-                autoCorrection = MatchCase(bestCorrection, typed);
-            }
-            else if (_dictionary.Contains(lower) && IsLowerCase(typed) && NounOnly(lower) is { } noun
-                     && _history.LearnedForm(lower) != lower) // bewusst klein geschrieben und gelernt
-            {
-                autoCorrection = noun; // "haus" → "Haus"
-            }
+            nounForm = noun;
         }
 
-        if (autoCorrection == typed) autoCorrection = null;
-        return new SuggestionResult(typed, candidates, autoCorrection, typedIsWord);
+        return new SuggestionAnalysis(
+            typed,
+            candidates,
+            bestCorrection == null ? null : (bestCorrection, bestCorrectionScore),
+            nounForm,
+            typedIsWord,
+            _noCorrection.Contains(lower),
+            _dictionary.Lookup(lower)?.Freq ?? 0,
+            learned);
     }
+
+    /// <summary>Steht das Wort im Wörterbuch dieser Sprache?</summary>
+    public bool InDictionary(string word) => _dictionary.Contains(word);
+
+    /// <summary>Kennt diese Sprache das Wort (Wörterbuch oder oft genug selbst geschrieben)?</summary>
+    public bool Knows(string word) => _dictionary.Contains(word) || _history.IsKnown(word);
+
+    /// <summary>Wie gebräuchlich das Wort in dieser Sprache ist: Häufigkeit im Wörterbuch plus eigene Verwendungen.</summary>
+    public double Weight(string word) => (_dictionary.Lookup(word)?.Freq ?? 0) + _history.CountOf(word) * UserWordWeight;
+
+    /// <summary>Tastennachbarn des Layouts dieser Sprache.</summary>
+    public KeyProximity Proximity => _proximity;
 
     /// <summary>Wörter für eine Wischspur (Koordinaten in Tastenbreiten), bestes zuerst.</summary>
     public IReadOnlyList<string> Glide(
+        IReadOnlyList<System.Numerics.Vector2> path,
+        IReadOnlyDictionary<char, System.Numerics.Vector2> keys,
+        string? previousWord = null,
+        int max = 4) =>
+        [.. GlideScored(path, keys, previousWord, max).Select(r => r.Word)];
+
+    /// <summary>Wie <see cref="Glide"/>, mit Bewertung (logarithmisch, höher ist besser).</summary>
+    public IReadOnlyList<(string Word, double Score)> GlideScored(
         IReadOnlyList<System.Numerics.Vector2> path,
         IReadOnlyDictionary<char, System.Numerics.Vector2> keys,
         string? previousWord = null,
@@ -160,11 +232,15 @@ public sealed class SuggestionEngine
         }
 
         _glide ??= new GlideDecoder(_dictionary, _history);
-        return _glide.Decode(path, keys, followers, max);
+        return _glide.DecodeScored(path, keys, followers, max);
     }
 
     /// <summary>Nächstes Wort nach <paramref name="previousWord"/>; eigene Wortfolgen haben Vorrang.</summary>
-    public IReadOnlyList<string> Predict(string previousWord, int max = 3)
+    public IReadOnlyList<string> Predict(string previousWord, int max = 3) =>
+        [.. PredictScored(previousWord, max).Select(p => p.Word)];
+
+    /// <summary>Wie <see cref="Predict"/>, mit Bewertung (Wortpaare 0..1, je gelernte Folge +0,5).</summary>
+    public IReadOnlyList<(string Word, double Score)> PredictScored(string previousWord, int max = 3)
     {
         var scores = new Dictionary<string, double>(StringComparer.Ordinal);
 
@@ -182,8 +258,7 @@ public sealed class SuggestionEngine
 
         return scores
             .OrderByDescending(s => s.Value)
-            .Select(s => s.Key)
-            .Distinct(StringComparer.Ordinal)
+            .Select(s => (s.Key, s.Value))
             .Take(max)
             .ToList();
     }

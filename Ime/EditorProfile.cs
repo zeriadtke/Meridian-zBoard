@@ -18,6 +18,10 @@ public sealed class EditorProfile
     const int TypeMaskVariation = 0x00000ff0;
     const int TextVariationUri = 0x00000010;
     const int TextVariationEmail = 0x00000020;
+    const int TextVariationEmailSubject = 0x00000030;
+    const int TextVariationShortMessage = 0x00000040;
+    const int TextVariationLongMessage = 0x00000050;
+    const int TextVariationWebEditText = 0x000000a0;
     const int TextVariationPassword = 0x00000080;
     const int TextVariationVisiblePassword = 0x00000090;
     const int TextVariationWebEmail = 0x000000d0;
@@ -54,6 +58,12 @@ public sealed class EditorProfile
     public bool NoPersonalizedLearning { get; private init; }
     public bool CapsRequested { get; private init; }
     public bool MultiLine { get; private init; }
+
+    /// <summary>
+    /// Einzeiliges Textfeld, das keine Suche ist (Formularfeld). Dort kann eine E-Mail-Adresse stehen, auch wenn die App
+    /// das Feld nicht so kennzeichnet – viele zeigen „E-Mail-Adresse“ nur als eigene Beschriftung an.
+    /// </summary>
+    public bool IsFormField => !MultiLine && !IsPassword && !IsNumeric && !NoPersonalizedLearning && Action != ActionSearch;
     public int Action { get; private init; }
     public bool NoEnterAction { get; private init; }
 
@@ -87,7 +97,9 @@ public sealed class EditorProfile
             && (options & ImeMaskAction) != ActionSearch)
         {
             string? hint = info.HintText?.ToString();
-            email = (MentionsMail(hint) && !MentionsSearch(hint)) || MentionsMail(info.FieldName);
+            string? label = info.Label?.ToString(); // Beschriftung über dem Feld, falls die App sie mitteilt
+            email = (MentionsMail(hint) && !MentionsSearch(hint)) || (MentionsMail(label) && !MentionsSearch(label))
+                || MentionsMail(info.FieldName);
         }
 
         bool password =
@@ -104,13 +116,26 @@ public sealed class EditorProfile
             IsEmail = email && !password,
             NoSuggestions = (type & TextFlagNoSuggestions) != 0,
             NoPersonalizedLearning = (options & ImeFlagNoPersonalizedLearning) != 0,
-            CapsRequested = cls == TypeClassText
-                && (type & (TextFlagCapCharacters | TextFlagCapWords | TextFlagCapSentences)) != 0,
+            CapsRequested = cls == TypeClassText && !password && !email
+                && ((type & (TextFlagCapCharacters | TextFlagCapWords | TextFlagCapSentences)) != 0
+                    || IsProse(variation, type, options)),
             MultiLine = (type & TextFlagMultiLine) != 0,
             Action = options & ImeMaskAction,
             NoEnterAction = (options & ImeFlagNoEnterAction) != 0,
         };
     }
+
+    /// <summary>
+    /// Fließtext-Felder (Nachrichten, Betreff, Notizen, Web-Textfelder), in denen zBoard Satzanfänge auch dann
+    /// großschreibt, wenn die App TYPE_TEXT_FLAG_CAP_SENTENCES nicht setzt – das vergessen viele Apps. Einzeilige
+    /// normale Felder mit Suchen/Los (Suchleisten, Adressen) bleiben ausgenommen.
+    /// </summary>
+    static bool IsProse(int variation, int type, int options) => variation switch
+    {
+        TextVariationEmailSubject or TextVariationShortMessage or TextVariationLongMessage or TextVariationWebEditText => true,
+        0 => (type & TextFlagMultiLine) != 0 || (options & ImeMaskAction) is not (ActionSearch or ActionGo),
+        _ => false,
+    };
 
     static bool MentionsMail(string? text) =>
         text != null && text.Length <= 60

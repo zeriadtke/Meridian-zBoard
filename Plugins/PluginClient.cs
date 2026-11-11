@@ -9,6 +9,12 @@ public sealed record PluginAction(PluginInfo Plugin, string Id, string Label);
 /// <summary>Antwort eines Plugins: neuer Text oder Fehlermeldung.</summary>
 public sealed record PluginResult(string? Text, string? Error);
 
+/// <summary>Zustand eines Synchronisations-Plugins: eingerichtet?, Anzeige des Speichers, Fehlermeldung.</summary>
+public sealed record SyncStatus(bool Ready, string? Target, string? Error);
+
+/// <summary>Ergebnis von Herunter-/Hochladen. <paramref name="Responded"/> false: Plugin hat nicht (rechtzeitig) geantwortet.</summary>
+public sealed record SyncTransfer(bool Responded, bool Found, string? Error);
+
 /// <summary>
 /// Spricht mit einem Plugin-Dienst über Messenger (Bindung nur für die Dauer einer Anfrage). Muss auf dem
 /// Hauptthread benutzt werden; Antworten kommen ebenfalls dort an.
@@ -45,6 +51,32 @@ public sealed class PluginClient(Context context)
         var reply = await RequestAsync(action.Plugin, PluginContract.MsgRun, data, RunTimeout, cancel);
         if (reply == null) return new PluginResult(null, null);
         return new PluginResult(reply.GetString(PluginContract.KeyText), reply.GetString(PluginContract.KeyError));
+    }
+
+    // ---------- Synchronisation ----------
+
+    public static readonly TimeSpan SyncTimeout = TimeSpan.FromSeconds(90);
+
+    /// <summary>Speicher des Synchronisations-Plugins; <c>null</c>, wenn es nicht antwortet.</summary>
+    public async Task<SyncStatus?> SyncStatusAsync(PluginInfo plugin, CancellationToken cancel = default)
+    {
+        var reply = await RequestAsync(plugin, PluginContract.MsgSyncStatus, new Bundle(), ListTimeout, cancel);
+        if (reply == null) return null;
+        return new SyncStatus(reply.GetBoolean(PluginContract.KeySyncReady, false), reply.GetString(PluginContract.KeySyncTarget),
+            reply.GetString(PluginContract.KeyError));
+    }
+
+    /// <summary>
+    /// Herunter- oder Hochladen (<see cref="PluginContract.MsgSyncDownload"/>, <see cref="PluginContract.MsgSyncUpload"/>).
+    /// Die URI muss dem Plugin vorher freigegeben sein.
+    /// </summary>
+    public async Task<SyncTransfer> SyncTransferAsync(PluginInfo plugin, int what, Android.Net.Uri uri, CancellationToken cancel = default)
+    {
+        var data = new Bundle();
+        data.PutString(PluginContract.KeyUri, uri.ToString());
+        var reply = await RequestAsync(plugin, what, data, SyncTimeout, cancel);
+        if (reply == null) return new SyncTransfer(false, false, null);
+        return new SyncTransfer(true, reply.GetBoolean(PluginContract.KeySyncFound, false), reply.GetString(PluginContract.KeyError));
     }
 
     /// <summary>Bindet den Dienst, schickt die Nachricht, wartet auf die Antwort und löst die Bindung wieder.</summary>

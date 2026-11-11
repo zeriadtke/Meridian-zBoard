@@ -9,7 +9,8 @@
 | Können Nutzer das Löschen ihrer Daten anfordern? | Daten liegen nur auf dem Gerät; Löschen in der App unter „Wörterbuch“ bzw. durch Deinstallieren |
 
 Begründung: zBoard hat keine Internet-Berechtigung. Gelernte Wörter, angeheftete Zwischenablage-Einträge und
-Einstellungen bleiben auf dem Gerät. Daten, die nur auf dem Gerät verarbeitet werden, gelten bei Google nicht als
+Einstellungen bleiben auf dem Gerät. Eine Sicherungsdatei erstellt nur der Nutzer selbst und legt sie über die
+Dateiauswahl des Systems ab; zBoard überträgt sie nirgendwohin. Daten, die nur auf dem Gerät verarbeitet werden, gelten bei Google nicht als
 „erhoben“. Die Spracheingabe läuft über den Erkennungsdienst des Systems; zBoard selbst überträgt nichts.
 
 ## App-Inhalte

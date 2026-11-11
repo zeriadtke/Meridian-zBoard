@@ -23,6 +23,14 @@ public sealed class GlideDecoder(WordDictionary dictionary, UserHistory? history
         IReadOnlyList<Vector2> path,
         IReadOnlyDictionary<char, Vector2> keys,
         IReadOnlySet<string>? followers = null,
+        int max = 4) =>
+        [.. DecodeScored(path, keys, followers, max).Select(r => r.Word)];
+
+    /// <summary>Wie <see cref="Decode"/>, mit Bewertung (logarithmisch, höher ist besser).</summary>
+    public IReadOnlyList<(string Word, double Score)> DecodeScored(
+        IReadOnlyList<Vector2> path,
+        IReadOnlyDictionary<char, Vector2> keys,
+        IReadOnlySet<string>? followers = null,
         int max = 4)
     {
         if (path.Count < 2) return [];
@@ -68,9 +76,9 @@ public sealed class GlideDecoder(WordDictionary dictionary, UserHistory? history
 
         return results
             .OrderByDescending(r => r.Score)
-            .Select(r => r.Word)
-            .Distinct(StringComparer.Ordinal)
+            .DistinctBy(r => r.Word, StringComparer.Ordinal)
             .Take(max)
+            .Select(r => (r.Word, r.Score))
             .ToList();
     }
 

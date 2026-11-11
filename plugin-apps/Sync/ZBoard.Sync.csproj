@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- zBoard Sync: Plugin-App für zBoard – gleicht über Google Drive, OneDrive, Dropbox oder WebDAV ab. Eigene App, damit nur sie Internet braucht. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>26</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ZBoard.Sync</RootNamespace>
+    <AssemblyName>ZBoard.Sync</AssemblyName>
+
+    <ApplicationId>de.World_of_Bytes.zBoard.Sync</ApplicationId>
+    <ApplicationTitle>zBoard Sync</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+  </PropertyGroup>
+
+  <!-- Gemeinsamer Vertrag mit zBoard -->
+  <ItemGroup>
+    <Compile Include="../../Plugins/PluginContract.cs" Link="Contract/PluginContract.cs" />
+  </ItemGroup>
+
+  <!-- Debug wie zBoard mit dem Testschlüssel signieren (zBoard zeigt dann "vom selben Entwickler") -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>$(MSBuildThisFileDirectory)../../signing/zboard-test.keystore</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>zboard-test</AndroidSigningStorePass>
+    <AndroidSigningKeyAlias>zboard-test</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass>zboard-test</AndroidSigningKeyPass>
+  </PropertyGroup>
+
+  <!-- Release für Google Play: Upload-Schlüssel per -p:AndroidSigningKeyStore=… usw. übergeben -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <AndroidPackageFormats>aab;apk</AndroidPackageFormats>
+  </PropertyGroup>
+
+</Project>

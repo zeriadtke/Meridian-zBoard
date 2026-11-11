@@ -5,7 +5,7 @@ namespace ZBoard.Suggestions;
 
 /// <summary>
 /// Was zBoard aus den eigenen Eingaben lernt: eigene Wörter und Wortfolgen.
-/// Bleibt ausschließlich auf dem Gerät und wird nie exportiert.
+/// Bleibt auf dem Gerät; verlässt es nur in einer Sicherung, die der Nutzer selbst erstellt.
 /// Plattformunabhängig.
 /// </summary>
 public sealed class UserHistory
@@ -125,23 +125,110 @@ public sealed class UserHistory
     {
         lock (_lock)
         {
-            using var writer = new StreamWriter(stream, new UTF8Encoding(false), leaveOpen: true);
-            foreach (var (_, (form, count)) in _words)
+            WriteTo(stream);
+            IsDirty = false;
+        }
+    }
+
+    /// <summary>Schreibt wie <see cref="Save"/>, lässt aber <see cref="IsDirty"/> unverändert (für Sicherungen).</summary>
+    public void SaveCopy(Stream stream)
+    {
+        lock (_lock) WriteTo(stream);
+    }
+
+    /// <summary>Übernimmt den Inhalt von <paramref name="other"/> (Wiederherstellen einer Sicherung, Datei ist schon geschrieben).</summary>
+    public void ReplaceWith(UserHistory other)
+    {
+        if (ReferenceEquals(other, this)) return;
+        lock (other._lock)
+        lock (_lock)
+        {
+            _words.Clear();
+            foreach (var (key, value) in other._words) _words[key] = value;
+            _bigrams.Clear();
+            foreach (var (prev, followers) in other._bigrams) _bigrams[prev] = new Dictionary<string, int>(followers, StringComparer.Ordinal);
+            _bigramCount = other._bigramCount;
+            IsDirty = false;
+        }
+    }
+
+    /// <summary>
+    /// Synchronisation: übernimmt Wörter und Wortfolgen von <paramref name="other"/>, ohne eigene zu verlieren
+    /// (je Eintrag die höhere Anzahl). Gelöschtes kommt dadurch wieder, wenn ein anderes Gerät es noch kennt.
+    /// </summary>
+    /// <returns>true, wenn sich etwas geändert hat.</returns>
+    public bool MergeFrom(UserHistory other)
+    {
+        if (ReferenceEquals(other, this)) return false;
+        lock (other._lock)
+        lock (_lock)
+        {
+            bool changed = false;
+            foreach (var (key, (form, count)) in other._words)
             {
-                writer.Write("w\t"); writer.Write(form); writer.Write('\t');
-                writer.WriteLine(count.ToString(CultureInfo.InvariantCulture));
+                if (_words.TryGetValue(key, out var mine))
+                {
+                    if (count <= mine.Count) continue;
+                    _words[key] = (mine.Form, count);
+                }
+                else
+                {
+                    _words[key] = (form, count);
+                }
+
+                changed = true;
             }
 
-            foreach (var (prev, followers) in _bigrams)
+            foreach (var (prev, theirs) in other._bigrams)
             {
-                foreach (var (next, count) in followers)
+                if (!_bigrams.TryGetValue(prev, out var followers))
                 {
-                    writer.Write("b\t"); writer.Write(prev); writer.Write('\t'); writer.Write(next); writer.Write('\t');
-                    writer.WriteLine(count.ToString(CultureInfo.InvariantCulture));
+                    followers = new Dictionary<string, int>(StringComparer.Ordinal);
+                    _bigrams[prev] = followers;
+                }
+
+                foreach (var (next, count) in theirs)
+                {
+                    if (followers.TryGetValue(next, out int mine))
+                    {
+                        if (count <= mine) continue;
+                    }
+                    else
+                    {
+                        _bigramCount++;
+                    }
+
+                    followers[next] = count;
+                    changed = true;
                 }
             }
 
-            IsDirty = false;
+            if (changed)
+            {
+                Prune();
+                IsDirty = true;
+            }
+
+            return changed;
+        }
+    }
+
+    void WriteTo(Stream stream)
+    {
+        using var writer = new StreamWriter(stream, new UTF8Encoding(false), leaveOpen: true);
+        foreach (var (_, (form, count)) in _words)
+        {
+            writer.Write("w\t"); writer.Write(form); writer.Write('\t');
+            writer.WriteLine(count.ToString(CultureInfo.InvariantCulture));
+        }
+
+        foreach (var (prev, followers) in _bigrams)
+        {
+            foreach (var (next, count) in followers)
+            {
+                writer.Write("b\t"); writer.Write(prev); writer.Write('\t'); writer.Write(next); writer.Write('\t');
+                writer.WriteLine(count.ToString(CultureInfo.InvariantCulture));
+            }
         }
     }
 

@@ -69,6 +69,17 @@ jobs:
           path: plugin-apps/DeepL/bin/Debug/net10.0-android/*-Signed.apk
           if-no-files-found: error
 
+      # Plugin-App "zBoard Sync" (Google Drive, OneDrive, Dropbox, WebDAV), ebenfalls mit dem Testschlüssel
+      - name: Plugin zBoard Sync bauen (Debug-APK)
+        run: dotnet build plugin-apps/Sync/ZBoard.Sync.csproj -c Debug -f net10.0-android -p:EmbedAssembliesIntoApk=true
+
+      - name: Sync-Plugin-APK bereitstellen
+        uses: actions/upload-artifact@v5
+        with:
+          name: zboard-sync-debug-apk
+          path: plugin-apps/Sync/bin/Debug/net10.0-android/*-Signed.apk
+          if-no-files-found: error
+
   # Release-Build (AOT, getrimmt) mit Testhaken und Testschlüssel: so nah an der Store-Version wie möglich,
   # aber im Emulator prüfbar und über ältere Testversionen installierbar.
   release-test-build:
@@ -239,6 +250,19 @@ jobs:
           -p:AndroidSigningKeyAlias="$KEY_ALIAS"
           -p:AndroidSigningKeyPass="$KEY_PASS"
 
+      - name: Plugin zBoard Sync bauen (.aab und .apk)
+        env:
+          STORE_PASS: ${{ secrets.ZBOARD_UPLOAD_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ZBOARD_UPLOAD_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ZBOARD_UPLOAD_KEY_PASSWORD }}
+        run: >
+          dotnet publish plugin-apps/Sync/ZBoard.Sync.csproj -c Release -f net10.0-android -o store-sync
+          -p:AndroidKeyStore=true
+          -p:AndroidSigningKeyStore="$RUNNER_TEMP/upload.keystore"
+          -p:AndroidSigningStorePass="$STORE_PASS"
+          -p:AndroidSigningKeyAlias="$KEY_ALIAS"
+          -p:AndroidSigningKeyPass="$KEY_PASS"
+
       - name: Dateien benennen
         run: |
           VERSION=$(grep -oP '(?<=<ApplicationDisplayVersion>)[^<]+' ZBoard.csproj)
@@ -248,6 +272,9 @@ jobs:
           cp store/*-Signed.apk "out/zboard-$VERSION.apk"
           cp store-deepl/*-Signed.aab "out/zboard-deepl-$DEEPL_VERSION.aab"
           cp store-deepl/*-Signed.apk "out/zboard-deepl-$DEEPL_VERSION.apk"
+          SYNC_VERSION=$(grep -oP '(?<=<ApplicationDisplayVersion>)[^<]+' plugin-apps/Sync/ZBoard.Sync.csproj)
+          cp store-sync/*-Signed.aab "out/zboard-sync-$SYNC_VERSION.aab"
+          cp store-sync/*-Signed.apk "out/zboard-sync-$SYNC_VERSION.apk"
           ls -l out
 
       - name: Bereitstellen

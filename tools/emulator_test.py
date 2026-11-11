@@ -304,6 +304,16 @@ def main():
         text = field_text()
         check("Autokorrektur (dsa → das)", text.endswith("das "), f"→ „{text}“")
 
+        # Wie Gboard: Rücktaste direkt danach stellt das Getippte wieder her, Leerzeichen übernimmt es unverändert
+        tap(keys["Delete"])
+        time.sleep(0.5)
+        text = field_text()
+        check("Autokorrektur rückgängig (Rücktaste → dsa)", text.endswith("dsa"), f"→ „{text}“")
+        tap(keys["Space"])
+        time.sleep(0.5)
+        text = field_text()
+        check("Wiederhergestelltes Wort bleibt beim Leerzeichen", text.endswith("dsa "), f"→ „{text}“")
+
         type_text(keys, "haus ")
         text = field_text()
         check("Substantiv großschreiben (haus → Haus)", text.endswith("Haus "), f"→ „{text}“")
@@ -322,23 +332,33 @@ def main():
 
         # Wie Gboard: Das häufigste Zusatzzeichen ist vorausgewählt – langer Druck auf o ohne Bewegung ergibt ö
         o = kb.wait_for("de")["o"]
-        holding = subprocess.Popen(["adb", "shell", f"input swipe {o[0]} {o[1]} {o[0]} {o[1]} 2500"])
-        time.sleep(1.4)
-        popup_shot = screenshot(out_dir, "2b-popup-o")  # Popup sichtbar, solange der Finger liegt
+        top, density = keyboard_top(keys)
+        width, _, bpp, before = read_png(os.path.join(out_dir, "2-getippt.png"))
+        x_from, x_to = max(0, int(o[0] - 5 * 40 * density)), min(width, int(o[0] + 40 * density))
+
+        def popup_profile(path):
+            """Pro Streifen (4 dp) Anteil der Pixel, die sich vom Bild ohne Popup unterscheiden."""
+            _, _, _, during = read_png(path)
+            result = []
+            for y in range(int(top - 200 * density), int(top + 30 * density), int(4 * density)):
+                diff = sum(1 for x in range(x_from, x_to, 3)
+                           if sum(abs(a - b) for a, b in zip(before[y][x * bpp:x * bpp + 3], during[y][x * bpp:x * bpp + 3])) > 60)
+                result.append((int((y - top) / density), diff * 3 * 100 // (x_to - x_from)))
+            return result
+
+        # Finger 5 s halten; Screenshots, bis der Popup zu sehen ist (der Emulator ist unterschiedlich schnell)
+        holding = subprocess.Popen(["adb", "shell", f"input swipe {o[0]} {o[1]} {o[0]} {o[1]} 5000"])
+        time.sleep(1.2)
+        profile = []
+        for attempt in range(4):
+            profile = popup_profile(screenshot(out_dir, "2b-popup-o"))
+            if max((p for d, p in profile if -45 <= d <= 0), default=0) >= 5:
+                break
+            time.sleep(0.6)
         holding.wait(timeout=30)
         time.sleep(0.5)
         text = field_text()
         check("Langer Druck auf o → ö (vorausgewählt)", text.endswith("gutö"), f"→ „{text}“")
-        # Wo liegt der Popup? Pro Streifen (8 dp) Anteil der Pixel, die sich vom Bild ohne Popup unterscheiden
-        top, density = keyboard_top(keys)
-        width, _, bpp, before = read_png(os.path.join(out_dir, "2-getippt.png"))
-        _, _, _, during = read_png(popup_shot)
-        x_from, x_to = max(0, int(o[0] - 5 * 40 * density)), min(width, int(o[0] + 40 * density))
-        profile = []
-        for y in range(int(top - 200 * density), int(top + 30 * density), int(8 * density)):
-            diff = sum(1 for x in range(x_from, x_to, 3)
-                       if sum(abs(a - b) for a, b in zip(before[y][x * bpp:x * bpp + 3], during[y][x * bpp:x * bpp + 3])) > 60)
-            profile.append((int((y - top) / density), diff * 3 * 100 // (x_to - x_from)))
         print("  Popup-Profil (relativ zur Tastatur-Oberkante):", " ".join(f"{d:+d}dp:{p}%" for d, p in profile))
         # Zweite Zeile des Popups (9 Zeichen auf o) liegt über der Vorschlagsleiste (48 dp)
         above_bar = max((p for d, p in profile if d < -50), default=0)

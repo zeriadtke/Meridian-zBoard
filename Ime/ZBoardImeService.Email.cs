@@ -60,22 +60,30 @@ public sealed partial class ZBoardImeService
     /// <summary>Anzahl gemerkter Adressen (für die Einstellungen).</summary>
     public static int EmailCount(Context context) => Emails(context).Count;
 
+    /// <summary>Mindestlänge, ab der in einem nicht gekennzeichneten Formularfeld gemerkte Adressen vorgeschlagen werden.</summary>
+    const int UnmarkedFieldMinChars = 3;
+
     bool EmailLearningAllowed =>
-        _settings.RememberEmails && _profile.IsEmail && !_profile.IsPassword && !_profile.NoPersonalizedLearning;
+        _settings.RememberEmails && (_profile.IsEmail || _profile.IsFormField) && !_profile.IsPassword
+        && !_profile.NoPersonalizedLearning;
 
     void StartEmailInput()
     {
         _pendingEmailRemoval = null;
         _emailLearnedText = null;
-        _emailInitialText = _profile.IsEmail ? FieldText() : null;
+        _emailInitialText = _profile.IsEmail || _profile.IsFormField ? FieldText() : null;
     }
 
-    /// <summary>Gültige Adressen aus dem Feld merken, wenn sich der Inhalt seit dem Öffnen geändert hat.</summary>
+    /// <summary>
+    /// Gültige Adressen aus dem Feld merken, wenn sich der Inhalt seit dem Öffnen geändert hat. In nicht gekennzeichneten
+    /// Formularfeldern nur, wenn genau eine Adresse und sonst nichts darin steht.
+    /// </summary>
     void LearnEmailsFromField()
     {
         if (!EmailLearningAllowed) return;
         string? text = FieldText();
         if (string.IsNullOrWhiteSpace(text) || text == _emailInitialText || text == _emailLearnedText) return;
+        if (!_profile.IsEmail && !EmailMemory.IsAddress(text.Trim())) return;
 
         var emails = Emails(this);
         if (emails.LearnFrom(text, NowMs()) > 0) _emailLearnedText = text;
@@ -135,8 +143,9 @@ public sealed partial class ZBoardImeService
         bool emailField = _profile.IsEmail;
         if (!emailField && (!_settings.RememberEmails || Emails(this).Count == 0)) return false;
         var (token, _) = EmailToken();
-        // In normalen Textfeldern nur, wenn gerade eine Adresse entsteht und eine gemerkte dazu passt
-        if (!emailField && !token.Contains('@')) return false;
+        // In normalen Textfeldern nur, wenn gerade eine Adresse entsteht und eine gemerkte dazu passt: nach "@" oder in
+        // einem einzeiligen Formularfeld, das nur dieses eine Wort enthält ("zeriadt" → zeriadtke@gmail.com).
+        if (!emailField && !token.Contains('@') && !IsLoneTokenInFormField(token)) return false;
 
         IReadOnlyList<EmailSuggestion> suggestions = Emails(this).Suggest(token);
         if (!_settings.RememberEmails) suggestions = [.. suggestions.Where(s => s.Display != s.Address)];
@@ -150,6 +159,11 @@ public sealed partial class ZBoardImeService
         _suggestionBar.SetSlots(Slot(0), Slot(1), Slot(2));
         return true;
     }
+
+    bool IsLoneTokenInFormField(string token) =>
+        _profile.IsFormField && token.Length >= UnmarkedFieldMinChars
+        && Emails(this).Suggest(token, max: 1).Count > 0
+        && FieldText()?.Trim() is { } field && (field == token || field.Length == 0);
 
     /// <summary>Ersetzt das angefangene Stück durch die gewählte Adresse (ohne Leerzeichen dahinter).</summary>
     void PickEmail(SuggestionSlot slot)

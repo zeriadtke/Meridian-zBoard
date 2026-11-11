@@ -31,6 +31,7 @@ TIPPEN WIE GEWOHNT
 • Vorschläge für das nächste Wort, bevor du zu tippen beginnst
 • Deutsche Substantive werden automatisch großgeschrieben
 • Lernt deine Wörter – nur auf dem Gerät, abschaltbar und jederzeit löschbar
+• Sichern & wiederherstellen: Einstellungen und Wörterbuch als Datei mitnehmen – ohne Konto
 
 WISCHEN STATT TIPPEN
 • Glide Typing: Wörter eingeben, indem du von Buchstabe zu Buchstabe wischst
@@ -73,6 +74,7 @@ TYPE THE WAY YOU'RE USED TO
 • Word suggestions and auto-correction for English, German, French, Spanish and Italian
 • Next-word suggestions before you start typing
 • Learns your words – on the device only, can be turned off and deleted at any time
+• Backup & restore: take your settings and dictionary along as a file – no account needed
 
 GLIDE INSTEAD OF TAP
 • Glide typing: enter words by sliding from letter to letter

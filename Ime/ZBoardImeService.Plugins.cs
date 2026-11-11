@@ -41,7 +41,7 @@ public sealed partial class ZBoardImeService
         _pluginSession++;
         CancelPlugin();
         _pluginUndo = null;
-        _enabledPlugins = _profile.IsPassword ? [] : PluginRegistry.Enabled(this, _settings);
+        _enabledPlugins = _profile.IsPassword ? [] : [.. PluginRegistry.Enabled(this, _settings).Where(p => !p.CanSync)];
         _suggestionBar?.ToolbarItems = _enabledPlugins.Count > 0 ? ToolbarWithPlugins : Toolbar;
     }
 

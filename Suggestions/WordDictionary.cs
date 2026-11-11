@@ -20,10 +20,21 @@ public sealed class WordDictionary
     public int Count => _keys.Length;
 
     /// <summary>
+    /// Gemeinsamer Maßstab für die Häufigkeiten aller Sprachen (etwa die Summe der deutschen Liste). Die Wortlisten
+    /// stammen aus unterschiedlich großen Korpora (die englische zählt rund viermal so viel wie die deutsche); erst auf
+    /// denselben Maßstab gebracht, lassen sich Wörter verschiedener Sprachen bei der mehrsprachigen Eingabe vergleichen.
+    /// </summary>
+    public const long ReferenceTotal = 150_000_000;
+
+    /// <summary>Summe aller Häufigkeiten (nach einer Normierung die normierte Summe).</summary>
+    public long TotalFrequency { get; private set; }
+
+    /// <summary>
     /// Lädt eine Wortliste: eine Zeile pro Schreibweise, "wort[Tab]häufigkeit". Zeilen mit # werden ignoriert.
     /// Dieselbe Kleinschreibung darf mehrfach vorkommen ("frage" und "Frage").
     /// </summary>
-    public static WordDictionary Load(Stream stream)
+    /// <param name="normalizeTo">Häufigkeiten so skalieren, dass ihre Summe diesem Wert entspricht (siehe <see cref="ReferenceTotal"/>).</param>
+    public static WordDictionary Load(Stream stream, long? normalizeTo = null)
     {
         var dict = new WordDictionary();
         using var reader = new StreamReader(stream);
@@ -39,7 +50,7 @@ public sealed class WordDictionary
             if (word.Length > 0) dict.Add(word, freq);
         }
 
-        dict.BuildTopLists();
+        dict.BuildTopLists(normalizeTo);
         return dict;
     }
 
@@ -61,9 +72,27 @@ public sealed class WordDictionary
     }
 
     /// <summary>Schließt den Aufbau ab: sortiert und berechnet die Vorschlagslisten für kurze Präfixe.</summary>
-    public void BuildTopLists()
+    /// <param name="normalizeTo">Häufigkeiten so skalieren, dass ihre Summe diesem Wert entspricht; null lässt sie unverändert.</param>
+    public void BuildTopLists(long? normalizeTo = null)
     {
         if (_builder == null) return;
+
+        long total = _builder.Values.Sum(forms => forms.Sum(x => (long)x.Freq));
+        if (normalizeTo is > 0 && total > 0)
+        {
+            double factor = (double)normalizeTo.Value / total;
+            foreach (var forms in _builder.Values)
+            {
+                for (int k = 0; k < forms.Count; k++)
+                {
+                    forms[k] = (forms[k].Word, (int)Math.Clamp(Math.Round(forms[k].Freq * factor), 1, int.MaxValue));
+                }
+            }
+
+            total = _builder.Values.Sum(forms => forms.Sum(x => (long)x.Freq));
+        }
+
+        TotalFrequency = total;
 
         var keys = _builder.Keys.ToArray();
         Array.Sort(keys, StringComparer.Ordinal);

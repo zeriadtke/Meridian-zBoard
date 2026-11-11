@@ -1,4 +1,5 @@
 using Android.Content;
+using ZBoard.Backup;
 
 namespace ZBoard.Settings;
 
@@ -51,6 +52,16 @@ public sealed class ZBoardSettings
             return current != null && Languages.Contains(current) ? current : Languages[0];
         }
         set => PutString("currentLanguage", value);
+    }
+
+    /// <summary>
+    /// Mehrsprachige Eingabe wie bei Gboard: Vorschläge und Autokorrektur aus allen aktiven Sprachen gleichzeitig
+    /// (höchstens drei), auf der Leertaste z. B. „DE · EN“. Der Sprachwechsel wählt dann nur noch das Layout.
+    /// </summary>
+    public bool MultilingualTyping
+    {
+        get => _prefs.GetBoolean("multilingualTyping", true);
+        set => PutBool("multilingualTyping", value);
     }
 
     public bool Haptics
@@ -181,9 +192,48 @@ public sealed class ZBoardSettings
     /// <summary>Angeheftete Einträge der Zwischenablage.</summary>
     public string PinnedClips
     {
-        get => _prefs.GetString("pinnedClips", string.Empty) ?? string.Empty;
-        set => PutString("pinnedClips", value);
+        get => _prefs.GetString(PinnedClipsKey, string.Empty) ?? string.Empty;
+        set => PutString(PinnedClipsKey, value);
     }
+
+    // ---------- Synchronisation (gerätebezogen, wird selbst nicht synchronisiert) ----------
+
+    /// <summary>Automatisch über ein Plugin mit einem Cloud-Speicher abgleichen.</summary>
+    public bool SyncEnabled
+    {
+        get => _prefs.GetBoolean("syncEnabled", false);
+        set => PutBool("syncEnabled", value);
+    }
+
+    /// <summary>Paketname des Synchronisations-Plugins.</summary>
+    public string SyncPlugin
+    {
+        get => _prefs.GetString("syncPlugin", string.Empty) ?? string.Empty;
+        set => PutString("syncPlugin", value);
+    }
+
+    public long SyncLastAttemptMs
+    {
+        get => _prefs.GetLong("syncLastAttemptMs", 0);
+        set => PutLong("syncLastAttemptMs", value);
+    }
+
+    /// <summary>Letzter erfolgreicher Abgleich (0 = noch nie: dann übernimmt das Gerät die Einstellungen aus der Cloud).</summary>
+    public long SyncLastSuccessMs
+    {
+        get => _prefs.GetLong("syncLastSuccessMs", 0);
+        set => PutLong("syncLastSuccessMs", value);
+    }
+
+    /// <summary>Fehlermeldung des letzten Versuchs, leer bei Erfolg.</summary>
+    public string SyncLastError
+    {
+        get => _prefs.GetString("syncLastError", string.Empty) ?? string.Empty;
+        set => PutString("syncLastError", value);
+    }
+
+    /// <summary>Letzte Änderung an Einstellungen, die synchronisiert werden (Unix-ms).</summary>
+    public long SettingsModifiedMs => _prefs.GetLong(BackupMerge.SettingsModifiedKey, 0);
 
     public ThemeMode Theme
     {
@@ -191,9 +241,89 @@ public sealed class ZBoardSettings
         set => PutInt("theme", (int)value);
     }
 
-    void PutBool(string key, bool value) => _prefs.Edit()!.PutBoolean(key, value)!.Apply();
+    // ---------- Sichern und Wiederherstellen ----------
 
-    void PutInt(string key, int value) => _prefs.Edit()!.PutInt(key, value)!.Apply();
+    /// <summary>Schlüssel der angehefteten Zwischenablage; wird in Sicherungen getrennt behandelt.</summary>
+    public const string PinnedClipsKey = "pinnedClips";
 
-    void PutString(string key, string value) => _prefs.Edit()!.PutString(key, value)!.Apply();
+    static readonly IDictionary<string, object> Empty = new Dictionary<string, object>();
+
+    /// <summary>Alle gespeicherten Einstellungen außer der Zwischenablage (Werte als bool, int, long, float, string).</summary>
+    public Dictionary<string, object> Export()
+    {
+        var result = new Dictionary<string, object>(StringComparer.Ordinal);
+        foreach (var (key, raw) in _prefs.All ?? Empty)
+        {
+            if (key == PinnedClipsKey) continue;
+            object? value = raw switch
+            {
+                bool or int or long or float or string => raw,
+                Java.Lang.Boolean b => b.BooleanValue(),
+                Java.Lang.Integer i => i.IntValue(),
+                Java.Lang.Long l => l.LongValue(),
+                Java.Lang.Float f => f.FloatValue(),
+                Java.Lang.String s => s.ToString(),
+                _ => null, // String-Sets nutzt zBoard nicht
+            };
+            if (value != null) result[key] = value;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Ersetzt die Einstellungen (nicht angegebene fallen auf den Standard zurück) und/oder die angeheftete
+    /// Zwischenablage. <c>null</c> lässt den jeweiligen Teil unverändert. Schreibt sofort (Commit).
+    /// </summary>
+    /// <param name="markModifiedNow">
+    /// Zeitpunkt der letzten Änderung auf jetzt setzen (Wiederherstellen einer Sicherung: soll sich auf andere Geräte
+    /// verteilen). Bei der Synchronisation false: der Zeitpunkt kommt mit den Einstellungen.
+    /// </param>
+    public void Import(IReadOnlyDictionary<string, object>? settings, string? pinnedClips, bool markModifiedNow = true)
+    {
+        var edit = _prefs.Edit()!;
+        if (settings != null)
+        {
+            foreach (var key in (_prefs.All ?? Empty).Keys)
+            {
+                if (key != PinnedClipsKey) edit.Remove(key);
+            }
+
+            foreach (var (key, value) in settings)
+            {
+                if (key == PinnedClipsKey) continue;
+                switch (value)
+                {
+                    case bool b: edit.PutBoolean(key, b); break;
+                    case int i: edit.PutInt(key, i); break;
+                    case long l: edit.PutLong(key, l); break;
+                    case float f: edit.PutFloat(key, f); break;
+                    case string s: edit.PutString(key, s); break;
+                }
+            }
+        }
+
+        if (settings != null && markModifiedNow) edit.PutLong(BackupMerge.SettingsModifiedKey, NowMs());
+        if (pinnedClips != null) edit.PutString(PinnedClipsKey, pinnedClips);
+        edit.Commit();
+    }
+
+    static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+    void PutBool(string key, bool value) => Apply(key, e => e.PutBoolean(key, value));
+
+    void PutInt(string key, int value) => Apply(key, e => e.PutInt(key, value));
+
+    void PutLong(string key, long value) => Apply(key, e => e.PutLong(key, value));
+
+    void PutString(string key, string value) => Apply(key, e => e.PutString(key, value));
+
+    /// <summary>Schreibt und merkt sich bei synchronisierten Einstellungen den Zeitpunkt der Änderung.</summary>
+    void Apply(string key, Action<ISharedPreferencesEditor> put)
+    {
+        var edit = _prefs.Edit()!;
+        put(edit);
+        if (!BackupMerge.IsDeviceKey(key)) edit.PutLong(BackupMerge.SettingsModifiedKey, NowMs());
+        edit.Apply();
+    }
 }
