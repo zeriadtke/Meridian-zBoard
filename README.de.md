@@ -1,5 +1,5 @@
-> **zHeal Meridian Tastatur:** Dieser Fork von zBoard misst zusätzlich die Tipp-Dynamik (nur Zeiten und Tastenarten,
-> nie Zeichen) für die App zHeal Meridian. Alles dazu in [Meridian/README.md](Meridian/README.md).
+> **zHealth Meridian Tastatur:** Dieser Fork von zBoard misst zusätzlich die Tipp-Dynamik (nur Zeiten und Tastenarten,
+> nie Zeichen) für die App zHealth Meridian. Alles dazu in [Meridian/README.md](Meridian/README.md).
 
 <img src="docs/logo/zboard-logo.svg" alt="zBoard-Logo" width="128" align="right">
 

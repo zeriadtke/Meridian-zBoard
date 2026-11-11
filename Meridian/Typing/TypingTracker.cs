@@ -1,4 +1,4 @@
-// zHeal Meridian – Tipp-Dynamik. Nicht Teil von zBoard (upstream), siehe Meridian/README.md.
+// zHealth Meridian – Tipp-Dynamik. Nicht Teil von zBoard (upstream), siehe Meridian/README.md.
 using ZBoard.Keyboard;
 
 namespace ZBoard.Meridian.Typing;

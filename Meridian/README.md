@@ -1,7 +1,13 @@
-# zHeal Meridian Tastatur
+# zHealth Meridian Tastatur
+
+> **Umbenennung zHeal → zHealth (November 2026):** App-Kennung, Berechtigung und ContentProvider heißen jetzt
+> `de.World_of_Bytes.zHealth.Meridian.*`. Für Android ist das eine neue App – alte Installationen deinstallieren.
+> Nur zusammen mit der Meridian-App ab derselben Umbenennung ausliefern, sonst kommen keine Tipp-Daten an.
+> Standard-Keystore ist jetzt `C:\keys\zhealth-meridian.jks` mit Alias `zhealth`.
+
 
 Fork von [zBoard](https://github.com/World-of-Bytes/zBoard) (BSD 2-Clause) mit einer Erweiterung, die die
-**Tipp-Dynamik** für zHeal Meridian misst – nach dem Vorbild der BiAffect-Forschung. Gemessen werden **nur Zeiten
+**Tipp-Dynamik** für zHealth Meridian misst – nach dem Vorbild der BiAffect-Forschung. Gemessen werden **nur Zeiten
 und Tastenarten**, nie Zeichen. Ersetzt die frühere Meridian-Tastatur auf Basis von AnySoftKeyboard
 (Repo `Meridian-Keyboard`, archiviert); Paketname und Datenschnittstelle sind gleich geblieben, die Meridian-App
 braucht deshalb keine Änderung.
@@ -40,7 +46,7 @@ Geräte und Tastatur-Versionen hinweg dasselbe bedeuten.
   Einfügen aus der Zwischenablage zählen nicht.
 
 Die Tastatur speichert selbst nichts dauerhaft. Sie übergibt die Zusammenfassung an die Meridian-App
-(ContentProvider `de.World_of_Bytes.zHeal.Meridian.typing`, `/status` und `/sessions`). Meridian nimmt sie nur an,
+(ContentProvider `de.World_of_Bytes.zHealth.Meridian.typing`, `/status` und `/sessions`). Meridian nimmt sie nur an,
 wenn die Quelle „Tipp-Dynamik“ freigegeben ist; sonst fragt die Tastatur nur den Status ab.
 
 ## Aufbau – warum Upstream-Merges einfach bleiben
@@ -50,7 +56,7 @@ wenn die Quelle „Tipp-Dynamik“ freigegeben ist; sonst fragt die Tastatur nur
 | `Meridian/Typing/*.cs` | Messung ohne Android-Abhängigkeiten (unit-getestet in `tests/Meridian.Keyboard.Tests`) |
 | `Meridian/MeridianBridge.cs` | Übergabe an die Meridian-App |
 | `Meridian/ZBoardImeService.Meridian.cs` | Teil der partiellen Klasse `ZBoardImeService` mit allen Meridian-Methoden |
-| `Directory.Build.targets` | App-Kennung `de.World_of_Bytes.zHeal.Meridian.Keyboard`, Versionsnummer, Signierung – überschreibt `ZBoard.csproj`, ohne es zu ändern |
+| `Directory.Build.targets` | App-Kennung `de.World_of_Bytes.zHealth.Meridian.Keyboard`, Versionsnummer, Signierung – überschreibt `ZBoard.csproj`, ohne es zu ändern |
 | `.github/workflows/meridian.yml` | eigener CI-Lauf auf dem selbst gehosteten Windows-Runner |
 
 Geänderte zBoard-Dateien (jede Stelle mit `Meridian:` markiert):
@@ -59,7 +65,7 @@ Geänderte zBoard-Dateien (jede Stelle mit `Meridian:` markiert):
 | --- | --- |
 | `Ime/ZBoardImeService.cs` | Name des Dienstes, sechs einzeilige Aufrufe (Sitzung, Taste gedrückt/losgelassen, Autokorrektur, Vorschlag) |
 | `AndroidManifest.xml` | Berechtigung `…permission.TYPING_DATA`, Paketsichtbarkeit des Providers, App-Name |
-| `Settings/SettingsActivity.cs`, `Resources/values/strings.xml` | App-Name „zHeal Meridian Tastatur“ |
+| `Settings/SettingsActivity.cs`, `Resources/values/strings.xml` | App-Name „zHealth Meridian Tastatur“ |
 
 Die Einstellungen der Tastatur selbst heißen weiter „zBoard“.
 
@@ -85,7 +91,7 @@ Voraussetzungen wie zBoard: .NET 10 SDK mit Android-Workload, Android SDK, JDK 2
 ```bash
 dotnet test tests/Meridian.Keyboard.Tests
 dotnet build ZBoard.csproj -c Release -f net10.0-android -p:AndroidPackageFormats=apk
-# APK: bin/Release/net10.0-android/de.World_of_Bytes.zHeal.Meridian.Keyboard-Signed.apk
+# APK: bin/Release/net10.0-android/de.World_of_Bytes.zHealth.Meridian.Keyboard-Signed.apk
 ```
 
 **Signierung:** Die Tastatur muss mit **demselben Schlüssel wie die Meridian-App** signiert sein. Meridian schützt
@@ -93,15 +99,15 @@ seine Datenschnittstelle mit einer Berechtigung der Stufe `signature`; mit ander
 Zugriff ab, und die Tastatur verwirft die Daten stillschweigend.
 
 ```
-MERIDIAN_KEYSTORE=C:\keys\zheal-meridian.jks
+MERIDIAN_KEYSTORE=C:\keys\zhealth-meridian.jks
 MERIDIAN_KEYSTORE_PASSWORD=…
-MERIDIAN_KEY_ALIAS=zheal          # optional, Standard "zheal"
+MERIDIAN_KEY_ALIAS=zhealth          # optional, Standard "zhealth"
 MERIDIAN_KEY_PASSWORD=…           # optional, Standard = Keystore-Passwort
 ```
 
 Dieselben Variablen liest `Meridian.App.csproj`. In der CI kommen sie aus dem Repository-Secret
 `MERIDIAN_KEYSTORE_PASSWORD` (Pfad und Alias optional als Repository-Variablen); die signierte APK wird nach
-`%USERPROFILE%\zheal-apks\zheal-meridian-keyboard.apk` kopiert und als Artefakt `Meridian-Keyboard-apk`
+`%USERPROFILE%\zhealth-apks\zhealth-meridian-keyboard.apk` kopiert und als Artefakt `Meridian-Keyboard-apk`
 hochgeladen. Ohne diese Variablen wird mit dem zBoard-Testschlüssel signiert (Build-Warnung) – dann kommen bei
 Meridian keine Daten an.
 

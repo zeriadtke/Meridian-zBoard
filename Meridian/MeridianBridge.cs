@@ -1,4 +1,4 @@
-// zHeal Meridian – Tipp-Dynamik. Nicht Teil von zBoard (upstream), siehe Meridian/README.md.
+// zHealth Meridian – Tipp-Dynamik. Nicht Teil von zBoard (upstream), siehe Meridian/README.md.
 using Android.Content;
 using Android.Util;
 using ZBoard.Meridian.Typing;
@@ -13,7 +13,7 @@ namespace ZBoard.Meridian;
 /// </summary>
 public sealed class MeridianBridge(Context context)
 {
-    public const string Authority = "de.World_of_Bytes.zHeal.Meridian.typing";
+    public const string Authority = "de.World_of_Bytes.zHealth.Meridian.typing";
     static readonly Uri Sessions = Uri.Parse($"content://{Authority}/sessions")!;
     static readonly Uri Status = Uri.Parse($"content://{Authority}/status")!;
     const string Tag = "MeridianBridge";
