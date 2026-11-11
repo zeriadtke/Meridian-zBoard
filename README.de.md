@@ -235,7 +235,7 @@ git -C cldr sparse-checkout set --no-cone /common/annotations /common/annotation
 python3 tools/build_emoji.py --emoji-json unicode-emoji-json/data-by-group.json --cldr cldr
 ```
 
-Das Logo und das App-Symbol (Farben von World of Bytes) erzeugt `python3 tools/build_logo.py`.
+Das Logo, das App-Symbol und die Symbole der Plugin-Apps (Farben von World of Bytes) erzeugt `python3 tools/build_logo.py`, die Play-Store-Grafiken `node tools/render_store_graphics.js`.
 
 Weitere Sprachen für die Wörterbücher: `--extra fr:fr_full.txt:2grams_french.csv` (siehe `tools/build_dictionaries.py --help`).
 

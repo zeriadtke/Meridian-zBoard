@@ -20,14 +20,15 @@ const feature = `<!doctype html><html><head><style>
     display: flex; align-items: center; gap: 56px; padding: 0 84px; box-sizing: border-box;
   }
   .logo svg { width: 260px; height: 260px; display: block; }
-  h1 { margin: 0; font-size: 104px; line-height: 1; letter-spacing: -2px; font-weight: 700;
-       background: linear-gradient(95deg, #B1C740 0%, #6BA942 35%, #3FA9D9 70%, #387ABE 100%);
+  /* Das „z“ von zBoard ist immer schwarz oder weiß – hier weiß, nur „Board“ trägt den Markenverlauf */
+  h1 { margin: 0; font-size: 104px; line-height: 1; letter-spacing: -2px; font-weight: 700; color: #FFFFFF; }
+  h1 .board { background: linear-gradient(95deg, #B1C740 0%, #6BA942 35%, #3FA9D9 70%, #387ABE 100%);
        -webkit-background-clip: text; background-clip: text; color: transparent; }
   p { margin: 18px 0 0; font-size: 34px; line-height: 1.3; color: #C9D0DB; }
   .by { margin-top: 28px; font-size: 22px; color: #98A2B3; letter-spacing: 1px; }
 </style></head><body>
   <div class="logo">${logo.replace(/width="\d+" height="\d+"/, '')}</div>
-  <div><h1>zBoard</h1><p>Die freie Tastatur.<br>Schnell. Offline. Open Source.</p><div class="by">WORLD OF BYTES</div></div>
+  <div><h1>z<span class="board">Board</span></h1><p>Die freie Tastatur.<br>Schnell. Offline. Open Source.</p><div class="by">WORLD OF BYTES</div></div>
 </body></html>`;
 
 (async () => {
