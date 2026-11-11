@@ -7,7 +7,7 @@
   <PropertyGroup Condition="'$(MSBuildProjectName)' == 'ZBoard'">
     <!-- Diese Kennung erwartet die Meridian-App (MeridianKeyboard.PackageName) -->
     <ApplicationId>de.World_of_Bytes.zHealth.Meridian.Keyboard</ApplicationId>
-    <ApplicationTitle>zHealth Meridian Tastatur</ApplicationTitle>
+    <ApplicationTitle>Meridian Tastatur</ApplicationTitle>
     <!--
       versionCode = 1 000 000 + versionCode von zBoard. So liegt jede Version über der früheren Meridian-Tastatur
       auf Basis von AnySoftKeyboard und steigt mit jeder zBoard-Version weiter. Seit der Umbenennung von zHeal in
