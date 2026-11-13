@@ -39,6 +39,11 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
     sealed record Correction(string Original, string Corrected, string Separator);
 
+    /// <summary>Das zuletzt mit der Leertaste abgeschlossene Wort: wie getippt, wie eingefügt, und was davor stand.</summary>
+    sealed record SpaceCommit(string Typed, string Committed, WordContext Context, string? Previous);
+
+    SpaceCommit? _lastSpaceCommit;
+
     readonly StringBuilder _composing = new();
 
     ZBoardSettings _settings = null!;
@@ -56,6 +61,10 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     const int NumpadPage = 3;
     long _lastSpaceMs;
     bool _autoSpaceInserted;    // Leerzeichen kam von einem Vorschlag
+    bool _toolbarOpen;          // Werkzeugleiste über den Pfeil geöffnet; bleibt, bis getippt wird
+
+    /// <summary>Je Zeichen des Worts in Bearbeitung: das Zeichen und wo der Finger die Taste traf (null = unbekannt).</summary>
+    readonly List<(char Char, Vector2? Point)> _touches = [];
     Correction? _lastCorrection;
     string? _restoredWord;      // per Rücktaste wiederhergestelltes Original; das nächste Leerzeichen übernimmt und lernt es
     SuggestionResult _currentSuggestions = SuggestionResult.Empty;
@@ -123,6 +132,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _lastCorrection = null;
         _restoredWord = null;
         _autoSpaceInserted = false;
+        _toolbarOpen = false;
         _glideActive = false;
         _swipeAnchor = -1;
         _reselect = null;
@@ -263,6 +273,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         if (wordChar && _profile.AllowSuggestions)
         {
             _autoSpaceInserted = false;
+            TrackTouches(text, _keyboardView?.TapPoint);
             _composing.Append(text);
             ic.SetComposingText(J(_composing.ToString()), 1);
             UpdateSuggestions();
@@ -502,9 +513,36 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         bool restored = typed == _restoredWord; // wiederhergestelltes Original: nicht korrigieren, sondern lernen
         _restoredWord = null;
 
-        if (autocorrect && !restored && _settings.AutoCorrect && _profile.AllowAutocorrect)
+        // Derselbe Kontext wie in der Vorschlagsleiste, damit eingesetzt wird, was dort hervorgehoben ist.
+        string? previous = PreviousWord();
+        var context = SentenceContext();
+        bool mayCorrect = autocorrect && !restored && _settings.AutoCorrect && _profile.AllowAutocorrect;
+
+        // Leertaste mitten im Wort ("da ke", "ha llo"): Das Stück davor und dieses ergeben zusammen das gemeinte Wort.
+        var before = _lastSpaceCommit;
+        _lastSpaceCommit = null;
+        if (mayCorrect && !_glideActive && before != null
+            && TextBeforeCursor(before.Committed.Length + 1 + typed.Length) == before.Committed + " " + typed
+            && Engine?.JoinAcrossSpace(before.Typed, typed, before.Context) is { } joined)
         {
-            var result = Engine?.Suggest(typed);
+            ic.BeginBatchEdit();
+            ic.FinishComposingText();
+            ic.DeleteSurroundingText(before.Committed.Length + 1 + typed.Length, 0);
+            ic.CommitText(J(joined + separator), 1);
+            ic.EndBatchEdit();
+
+            _lastCorrection = new Correction(before.Typed + " " + typed, joined, separator); // Löschen stellt das Getippte wieder her
+            MeridianAutoCorrected(); // Meridian: nur das Ereignis
+            _composing.Clear();
+            _currentSuggestions = SuggestionResult.Empty;
+            if (_settings.LearnWords && _profile.AllowLearning) Engine?.Unlearn(before.Previous, before.Committed);
+            Learn(before.Previous, joined);
+            return;
+        }
+
+        if (mayCorrect)
+        {
+            var result = Engine?.Suggest(typed, context, touches: Touches());
             if (result?.AutoCorrection is { } corrected && corrected != typed)
             {
                 final = corrected;
@@ -513,8 +551,8 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             }
         }
 
-        string? previous = PreviousWord();
         ic.CommitText(J(final + separator), 1);
+        if (separator == " " && !_glideActive && !restored) _lastSpaceCommit = new SpaceCommit(typed, final, context, previous);
         _composing.Clear();
         _glideActive = false;
         _currentSuggestions = SuggestionResult.Empty;
@@ -571,7 +609,14 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
     void Learn(string? previous, string word, bool accepted = false)
     {
-        if (_settings.LearnWords && _profile.AllowLearning) Engine?.Learn(previous, word, accepted);
+        if (!_settings.LearnWords || !_profile.AllowLearning) return;
+
+        // Eine Korrektur kann zwei Wörter liefern ("ichhabe" → "ich habe"): jedes einzeln lernen.
+        foreach (var part in word.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        {
+            Engine?.Learn(previous, part, accepted);
+            previous = part;
+        }
     }
 
     /// <summary>
@@ -602,6 +647,61 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         return start < trimmed.Length ? trimmed[start..] : null;
     }
 
+    /// <summary>
+    /// Die beiden Wörter vor dem Cursor (bzw. vor dem gerade getippten Wort) für das Sprachmodell; auch Satzanfang und
+    /// Komma zählen. <paramref name="adjacent"/>: ein Wort direkt vor dem Cursor zählt als vorheriges Wort.
+    /// </summary>
+    WordContext SentenceContext(bool adjacent = false)
+    {
+        const int Window = 96;
+        string before = TextBeforeCursor(Window);
+        bool fromFieldStart = before.Length < Window;
+        if (adjacent && _composing.Length == 0 && before.Length > 0 && char.IsLetterOrDigit(before[^1]))
+        {
+            before += " ";
+        }
+
+        if (_composing.Length > 0)
+        {
+            string current = _composing.ToString();
+            if (!before.EndsWith(current, StringComparison.Ordinal)) return WordContext.None;
+            before = before[..^current.Length];
+        }
+
+        return WordContext.FromText(before, fromFieldStart);
+    }
+
+    /// <summary>Merkt sich zu den Zeichen, die gleich an das Wort in Bearbeitung angehängt werden, den Fingerpunkt.</summary>
+    void TrackTouches(string text, Vector2? point)
+    {
+        // Das Wort kann sich anders als durch Tippen geändert haben (Löschen, Wiederherstellen): Liste angleichen.
+        int length = _composing.Length;
+        if (_touches.Count > length) _touches.RemoveRange(length, _touches.Count - length);
+        while (_touches.Count < length) _touches.Add((_composing[_touches.Count], null));
+
+        foreach (char c in text) _touches.Add((c, text.Length == 1 ? point : null));
+    }
+
+    /// <summary>
+    /// Fingerpunkte zum Wort in Bearbeitung für die Autokorrektur; null, wenn keine bekannt sind. Punkte zählen nur,
+    /// wo das gemerkte Zeichen noch an derselben Stelle steht.
+    /// </summary>
+    TouchTrace? Touches()
+    {
+        if (_keyboardView == null || _glideActive || _composing.Length == 0 || _touches.Count < _composing.Length) return null;
+
+        var points = new Vector2?[_composing.Length];
+        bool any = false;
+        for (int i = 0; i < points.Length; i++)
+        {
+            if (char.ToLowerInvariant(_touches[i].Char) != char.ToLowerInvariant(_composing[i])) continue;
+            points[i] = _touches[i].Point;
+            any |= points[i] != null;
+        }
+
+        return any ? new TouchTrace(points, _keyboardView.KeyCenters) : null;
+    }
+
     // ---------- Wischeingabe ----------
 
     public void OnGlide(IReadOnlyList<Vector2> path, IReadOnlyDictionary<char, Vector2> keyCenters)
@@ -613,7 +713,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
         if (_composing.Length > 0) CommitComposing(autocorrect: !_glideActive, separator: string.Empty);
 
-        var words = engine.Glide(path, keyCenters, PreviousWord(adjacent: true));
+        var words = engine.Glide(path, keyCenters, SentenceContext(adjacent: true));
         if (words.Count == 0) return;
         _glideCandidates = [.. words.Select(ApplyShiftCase)];
 
@@ -689,6 +789,12 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     void UpdateSuggestions()
     {
         if (_suggestionBar == null || _emojiSearchActive || _voiceActive) return;
+        if (_toolbarOpen)
+        {
+            ShowToolbar();
+            return;
+        }
+
         if (!_glideActive && TryShowEmailSuggestions()) return;
         if (_reselect != null && _composing.Length == 0 && ShowReselect()) return;
         var engine = Engine;
@@ -713,7 +819,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         var typed = _composing.ToString();
-        var result = engine.Suggest(typed, PreviousWord());
+        var result = engine.Suggest(typed, SentenceContext(), touches: Touches());
         _currentSuggestions = result;
         bool autocorrectActive = _settings.AutoCorrect && _profile.AllowAutocorrect;
 
@@ -759,8 +865,18 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     /// <summary>Nächstes-Wort-Vorhersage nach einem Leerzeichen.</summary>
     void ShowPredictions(MultilingualEngine engine)
     {
-        string? previous = _settings.NextWordPrediction ? PreviousWord() : null;
-        IReadOnlyList<string> predictions = previous == null ? [] : engine.Predict(previous);
+        WordContext context = _settings.NextWordPrediction ? SentenceContext() : WordContext.None;
+
+        // Im leeren Feld bleibt die Werkzeugleiste (wie bei Gboard); Satzanfänge sagt zBoard erst im Text vorher.
+        if (context.IsSentenceStart && TextBeforeCursor(1).Length == 0) context = WordContext.None;
+
+        IReadOnlyList<string> predictions = context.Previous == null ? [] : engine.Predict(context);
+        if (context.IsSentenceStart && _shift != ShiftState.Off)
+        {
+            // Die Umschalttaste ist aktiv: Vorhersagen so zeigen, wie sie eingefügt werden.
+            predictions = [.. predictions.Select(p => char.ToUpperInvariant(p[0]) + p[1..])];
+        }
+
         if (predictions.Count == 0)
         {
             ShowToolbar();
@@ -851,15 +967,15 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             dictionary = WordDictionary.Load(stream, WordDictionary.ReferenceTotal);
         }
 
-        var bigrams = BigramModel.Empty;
+        var model = NgramModel.Empty;
         try
         {
-            using var stream = Assets!.Open($"dict/{language}.bigrams.txt");
-            bigrams = BigramModel.Load(stream);
+            using var stream = Assets!.Open($"dict/{language}.ngrams.bin");
+            model = NgramModel.Load(stream);
         }
         catch (Java.IO.FileNotFoundException)
         {
-            // Sprache ohne Wortpaare: Vorhersage nur aus Gelerntem
+            // Sprache ohne Sprachmodell: Vorhersage nur aus Gelerntem
         }
 
         var history = new UserHistory();
@@ -871,7 +987,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         var proximity = KeyProximity.FromLayout(Layouts.Alphabet(language, showLanguageKey: false));
-        return new SuggestionEngine(dictionary, proximity, bigrams, history);
+        return new SuggestionEngine(dictionary, proximity, model, history);
     }
 
     public void OnLanguageSelected(string language)

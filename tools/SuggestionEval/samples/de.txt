@@ -1,0 +1,155 @@
+# Testsätze für tools/SuggestionEval (Alltagssprache: Nachrichten, kurze E-Mails).
+# Eigens für zBoard geschrieben, Lizenz wie der Code (BSD 2-Clause). Ein Satz oder eine Nachricht pro Zeile.
+Hallo, wie geht es dir?
+Mir geht es gut, danke.
+Ich bin gerade im Büro und komme erst gegen sieben nach Hause.
+Kannst du bitte noch Brot und Milch mitbringen?
+Wann treffen wir uns morgen?
+Ich habe den Termin leider vergessen.
+Das ist überhaupt kein Problem.
+Wir sehen uns dann am Samstag.
+Hast du heute Abend schon etwas vor?
+Ich rufe dich später noch einmal an.
+Der Zug hat schon wieder Verspätung.
+Vielen Dank für die schnelle Antwort.
+Können wir das Treffen auf nächste Woche verschieben?
+Ich schicke dir die Unterlagen gleich per Mail.
+Bist du schon unterwegs?
+Ich warte vor dem Eingang auf dich.
+Das Essen war wirklich sehr lecker.
+Wir müssen unbedingt mal wieder telefonieren.
+Sag mir bitte Bescheid, wenn du angekommen bist.
+Ich glaube, das schaffe ich heute nicht mehr.
+Alles Gute zum Geburtstag!
+Ich wünsche dir einen schönen Tag.
+Wo hast du das Auto geparkt?
+Die Kinder sind schon im Bett.
+Morgen soll es den ganzen Tag regnen.
+Ich muss noch schnell einkaufen gehen.
+Hast du meine Nachricht bekommen?
+Das habe ich mir auch schon gedacht.
+Ich melde mich, sobald ich mehr weiß.
+Wie war dein Wochenende?
+Wir waren am Sonntag bei meinen Eltern.
+Ich finde die Idee richtig gut.
+Kannst du mir kurz helfen?
+Der Arzt hat erst nächsten Monat einen Termin frei.
+Ich bin in zehn Minuten da.
+Entschuldigung, ich habe dich nicht gehört.
+Was möchtest du heute essen?
+Wir könnten ins Kino gehen oder einfach zu Hause bleiben.
+Ich habe gestern lange gearbeitet und bin sehr müde.
+Bitte vergiss nicht, die Tür abzuschließen.
+Das Paket ist heute angekommen.
+Ich habe keine Ahnung, wo mein Schlüssel ist.
+Schreib mir einfach, wenn du Zeit hast.
+Das klingt nach einem guten Plan.
+Ich hole dich um halb acht vom Bahnhof ab.
+Leider kann ich morgen nicht kommen.
+Wir haben uns lange nicht gesehen.
+Ist bei dir alles in Ordnung?
+Ich wollte nur kurz fragen, ob es dir besser geht.
+Die Rechnung habe ich schon bezahlt.
+Mach dir keine Sorgen, das wird schon.
+Ich freue mich sehr auf den Urlaub.
+Hast du Lust, am Freitag mit uns zu grillen?
+Das Wetter ist heute wirklich schön.
+Ich bin mir nicht sicher, ob das funktioniert.
+Kannst du mir die Adresse noch einmal schicken?
+Wir fahren nächste Woche für ein paar Tage an die Ostsee.
+Ich habe das Buch fast fertig gelesen.
+Der Film hat mir nicht besonders gefallen.
+Gib mir bitte fünf Minuten.
+Ich bin gleich wieder da.
+Sehr geehrte Frau Schneider, vielen Dank für Ihre Nachricht.
+Anbei erhalten Sie die gewünschten Unterlagen.
+Bitte bestätigen Sie mir kurz den Eingang.
+Für Rückfragen stehe ich Ihnen gerne zur Verfügung.
+Mit freundlichen Grüßen
+Ich möchte den Vertrag zum nächstmöglichen Zeitpunkt kündigen.
+Könnten Sie mir bitte einen Rückruf anbieten?
+Die Lieferung ist leider beschädigt bei mir angekommen.
+Ich bitte um eine kurze Rückmeldung bis Ende der Woche.
+Wir haben das Angebot geprüft und sind einverstanden.
+Der Termin am Dienstag passt mir sehr gut.
+Ich habe noch eine Frage zu meiner letzten Bestellung.
+Leider habe ich bis heute keine Antwort erhalten.
+Vielen Dank im Voraus für Ihre Mühe.
+Guten Morgen, hast du gut geschlafen?
+Ich koche heute Abend Nudeln mit Tomatensoße.
+Der Hund muss noch einmal raus.
+Wir brauchen neue Batterien für die Fernbedienung.
+Kannst du die Wäsche aufhängen?
+Ich habe den Bus verpasst und komme etwas später.
+Das war wirklich ein schöner Abend.
+Wie viel kostet die Fahrkarte nach Hamburg?
+Ich habe mein Handy zu Hause vergessen.
+Lass uns das morgen in Ruhe besprechen.
+Ich verstehe nicht, warum das so lange dauert.
+Hast du die Fotos vom Wochenende schon gesehen?
+Meine Schwester zieht im Sommer nach Berlin.
+Ich gehe jetzt schlafen, gute Nacht.
+Bis später, ich freue mich.
+Das hätte ich nicht erwartet.
+Wir sollten früher losfahren, damit wir nicht im Stau stehen.
+Ich habe heute frei und könnte vorbeikommen.
+Der Kühlschrank ist fast leer.
+Kannst du mich bitte zurückrufen?
+Ich habe dir etwas Kleines mitgebracht.
+Das Internet funktioniert schon wieder nicht.
+Wir treffen uns um acht vor dem Restaurant.
+Ich bin mit der Arbeit noch nicht ganz fertig.
+Danke, dass du an mich gedacht hast.
+Ich weiß nicht, was ich dazu sagen soll.
+Vielleicht klappt es ja beim nächsten Mal.
+Die Wohnung gefällt mir, aber sie ist ziemlich teuer.
+Hast du schon gefrühstückt?
+Ich trinke morgens immer zuerst einen Kaffee.
+Das Fahrrad steht im Keller.
+Meine Mutter hat nächste Woche Geburtstag.
+Wir müssen noch ein Geschenk kaufen.
+Ich habe mich über deinen Anruf gefreut.
+Es tut mir leid, dass ich so spät antworte.
+Die Besprechung wurde auf Donnerstag verschoben.
+Ich schaue kurz nach und sage dir dann Bescheid.
+Wie lange brauchst du noch?
+Ich bin heute mit dem Fahrrad zur Arbeit gefahren.
+Der Zahnarzt hat gesagt, dass alles in Ordnung ist.
+Kannst du das bitte noch einmal erklären?
+Ich habe gerade keine Zeit, können wir später reden?
+Das Spiel fängt um halb neun an.
+Wir haben gestern Abend zusammen gekocht.
+Ich hoffe, du hattest eine gute Reise.
+Der Schlüssel liegt unter der Fußmatte.
+Ich muss morgen sehr früh aufstehen.
+Hast du daran gedacht, die Blumen zu gießen?
+Das ist mir ehrlich gesagt egal.
+Ich bringe morgen einen Kuchen mit.
+Wir könnten am Wochenende einen Ausflug machen.
+Ich habe schon dreimal versucht, dich zu erreichen.
+Die Kinder haben nächste Woche Ferien.
+Ich kann dich leider nicht abholen, weil das Auto in der Werkstatt ist.
+Schick mir bitte ein Foto davon.
+Das stimmt, daran habe ich gar nicht gedacht.
+Ich würde gerne einen Tisch für vier Personen reservieren.
+Gibt es in der Nähe einen Supermarkt?
+Wir bleiben wahrscheinlich bis Sonntag.
+Ich habe ein bisschen Kopfschmerzen und lege mich hin.
+Die Präsentation ist gut gelaufen.
+Kannst du mir sagen, wie spät es ist?
+Ich habe den Brief heute zur Post gebracht.
+Wir sind gerade erst nach Hause gekommen.
+Das können wir gerne so machen.
+Ich denke, wir sollten noch einmal darüber sprechen.
+Bis morgen und liebe Grüße an deine Familie!
+Natürlich, das mache ich gerne.
+Ich habe die Datei auf dem Schreibtisch gespeichert.
+Der Drucker funktioniert nicht, kannst du mal schauen?
+Wir haben uns für die größere Wohnung entschieden.
+Ich brauche dringend eine Pause.
+Hast du zufällig ein Ladekabel dabei?
+Die Straße ist wegen einer Baustelle gesperrt.
+Ich komme gerade vom Sport und gehe erst einmal duschen.
+Das war ein Missverständnis, tut mir leid.
+Viel Erfolg bei deiner Prüfung!
+Ich drücke dir die Daumen.

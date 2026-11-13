@@ -13,6 +13,13 @@ public sealed class UserHistory
     /// <summary>Ab so vielen Verwendungen gilt ein unbekanntes Wort als bekannt (keine Autokorrektur mehr).</summary>
     public const int KnownThreshold = 2;
 
+    /// <summary>
+    /// Nach so vielen gelernten Wörtern altert das Gelernte einmal: Zählungen halbieren sich, einmalige Wortfolgen und
+    /// nur einmal getippte unbekannte Wörter fallen weg. So zählt, was man heute schreibt, mehr als alte Gewohnheiten.
+    /// Bekannte Wörter (ab <see cref="KnownThreshold"/>) bleiben bekannt.
+    /// </summary>
+    public const int AgingInterval = 5000;
+
     const int MaxWords = 5000;
     const int MaxBigrams = 20000;
 
@@ -20,6 +27,7 @@ public sealed class UserHistory
     readonly Dictionary<string, (string Form, int Count)> _words = new(StringComparer.Ordinal);
     readonly Dictionary<string, Dictionary<string, int>> _bigrams = new(StringComparer.Ordinal);
     int _bigramCount;
+    int _learnedSinceAging;
 
     public bool IsDirty { get; private set; }
 
@@ -61,8 +69,44 @@ public sealed class UserHistory
                 followers[word] = followers.GetValueOrDefault(word) + 1;
             }
 
+            if (++_learnedSinceAging >= AgingInterval) Age();
             Prune();
             IsDirty = true;
+        }
+    }
+
+    /// <summary>
+    /// Nimmt eine Verwendung zurück, die sich als Teil eines Tippfehlers herausgestellt hat ("ha" aus "ha llo").
+    /// Bekannte Wörter bleiben bekannt.
+    /// </summary>
+    public void Unlearn(string? previous, string word)
+    {
+        lock (_lock)
+        {
+            var key = word.ToLowerInvariant();
+            if (_words.TryGetValue(key, out var entry) && entry.Count != KnownThreshold)
+            {
+                if (entry.Count <= 1) _words.Remove(key);
+                else _words[key] = (entry.Form, entry.Count - 1);
+                IsDirty = true;
+            }
+
+            if (previous != null && _bigrams.TryGetValue(previous.ToLowerInvariant(), out var followers)
+                && followers.TryGetValue(word, out int count))
+            {
+                if (count <= 1)
+                {
+                    followers.Remove(word);
+                    _bigramCount--;
+                    if (followers.Count == 0) _bigrams.Remove(previous.ToLowerInvariant());
+                }
+                else
+                {
+                    followers[word] = count - 1;
+                }
+
+                IsDirty = true;
+            }
         }
     }
 
@@ -115,11 +159,13 @@ public sealed class UserHistory
             _words.Clear();
             _bigrams.Clear();
             _bigramCount = 0;
+            _learnedSinceAging = 0;
             IsDirty = true;
         }
     }
 
-    // ---------- Speichern / Laden (Textformat: w<TAB>wort<TAB>anzahl, b<TAB>vorher<TAB>wort<TAB>anzahl) ----------
+    // ---------- Speichern / Laden ----------
+    // Textformat: w<TAB>wort<TAB>anzahl, b<TAB>vorher<TAB>wort<TAB>anzahl, a<TAB>gelernte Wörter seit dem letzten Altern
 
     public void Save(Stream stream)
     {
@@ -148,6 +194,7 @@ public sealed class UserHistory
             _bigrams.Clear();
             foreach (var (prev, followers) in other._bigrams) _bigrams[prev] = new Dictionary<string, int>(followers, StringComparer.Ordinal);
             _bigramCount = other._bigramCount;
+            _learnedSinceAging = other._learnedSinceAging;
             IsDirty = false;
         }
     }
@@ -216,6 +263,8 @@ public sealed class UserHistory
     void WriteTo(Stream stream)
     {
         using var writer = new StreamWriter(stream, new UTF8Encoding(false), leaveOpen: true);
+        writer.Write("a\t");
+        writer.WriteLine(_learnedSinceAging.ToString(CultureInfo.InvariantCulture));
         foreach (var (_, (form, count)) in _words)
         {
             writer.Write("w\t"); writer.Write(form); writer.Write('\t');
@@ -244,6 +293,10 @@ public sealed class UserHistory
             {
                 history._words[p[1].ToLowerInvariant()] = (p[1], wc);
             }
+            else if (p.Length == 2 && p[0] == "a" && int.TryParse(p[1], out var age))
+            {
+                history._learnedSinceAging = Math.Clamp(age, 0, AgingInterval);
+            }
             else if (p.Length == 4 && p[0] == "b" && int.TryParse(p[3], out var bc))
             {
                 if (!history._bigrams.TryGetValue(p[1], out var followers))
@@ -267,6 +320,36 @@ public sealed class UserHistory
         word.Length is > 0 and <= 40
         && word.Any(char.IsLetter)
         && word.All(c => char.IsLetterOrDigit(c) || c is '\'' or '-');
+
+    /// <summary>Lässt das Gelernte einmal altern (siehe <see cref="AgingInterval"/>).</summary>
+    void Age()
+    {
+        _learnedSinceAging = 0;
+
+        foreach (var (key, (form, count)) in _words.ToList())
+        {
+            if (count < KnownThreshold) _words.Remove(key);
+            else _words[key] = (form, Math.Max(KnownThreshold, count / 2));
+        }
+
+        foreach (var (prev, followers) in _bigrams.ToList())
+        {
+            foreach (var (next, count) in followers.ToList())
+            {
+                if (count / 2 > 0)
+                {
+                    followers[next] = count / 2;
+                }
+                else
+                {
+                    followers.Remove(next);
+                    _bigramCount--;
+                }
+            }
+
+            if (followers.Count == 0) _bigrams.Remove(prev);
+        }
+    }
 
     /// <summary>Hält die Größe begrenzt: die seltensten Einträge fallen zuerst heraus.</summary>
     void Prune()

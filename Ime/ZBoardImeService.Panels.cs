@@ -169,13 +169,21 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
             if (latest != null && latest.Text != _dismissedClip) chip = latest.Text;
         }
 
-        _suggestionBar.Clear(chip);
+        _suggestionBar.Clear(chip, closable: _toolbarOpen);
     }
 
     void OnToolbarPicked(string id)
     {
         switch (id)
         {
+            case SuggestionBarView.ToolbarOpenId:
+                _toolbarOpen = true;
+                ShowToolbar();
+                break;
+            case SuggestionBarView.ToolbarCloseId:
+                _toolbarOpen = false;
+                UpdateSuggestions();
+                break;
             case SuggestionBarView.ClipChipId:
                 var latest = _clipboard.Latest(NowMs(), ClipChipMaxAgeMs);
                 if (latest != null)

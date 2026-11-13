@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Erzeugt die Sprachmodelle Assets/dict/<Sprache>.ngrams.bin aus Satzsammlungen (Aufruf: siehe README.md). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ZBoard.Tools.NgramBuilder</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <ServerGarbageCollector>false</ServerGarbageCollector>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Suggestions/WordDictionary.cs" Link="Core/WordDictionary.cs" />
+    <Compile Include="../../Suggestions/NgramModel.cs" Link="Core/NgramModel.cs" />
+  </ItemGroup>
+
+</Project>

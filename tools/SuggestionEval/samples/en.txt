@@ -1,0 +1,119 @@
+# Test sentences for tools/SuggestionEval (everyday language: messages, short e-mails).
+# Written for zBoard, licensed like the code (BSD 2-Clause). One sentence or message per line.
+Hi, how are you doing?
+I'm fine, thanks for asking.
+I am still at work and will be home around seven.
+Can you pick up some bread and milk on your way home?
+What time are we meeting tomorrow?
+Sorry, I completely forgot about the appointment.
+That is no problem at all.
+See you on Saturday then.
+Do you have any plans for tonight?
+I will call you back later.
+The train is late again.
+Thank you for the quick reply.
+Could we move the meeting to next week?
+I will send you the documents by email in a minute.
+Are you on your way yet?
+I am waiting for you outside the entrance.
+The food was really delicious.
+We should talk on the phone again soon.
+Let me know when you get there.
+I don't think I can finish this today.
+Happy birthday!
+Have a great day.
+Where did you park the car?
+The kids are already in bed.
+It is supposed to rain all day tomorrow.
+I just need to go shopping quickly.
+Did you get my message?
+I was thinking the same thing.
+I will get back to you as soon as I know more.
+How was your weekend?
+We went to see my parents on Sunday.
+I think that is a really good idea.
+Can you help me for a second?
+The doctor has no free appointments until next month.
+I will be there in ten minutes.
+Sorry, I didn't hear you.
+What would you like to eat today?
+We could go to the movies or just stay at home.
+I worked late yesterday and I am very tired.
+Please don't forget to lock the door.
+The package arrived today.
+I have no idea where my keys are.
+Just text me when you have time.
+That sounds like a good plan.
+I will pick you up from the station at half past seven.
+Unfortunately I can't come tomorrow.
+We haven't seen each other in a long time.
+Is everything all right with you?
+I just wanted to ask if you are feeling better.
+I have already paid the bill.
+Don't worry, it will be fine.
+I am really looking forward to the holidays.
+Would you like to join us for a barbecue on Friday?
+The weather is really nice today.
+I am not sure whether that will work.
+Could you send me the address again?
+We are going to the coast for a few days next week.
+I have almost finished reading the book.
+I didn't like the movie very much.
+Give me five minutes, please.
+I will be right back.
+Dear Ms Taylor, thank you very much for your message.
+Please find the requested documents attached.
+Could you please confirm that you have received them?
+If you have any questions, please do not hesitate to contact me.
+Kind regards
+I would like to cancel the contract at the earliest possible date.
+Could you please call me back?
+Unfortunately the delivery arrived damaged.
+I would appreciate a short reply by the end of the week.
+We have looked at the offer and we agree.
+The appointment on Tuesday works very well for me.
+I have another question about my last order.
+Unfortunately I have not received an answer so far.
+Thank you in advance for your help.
+Good morning, did you sleep well?
+I am making pasta with tomato sauce tonight.
+The dog needs to go out again.
+We need new batteries for the remote control.
+I missed the bus and will be a little late.
+That was a really lovely evening.
+How much is a ticket to London?
+I left my phone at home.
+Let's talk about it tomorrow.
+I don't understand why this is taking so long.
+Have you seen the photos from the weekend yet?
+My sister is moving to Manchester in the summer.
+I am going to bed now, good night.
+See you later, I am looking forward to it.
+I did not expect that.
+We should leave earlier so we don't get stuck in traffic.
+The fridge is almost empty.
+The internet is not working again.
+I don't know what to say about that.
+Maybe it will work out next time.
+I like the apartment, but it is quite expensive.
+I always have a cup of coffee first thing in the morning.
+We still need to buy a present.
+I am sorry for replying so late.
+The meeting has been moved to Thursday.
+How much longer do you need?
+Could you explain that again, please?
+I hope you had a good trip.
+I have to get up very early tomorrow.
+To be honest, I don't really care.
+I would like to book a table for four people.
+Is there a supermarket nearby?
+I have a bit of a headache and I am going to lie down.
+The presentation went well.
+We just got home.
+I think we should talk about this again.
+Of course, I am happy to do that.
+The printer is not working, can you have a look?
+Do you happen to have a charger with you?
+The road is closed because of construction work.
+Good luck with your exam!
+I am keeping my fingers crossed for you.

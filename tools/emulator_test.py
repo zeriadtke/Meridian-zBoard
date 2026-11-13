@@ -314,6 +314,16 @@ def main():
         text = field_text()
         check("Wiederhergestelltes Wort bleibt beim Leerzeichen", text.endswith("dsa "), f"→ „{text}“")
 
+        # Leertaste statt "n" getroffen: Beim zweiten Leerzeichen werden die Stücke zum gemeinten Wort
+        type_text(keys, "da ke ")
+        text = field_text()
+        check("Leertaste mitten im Wort (da ke → danke)", text.endswith("dsa danke "), f"→ „{text}“")
+
+        # Leerzeichen vergessen: braucht das Sprachmodell (prüft nebenbei, dass es geladen ist)
+        type_text(keys, "ichhabe ")
+        text = field_text()
+        check("Fehlendes Leerzeichen (ichhabe → ich habe)", text.endswith("danke ich habe "), f"→ „{text}“")
+
         type_text(keys, "haus ")
         text = field_text()
         check("Substantiv großschreiben (haus → Haus)", text.endswith("Haus "), f"→ „{text}“")
@@ -350,9 +360,11 @@ def main():
         holding = subprocess.Popen(["adb", "shell", f"input swipe {o[0]} {o[1]} {o[0]} {o[1]} 5000"])
         time.sleep(1.2)
         profile = []
-        for attempt in range(4):
+        for attempt in range(5):
             profile = popup_profile(screenshot(out_dir, "2b-popup-o"))
-            if max((p for d, p in profile if -45 <= d <= 0), default=0) >= 5:
+            # Erst fertig, wenn auch die obere Zeile gezeichnet ist: Der Popup baut sich über mehrere Bilder auf.
+            if (max((p for d, p in profile if -45 <= d <= 0), default=0) >= 5
+                    and max((p for d, p in profile if d < -50), default=0) >= 5):
                 break
             time.sleep(0.6)
         holding.wait(timeout=30)

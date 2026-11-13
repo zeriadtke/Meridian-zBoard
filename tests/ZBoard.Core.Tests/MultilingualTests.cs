@@ -128,14 +128,12 @@ public class MultilingualTests
     }
 
     [Fact]
-    public void Predict_UsesBigramsOfBothLanguages()
+    public void Predict_UsesLanguageModelsOfBothLanguages()
     {
-        var deBigrams = new BigramModel();
-        deBigrams.Add("ich", "habe", 100);
-        var enBigrams = new BigramModel();
-        enBigrams.Add("i", "have", 100);
-        var de = new SuggestionEngine(new WordDictionary(), KeyProximity.FromLayout(Layouts.Alphabet("de", showLanguageKey: false)), deBigrams.Seal());
-        var en = new SuggestionEngine(new WordDictionary(), KeyProximity.FromLayout(Layouts.Alphabet("en", showLanguageKey: false)), enBigrams.Seal());
+        var deModel = new NgramModel.Builder().Add("ich", "habe", 100).Build();
+        var enModel = new NgramModel.Builder().Add("i", "have", 100).Build();
+        var de = new SuggestionEngine(new WordDictionary(), KeyProximity.FromLayout(Layouts.Alphabet("de", showLanguageKey: false)), deModel);
+        var en = new SuggestionEngine(new WordDictionary(), KeyProximity.FromLayout(Layouts.Alphabet("en", showLanguageKey: false)), enModel);
         var engine = new MultilingualEngine([("de", de), ("en", en)]);
 
         Assert.Equal(["habe"], engine.Predict("ich"));

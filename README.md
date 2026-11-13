@@ -10,8 +10,8 @@
 [![Build](https://github.com/World-of-Bytes/zBoard/actions/workflows/build.yml/badge.svg)](https://github.com/World-of-Bytes/zBoard/actions/workflows/build.yml)
 
 zBoard is a free Android keyboard modelled on Gboard in look, feel and features:
-word suggestions, autocorrect, glide typing, next-word prediction, phrase suggestions, email suggestions, emoji,
-clipboard and voice typing for German, English, French, Spanish and Italian.
+word suggestions and autocorrect that take the sentence into account, glide typing, next-word prediction, phrase
+suggestions, email suggestions, emoji, clipboard and voice typing for German, English, French, Spanish and Italian.
 Unlike Gboard, zBoard works completely offline and has no internet permission; whatever it learns from your typing
 stays on your device. Features that need the internet (such as translating with DeepL) come as separate
 plugin apps – only people who install them give them internet access. zBoard is written in C# with .NET 10 for Android.
@@ -22,16 +22,20 @@ Status: **all five milestones done** – testing on real devices, not yet publis
 
 | | Gboard | zBoard |
 | --- | --- | --- |
-| License | proprietary, source code not public | BSD 2-Clause (code), word lists CC BY-SA 4.0 / CC BY 3.0 |
+| License | proprietary, source code not public | BSD 2-Clause (code), word lists and language models CC BY-SA 4.0 |
 | Internet access | yes (GIFs, translation, sync and more) | no internet permission; online features only via separate plugin apps |
-| Learning from your typing | yes, models are improved with Google's servers via federated learning | yes, only on the device, can be turned off and deleted |
+| Learning from your typing | yes, models are improved with Google's servers via federated learning | yes, only on the device, can be turned off and deleted; what you stop using loses weight over time |
 | Languages | a great many languages and layouts | German (QWERTZ), English, Spanish, Italian (QWERTY), French (AZERTY) |
 | Typing, shift, symbols, long press for accented characters | ✓ | ✓ in Gboard's order, most frequent character preselected |
-| Word suggestions and autocorrect | ✓ | ✓ 120,000 German, 100,000 English words; neighbouring keys, swapped letters, umlauts |
+| Word suggestions and autocorrect | ✓ | ✓ 120,000 German, 100,000 English words; uses where the finger hit each key; swapped letters, left-out umlauts and apostrophes |
+| Language model | neural network, sees the whole sentence | count table of frequent word sequences, sees the two words before; every value traceable, about 2.4 MB per language |
+| Correction that follows the sentence | ✓ | ✓ "ich hae" → "habe"; correctly spelled words only when the finger was almost on the key border ("heute drei" → "frei") |
+| Missing and accidental spaces | ✓ | ✓ "ihave" → "I have", "da ke" → "danke" |
+| German compound nouns | ✓ | ✓ recognised from known nouns, capitalised and completed ("Haustürschlüssel") |
 | Multilingual typing (several dictionaries at once, “DE · EN” on the space bar) | ✓ | ✓ up to three languages, language of the previous word preferred |
 | Capitalisation at the start of a sentence | ✓ | ✓ also in apps that don't ask for it |
-| Capitalising German nouns | ✓ | ✓ |
-| Next-word prediction | ✓ | ✓ bundled word pairs plus your own word sequences |
+| Capitalising German nouns | ✓ | ✓ ambiguous words from the sentence ("eine frage" → "Frage") |
+| Next-word prediction | ✓ | ✓ from the language model and your own word sequences, also at sentence start and after a comma |
 | Suggesting whole phrases ("freundlichen Grüßen") | ✓ | ✓ from what it has learned |
 | Suggestions for a word you tap in the text | ✓ | ✓ tapping replaces the whole word |
 | Suggesting email addresses | ✓ | ✓ remembered addresses and common providers after "@" |
@@ -44,6 +48,7 @@ Status: **all five milestones done** – testing on real devices, not yet publis
 | Backup & restore (settings, learned words, email addresses, pinned clips) | partly: learned words only via sync with the Google account, personal dictionary export; no settings backup | ✓ as a ZIP file you store wherever you like, no account needed |
 | GIFs and stickers | ✓ | deliberately not (would need internet access) |
 | Voice typing | ✓ | ✓ via the system's speech recognition, offline only by default |
+| Toolbar (clipboard, microphone, settings) | ✓ | ✓ via the arrow at the left of the suggestion bar |
 | One-handed mode, height, number row | ✓ | ✓ |
 | Translation | ✓ | ✓ via the plugin app "zBoard DeepL" (your own DeepL API key) |
 | Sync between devices | learned words via the Google account | ✓ via the plugin app "zBoard Sync": settings, learned words, email addresses via Google Drive, OneDrive, Dropbox or WebDAV (HiDrive, Nextcloud …) |
@@ -78,15 +83,25 @@ The user interface is bilingual: German if the system language is German, Englis
 
 ## Tests
 
-The logic that does not depend on Android (dictionary, autocorrect, prediction, phrases, learning, email addresses,
-glide typing, emoji, clipboard, layouts, accented-character popup, backups) has its own unit tests:
+The logic that does not depend on Android (dictionary, autocorrect, language model, finger positions, compound
+words, spaces, prediction, phrases, learning, email addresses, glide typing, emoji, clipboard, layouts,
+accented-character popup, backups) has its own unit tests:
 
 ```bash
 dotnet test tests/ZBoard.Core.Tests
 ```
 
-The emulator test (`tools/emulator_test.py`, run by GitHub Actions) checks typing, autocorrect, glide typing, the
-popups, the suggestion bar and the layout on a real Android system, partly by measuring screenshots.
+The emulator test (`tools/emulator_test.py`, run by GitHub Actions) checks typing, autocorrect, missing and
+accidental spaces, glide typing, the popups, the suggestion bar and the layout on a real Android system, partly by
+measuring screenshots.
+
+`tools/SuggestionEval` measures the quality of suggestions and autocorrect with simulated typing (the metrics in
+detail, in German: [tools/SuggestionEval/README.md](tools/SuggestionEval/README.md); results under
+[Suggestions and autocorrect](#suggestions-and-autocorrect)):
+
+```bash
+dotnet run -c Release --project tools/SuggestionEval -- --lang de
+```
 
 ## Structure
 
@@ -96,16 +111,16 @@ popups, the suggestion bar and the layout on a real Android system, partly by me
 | `Keyboard/` | layout model, all layouts, `KeyboardView` (drawing and touch), `PopupGrid` (popup layout), colours |
 | `Emoji/` | `EmojiCatalog` (data, search, skin tones), `EmojiPanelView` |
 | `Clipboard/` | `ClipboardHistory`, `ClipboardPanelView` |
-| `Suggestions/` | `WordDictionary` (sorted array), `SuggestionEngine`, `GlideDecoder`, `BigramModel`, `UserHistory`, `EmailMemory`, `KeyProximity`, `SuggestionBarView` |
+| `Suggestions/` | `WordDictionary` (sorted array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (language model), `TouchTrace` (finger positions), `UserHistory`, `EmailMemory`, `KeyProximity`, `SuggestionBarView` |
 | `Settings/` | `SettingsActivity` (start screen), `ZBoardSettings` |
 | `Backup/` | `BackupArchive` (backup file: writing, reading, validation) |
-| `Assets/dict/` | word lists and word pairs per language |
+| `Assets/dict/` | word lists and language models per language |
 | `Assets/emoji/` | emoji by category, names and search terms per language |
 | `Plugins/` | `PluginContract` (interface), `PluginRegistry` (installed plugins), `PluginClient` (messenger) |
 | `plugin-apps/DeepL/` | plugin app "zBoard DeepL" (a separate app with internet permission) |
 | `Sync/` | `SyncManager` (sync through a plugin), `SyncFileProvider` (hands the file to the plugin) |
 | `plugin-apps/Sync/` | plugin app "zBoard Sync" (Google Drive, OneDrive, Dropbox, WebDAV); provider setup in its README |
-| `tools/` | `build_dictionaries.py` (word lists), `build_emoji.py` (emoji data), `emulator_test.py` |
+| `tools/` | `build_dictionaries.py` (word lists), `NgramBuilder` (language models), `SuggestionEval` (suggestion measurement), `build_emoji.py` (emoji data), `emulator_test.py` |
 | `tests/` | unit tests for the platform-independent logic |
 
 ## Dictionaries
@@ -113,17 +128,24 @@ popups, the suggestion bar and the layout on a real Android system, partly by me
 Bundled: **German** with 120,000 words and **English** with 100,000 words, each ranked by frequency in film and TV
 subtitles (OpenSubtitles 2018). Format: one spelling per line, `word<TAB>frequency`.
 The script filters out typical typos from the subtitles ("nciht", "waht").
+The source splits English contractions ("don't", "I'm") into two entries; the script puts them back together
+(frequencies partly estimated, see `EN_SUFFIX_SHARES`).
 
-For prediction: the 5,000 most frequent word pairs each (`de.bigrams.txt`, `en.bigrams.txt`) from the Google Books
-Ngram Corpus, format `first<TAB>second<TAB>frequency`. zBoard learns the rest from your typing
+For prediction: one language model per language (`de.ngrams.bin` …) with the 200,000 most frequent two-word and
+150,000 most frequent three-word sequences, counted in the public-domain sentence collection of Mozilla Common Voice.
+It drives next-word prediction, the order of suggestions, the choice of correction and the capitalisation of
+ambiguous German words ("eine frage" → "Frage"). zBoard learns the rest from your typing
 (`files/learning/<language>.tsv` in the app's private storage).
 
 Capitalisation in German:
 
 - Pure nouns appear in the list only capitalised. zBoard automatically writes "haus" as "Haus" when you press space
   (deleting right afterwards undoes it).
-- Ambiguous words ("frage/Frage", "essen/Essen") appear in both spellings. zBoard keeps what you typed and offers the
-  other form in the suggestion bar.
+- Ambiguous words ("frage/Frage", "essen/Essen") appear in both spellings. zBoard capitalises them where the
+  language model clearly expects the noun ("eine frage" → "Frage", "vielen dank" → "Dank"); otherwise it keeps what
+  you typed and offers the other form in the suggestion bar.
+- Compound nouns that are not in the list themselves are recognised from their parts ("Haus" + "Tür" + "Schlüssel",
+  also with a linking "s") and capitalised.
 
 ### Regenerating the dictionaries
 
@@ -138,21 +160,82 @@ python3 tools/build_dictionaries.py \
   --freq-de FrequencyWords/content/2018/de/de_full.txt \
   --freq-en FrequencyWords/content/2018/en/en_full.txt \
   --nouns german-nouns/german_nouns/nouns.csv \
-  --hunspell-de dictionaries/dictionaries/de/index.dic \
-  --bigrams-de google-books-ngram-frequency/ngrams/2grams_german.csv \
-  --bigrams-en google-books-ngram-frequency/ngrams/2grams_english.csv
+  --hunspell-de dictionaries/dictionaries/de/index.dic
 ```
-
-The word pairs come from `git clone --depth 1 https://github.com/orgtre/google-books-ngram-frequency`.
 
 Capitalisation errors can be corrected with the hand-maintained lists at the top of the script
 (`DE_FORCE_LOWER`, `DE_FORCE_NOUN`, `DE_FORCE_BOTH`).
 
+### Regenerating the language models
+
+```bash
+git clone --depth 1 --filter=blob:none --sparse https://github.com/common-voice/common-voice
+git -C common-voice sparse-checkout set --no-cone '/server/data/de/*' '/server/data/en/*'
+
+dotnet run -c Release --project tools/NgramBuilder -- \
+  --words Assets/dict/de.txt --out Assets/dict/de.ngrams.bin --common-voice common-voice/server/data/de
+```
+
+Likewise for the other languages (`en`, `fr`, `es`, `it`). Submitted everyday sentences count ten times, Wikipedia
+sentences only 15 %, because they read differently from messages; add your own texts with `--source`.
+Regenerate the models after changing the word lists so the spellings match.
+
 ## License
 
-The code is licensed under the **BSD 2-Clause License** (`LICENSE`). The word lists in `Assets/dict/` are licensed
-under **CC BY-SA 4.0**, the word pairs under **CC BY 3.0**; sources and obligations in `THIRD_PARTY_NOTICES.md`.
+The code is licensed under the **BSD 2-Clause License** (`LICENSE`). The word lists and language models in
+`Assets/dict/` are licensed under **CC BY-SA 4.0**; sources and obligations in `THIRD_PARTY_NOTICES.md`.
 The app credits the sources under "About zBoard".
+
+## Suggestions and autocorrect
+
+Suggestions and corrections come from five sources. All of them live on the device, and none is a neural network:
+
+- **Dictionary** (`WordDictionary`): how frequent a word is.
+- **Language model** (`NgramModel`): a count table of which word follows the one or two words before it, and how
+  often. It drives next-word prediction ("Vielen" → "Dank"), also at the start of a sentence and after a comma, the
+  order of suggestions, the choice of correction ("ich hae" → "habe", not the more frequent "hat") and the
+  capitalisation of ambiguous words. Every value is a count you can trace; the model sees no further back than two
+  words.
+- **Finger position** (`TouchTrace`): the keyboard remembers where the finger hit the key for every letter. A hit
+  on the border between "g" and "h" leaves both letters almost equally likely; a hit in the middle of "g" speaks
+  against "h".
+- **Rules for typical mistakes**: left-out umlauts and apostrophes ("fur" → "für", "dont" → "don't"), swapped
+  letters, a missing space ("ihave" → "I have"), the space bar hit in the middle of a word ("da ke" → "danke"), and
+  German compound nouns, which count as correct and are completed.
+- **What it has learned** (`UserHistory`): your own words and word sequences take precedence. A word you have
+  typed several times, or restored after a correction, is no longer corrected. After every 5,000 learned words the counts are halved, so that what you write today
+  counts most; known words stay known.
+
+A word that is in the dictionary normally stays as typed. It is corrected in three cases only:
+
+1. It is the lazy spelling of a much more frequent word ("fur", "mussen", "dont").
+2. It is a very rare entry right next to a very frequent word ("yiu" next to "you"). The word lists come from
+   subtitles and contain such typos.
+3. The finger was almost on the border to the neighbouring key, and the word with the neighbouring letter fits the
+   sentence much better ("heute drei" → "frei").
+
+Deleting right after a correction restores what you typed, and zBoard remembers it.
+
+### Measured
+
+`tools/SuggestionEval` types about 1,000 words of everyday text per language, once without mistakes and five times
+with simulated typos:
+
+| | German 0.11.1 | German 0.12.0 | English 0.11.1 | English 0.12.0 |
+| --- | --- | --- | --- | --- |
+| Next word among the top 3 suggestions (after a word) | 15.6 % | 28.2 % | 18.2 % | 33.6 % |
+| Word in the bar after half its letters | 61.1 % | 76.6 % | 71.0 % | 83.7 % |
+| Keystrokes saved | 42.1 % | 51.0 % | 39.3 % | 49.9 % |
+| Typos corrected | 66.3 % | 81.9 % | 60.1 % | 78.9 % |
+| Correctly typed words that were changed | 0.0 % | 0.0 % | 1.4 % | 0.0 % |
+| Wrong words in the text after correction | 8.8 % | 4.8 % | 8.5 % | 4.3 % |
+| Missing space: split correctly | – | 68.6 % | – | 63.5 % |
+| Space bar instead of a letter: word restored | – | 57.4 % | – | 68.3 % |
+
+These numbers come from the simulation, not from real fingers. That applies most to the gain from finger positions:
+the correction assumes the same kind of scatter the measurement types with. French, Spanish and Italian have
+language models from the same process but no test sentences yet. In places the language models sound like Wikipedia
+and parliament, because the source contains little everyday text.
 
 ## Glide typing
 
@@ -183,9 +266,10 @@ used. zBoard has no internet permission (release build).
 - **Emoji:** the ☺ key left of the comma. Categories at the bottom, 🕘 recently used, 🔍 search. While searching, the
   keyboard types into the search field in the bar ("thumbs", "good", "laugh"); matches appear next to it. Long-pressing
   people emoji shows the skin tones. Emoji the device's font does not know are hidden.
-- **Toolbar:** appears when there is nothing to suggest: 📋 clipboard, 🎤 voice typing,
-  ✋ one-handed mode (right → left → off), ⚙ settings. Text you have just copied appears there as a suggestion for
-  90 seconds.
+- **Toolbar:** 📋 clipboard, 🎤 voice typing, ✋ one-handed mode (right → left → off), ⚙ settings. It appears in an
+  empty field and when there is nothing to suggest; otherwise the arrow at the left of the suggestion bar opens it,
+  and the arrow there, or simply typing on, brings the suggestions back. Text you have just copied appears there as
+  a suggestion for 90 seconds.
 - **Accented characters:** long-press a letter. As in Gboard, the characters appear in a grid above your finger,
   with the most frequent one (ö on o, ä on a, é on e in French …) preselected.
 - **Plugins:** online features as separate apps, e.g. **zBoard DeepL** for translating (`plugin-apps/DeepL`).
@@ -235,11 +319,13 @@ python3 tools/build_emoji.py --emoji-json unicode-emoji-json/data-by-group.json 
 
 The logo, the app icon and the icons of the plugin apps (World of Bytes colours) are generated by `python3 tools/build_logo.py`; the Play Store graphics by `node tools/render_store_graphics.js`.
 
-More dictionary languages: `--extra fr:fr_full.txt:2grams_french.csv` (see `tools/build_dictionaries.py --help`).
+More dictionary languages: `--extra fr:fr_full.txt` (see `tools/build_dictionaries.py --help`).
 
 ## Next steps
 
 - Testing on real devices: typing feel, glide recognition with real paths, loading time and memory of the
-  dictionaries, voice typing on devices with and without offline recognition
+  dictionaries and language models, voice typing on devices with and without offline recognition
+- Checking the autocorrect thresholds against real typing (so far tuned on simulated typing only)
+- Test sentences for French, Spanish and Italian; more everyday text for the language models
 - F-Droid metadata
 - More user-interface languages (French, Spanish, Italian)

@@ -10,8 +10,8 @@
 [![Build](https://github.com/World-of-Bytes/zBoard/actions/workflows/build.yml/badge.svg)](https://github.com/World-of-Bytes/zBoard/actions/workflows/build.yml)
 
 zBoard ist eine freie Android-Tastatur, die sich in Bedienung und Funktionsumfang an Gboard orientiert:
-Wortvorschläge, Autokorrektur, Wischeingabe, Nächstes-Wort-Vorhersage, Wortfolgen, E-Mail-Vorschläge, Emoji,
-Zwischenablage und Spracheingabe für Deutsch, Englisch, Französisch, Spanisch und Italienisch.
+Wortvorschläge und Autokorrektur mit Satzkontext, Wischeingabe, Nächstes-Wort-Vorhersage, Wortfolgen,
+E-Mail-Vorschläge, Emoji, Zwischenablage und Spracheingabe für Deutsch, Englisch, Französisch, Spanisch und Italienisch.
 Anders als Gboard arbeitet zBoard vollständig offline und ohne Internetberechtigung; was es aus deinen Eingaben
 lernt, bleibt auf dem Gerät. Funktionen, die Internet brauchen (etwa Übersetzen mit DeepL), kommen als eigene
 Plugin-Apps dazu – nur wer sie installiert, gibt ihnen Internetzugriff. Geschrieben ist zBoard in C# mit .NET 10 for Android.
@@ -22,16 +22,20 @@ Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, 
 
 | | Gboard | zBoard |
 | --- | --- | --- |
-| Lizenz | proprietär, Quellcode nicht öffentlich | BSD 2-Clause (Code), Wortlisten CC BY-SA 4.0 / CC BY 3.0 |
+| Lizenz | proprietär, Quellcode nicht öffentlich | BSD 2-Clause (Code), Wortlisten und Sprachmodelle CC BY-SA 4.0 |
 | Internetzugriff | ja (u. a. GIFs, Übersetzen, Synchronisation) | keine Internetberechtigung; Internet-Funktionen nur über eigene Plugin-Apps |
-| Lernen aus Eingaben | ja, Modelle werden per Federated Learning mit Google-Servern verbessert | ja, ausschließlich auf dem Gerät, abschaltbar und löschbar |
+| Lernen aus Eingaben | ja, Modelle werden per Federated Learning mit Google-Servern verbessert | ja, ausschließlich auf dem Gerät, abschaltbar und löschbar; lange nicht Benutztes verliert an Gewicht |
 | Sprachen | sehr viele Sprachen und Layouts | Deutsch (QWERTZ), Englisch, Spanisch, Italienisch (QWERTY), Französisch (AZERTY) |
 | Tippen, Umschalt, Symbole, langer Druck für Sonderzeichen | ✓ | ✓ in Gboard-Reihenfolge, häufigstes Zeichen vorausgewählt |
-| Wortvorschläge und Autokorrektur | ✓ | ✓ 120 000 deutsche, 100 000 englische Wörter; Tastennachbarn, Vertauschungen, Umlaute |
-| Großschreibung deutscher Substantive | ✓ | ✓ |
+| Wortvorschläge und Autokorrektur | ✓ | ✓ 120 000 deutsche, 100 000 englische Wörter; rechnet mit der Stelle, an der der Finger die Taste traf; Vertauschungen, weggelassene Umlaute und Apostrophe |
+| Sprachmodell | neuronales Netz, sieht den ganzen Satz | Zähltabelle häufiger Wortfolgen, sieht die zwei Wörter davor; jeder Wert nachvollziehbar, rund 2,4 MB je Sprache |
+| Korrektur nach dem Satz | ✓ | ✓ „ich hae“ → „habe“; richtig geschriebene Wörter nur, wenn der Finger fast auf der Tastengrenze lag („heute drei“ → „frei“) |
+| Fehlende und versehentliche Leerzeichen | ✓ | ✓ „ichhabe“ → „ich habe“, „da ke“ → „danke“ |
+| Zusammengesetzte deutsche Substantive | ✓ | ✓ aus bekannten Substantiven erkannt, großgeschrieben und vervollständigt („Haustürschlüssel“) |
+| Großschreibung deutscher Substantive | ✓ | ✓ mehrdeutige Wörter aus dem Satz („eine frage“ → „Frage“) |
 | Mehrsprachige Eingabe (mehrere Wörterbücher gleichzeitig, „DE · EN“ auf der Leertaste) | ✓ | ✓ bis zu drei Sprachen, Sprache des vorherigen Worts bevorzugt |
 | Großschreibung am Satzanfang | ✓ | ✓ auch in Apps, die sie nicht anfordern |
-| Nächstes-Wort-Vorhersage | ✓ | ✓ mitgelieferte Wortpaare plus eigene Wortfolgen |
+| Nächstes-Wort-Vorhersage | ✓ | ✓ aus dem Sprachmodell und eigenen Wortfolgen, auch am Satzanfang und nach Komma |
 | Ganze Wortfolgen vorschlagen („freundlichen Grüßen“) | ✓ | ✓ aus Gelerntem |
 | Vorschläge für ein angetipptes Wort im Text | ✓ | ✓ Antippen ersetzt das ganze Wort |
 | E-Mail-Adressen vorschlagen | ✓ | ✓ gemerkte Adressen und bekannte Anbieter nach „@“ |
@@ -44,6 +48,7 @@ Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, 
 | Sichern & wiederherstellen (Einstellungen, gelernte Wörter, E-Mail-Adressen, angeheftete Zwischenablage) | teilweise: gelernte Wörter nur per Synchronisation mit dem Google-Konto, Export des persönlichen Wörterbuchs; keine Sicherung der Einstellungen | ✓ als ZIP-Datei, die du ablegst, wo du willst – ohne Konto |
 | GIFs und Sticker | ✓ | bewusst nicht (bräuchte Internetzugriff) |
 | Spracheingabe | ✓ | ✓ über die Spracherkennung des Systems, standardmäßig nur offline |
+| Werkzeugleiste (Zwischenablage, Mikrofon, Einstellungen) | ✓ | ✓ über den Pfeil links in der Vorschlagsleiste |
 | Einhandmodus, Höhe, Zahlenreihe | ✓ | ✓ |
 | Übersetzen | ✓ | ✓ über die Plugin-App „zBoard DeepL“ (eigener DeepL-API-Schlüssel) |
 | Synchronisation zwischen Geräten | gelernte Wörter über das Google-Konto | ✓ über die Plugin-App „zBoard Sync“: Einstellungen, gelernte Wörter, E-Mail-Adressen via Google Drive, OneDrive, Dropbox oder WebDAV (HiDrive, Nextcloud …) |
@@ -78,15 +83,25 @@ Die Oberfläche ist zweisprachig: Deutsch, wenn das System auf Deutsch steht, so
 
 ## Tests
 
-Die Logik ohne Android (Wörterbuch, Autokorrektur, Vorhersage, Wortfolgen, Lernen, E-Mail-Adressen, Wischeingabe,
-Emoji, Zwischenablage, Layouts, Sonderzeichen-Popup, Sicherungen) hat eigene Unit-Tests:
+Die Logik ohne Android (Wörterbuch, Autokorrektur, Sprachmodell, Fingerpositionen, zusammengesetzte Wörter,
+Leerzeichen, Vorhersage, Wortfolgen, Lernen, E-Mail-Adressen, Wischeingabe, Emoji, Zwischenablage, Layouts,
+Sonderzeichen-Popup, Sicherungen) hat eigene Unit-Tests:
 
 ```bash
 dotnet test tests/ZBoard.Core.Tests
 ```
 
-Der Emulator-Test (`tools/emulator_test.py`, läuft in GitHub Actions) prüft Tippen, Autokorrektur, Wischeingabe,
-Popups, Vorschlagsleiste und Lage der Tastatur auf einem echten Android-System, teils durch Ausmessen von Screenshots.
+Der Emulator-Test (`tools/emulator_test.py`, läuft in GitHub Actions) prüft Tippen, Autokorrektur, fehlende und
+versehentliche Leerzeichen, Wischeingabe, Popups, Vorschlagsleiste und Lage der Tastatur auf einem echten
+Android-System, teils durch Ausmessen von Screenshots.
+
+Wie gut Vorschläge und Autokorrektur sind, misst `tools/SuggestionEval` mit simuliertem Tippen
+(Kennzahlen im Einzelnen: [tools/SuggestionEval/README.md](tools/SuggestionEval/README.md), Ergebnisse unter
+[Vorschläge und Autokorrektur](#vorschläge-und-autokorrektur)):
+
+```bash
+dotnet run -c Release --project tools/SuggestionEval -- --lang de
+```
 
 ## Aufbau
 
@@ -96,16 +111,16 @@ Popups, Vorschlagsleiste und Lage der Tastatur auf einem echten Android-System, 
 | `Keyboard/` | Layout-Modell, alle Layouts, `KeyboardView` (Zeichnen und Touch), `PopupGrid` (Anordnung im Popup), Farben |
 | `Emoji/` | `EmojiCatalog` (Daten, Suche, Hauttöne), `EmojiPanelView` |
 | `Clipboard/` | `ClipboardHistory`, `ClipboardPanelView` |
-| `Suggestions/` | `WordDictionary` (sortiertes Array), `SuggestionEngine`, `GlideDecoder`, `BigramModel`, `UserHistory`, `EmailMemory`, `KeyProximity`, `SuggestionBarView` |
+| `Suggestions/` | `WordDictionary` (sortiertes Array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (Sprachmodell), `TouchTrace` (Fingerpositionen), `UserHistory`, `EmailMemory`, `KeyProximity`, `SuggestionBarView` |
 | `Settings/` | `SettingsActivity` (Startbildschirm), `ZBoardSettings` |
 | `Backup/` | `BackupArchive` (Sicherungsdatei: Schreiben, Lesen, Prüfen) |
-| `Assets/dict/` | Wortlisten und Wortpaare pro Sprache |
+| `Assets/dict/` | Wortlisten und Sprachmodelle pro Sprache |
 | `Assets/emoji/` | Emoji nach Kategorien, Namen und Suchbegriffe pro Sprache |
 | `Plugins/` | `PluginContract` (Schnittstelle), `PluginRegistry` (installierte Plugins), `PluginClient` (Messenger) |
 | `plugin-apps/DeepL/` | Plugin-App „zBoard DeepL“ (eigene App mit Internet-Berechtigung) |
 | `Sync/` | `SyncManager` (Abgleich über ein Plugin), `SyncFileProvider` (Datei-Übergabe an das Plugin) |
 | `plugin-apps/Sync/` | Plugin-App „zBoard Sync“ (Google Drive, OneDrive, Dropbox, WebDAV); Einrichtung der Anbieter in der README dort |
-| `tools/` | `build_dictionaries.py` (Wortlisten), `build_emoji.py` (Emoji-Daten), `emulator_test.py` |
+| `tools/` | `build_dictionaries.py` (Wortlisten), `NgramBuilder` (Sprachmodelle), `SuggestionEval` (Vorschlagsmessung), `build_emoji.py` (Emoji-Daten), `emulator_test.py` |
 | `tests/` | Unit-Tests der plattformunabhängigen Logik |
 
 ## Wörterbücher
@@ -113,17 +128,24 @@ Popups, Vorschlagsleiste und Lage der Tastatur auf einem echten Android-System, 
 Mitgeliefert: **Deutsch** mit 120 000 Wörtern, **Englisch** mit 100 000 Wörtern, jeweils nach Häufigkeit
 aus Film- und Serienuntertiteln (OpenSubtitles 2018). Format: eine Schreibweise pro Zeile, `wort<TAB>häufigkeit`.
 Typische Tippfehler aus den Untertiteln („nciht“, „waht“) filtert das Skript heraus.
+Englische Kurzformen („don't“, „I'm“) zerlegt die Quelle in zwei Einträge; das Skript setzt sie wieder zusammen
+(Häufigkeiten teils geschätzt, siehe `EN_SUFFIX_SHARES`).
 
-Für die Vorhersage: je 5 000 häufigste Wortpaare (`de.bigrams.txt`, `en.bigrams.txt`) aus dem Google Books
-Ngram Corpus, Format `erstes<TAB>zweites<TAB>häufigkeit`. Den Rest lernt zBoard aus deinen Eingaben
+Für die Vorhersage: ein Sprachmodell je Sprache (`de.ngrams.bin` …) mit den 200 000 häufigsten Zweier- und 150 000
+häufigsten Dreierfolgen von Wörtern, gezählt in der gemeinfreien Satzsammlung von Mozilla Common Voice. Es bestimmt
+die Vorhersage des nächsten Worts, die Reihenfolge der Vorschläge, die Wahl der Korrektur und die Großschreibung
+mehrdeutiger Wörter („eine frage“ → „Frage“). Den Rest lernt zBoard aus deinen Eingaben
 (`files/learning/<sprache>.tsv` im app-privaten Speicher).
 
 Großschreibung im Deutschen:
 
 - Reine Substantive stehen nur großgeschrieben in der Liste. zBoard schreibt „haus“ beim Leerzeichen
   automatisch als „Haus“ (Löschen direkt danach macht das rückgängig).
-- Mehrdeutige Wörter („frage/Frage“, „essen/Essen“) stehen in beiden Schreibweisen. zBoard lässt das
-  Getippte stehen und bietet die andere Form in der Vorschlagsleiste an.
+- Mehrdeutige Wörter („frage/Frage“, „essen/Essen“) stehen in beiden Schreibweisen. zBoard schreibt sie groß, wo
+  das Sprachmodell klar das Substantiv erwartet („eine frage“ → „Frage“, „vielen dank“ → „Dank“); sonst bleibt das
+  Getippte stehen, und die andere Form steht in der Vorschlagsleiste.
+- Zusammengesetzte Substantive, die nicht einzeln in der Liste stehen, erkennt zBoard an ihren Teilen
+  („Haus“ + „Tür“ + „Schlüssel“, auch mit Fugen-s) und schreibt sie groß.
 
 ### Wörterbücher neu erzeugen
 
@@ -138,20 +160,81 @@ python3 tools/build_dictionaries.py \
   --freq-de FrequencyWords/content/2018/de/de_full.txt \
   --freq-en FrequencyWords/content/2018/en/en_full.txt \
   --nouns german-nouns/german_nouns/nouns.csv \
-  --hunspell-de dictionaries/dictionaries/de/index.dic \
-  --bigrams-de google-books-ngram-frequency/ngrams/2grams_german.csv \
-  --bigrams-en google-books-ngram-frequency/ngrams/2grams_english.csv
+  --hunspell-de dictionaries/dictionaries/de/index.dic
 ```
-
-Die Wortpaare kommen aus `git clone --depth 1 https://github.com/orgtre/google-books-ngram-frequency`.
 
 Fehler in der Großschreibung lassen sich über die Handlisten oben im Skript korrigieren
 (`DE_FORCE_LOWER`, `DE_FORCE_NOUN`, `DE_FORCE_BOTH`).
 
+### Sprachmodelle neu erzeugen
+
+```bash
+git clone --depth 1 --filter=blob:none --sparse https://github.com/common-voice/common-voice
+git -C common-voice sparse-checkout set --no-cone '/server/data/de/*' '/server/data/en/*'
+
+dotnet run -c Release --project tools/NgramBuilder -- \
+  --words Assets/dict/de.txt --out Assets/dict/de.ngrams.bin --common-voice common-voice/server/data/de
+```
+
+Für die anderen Sprachen entsprechend (`en`, `fr`, `es`, `it`). Eingesandte Alltagssätze zählen zehnfach, Sätze aus
+Wikipedia nur zu 15 %, weil sie anders klingen als Nachrichten; eigene Texte lassen sich mit `--source` dazunehmen.
+Nach einer Änderung an den Wortlisten die Modelle neu erzeugen, damit die Schreibweisen übereinstimmen.
+
 ## Lizenz
 
-Der Code steht unter der **BSD 2-Clause License** (`LICENSE`). Die Wortlisten in `Assets/dict/` stehen unter
-**CC BY-SA 4.0**, die Wortpaare unter **CC BY 3.0**; Quellen und Pflichten in `THIRD_PARTY_NOTICES.md`. Die App nennt die Quellen unter „Über zBoard“.
+Der Code steht unter der **BSD 2-Clause License** (`LICENSE`). Die Wortlisten und Sprachmodelle in `Assets/dict/` stehen
+unter **CC BY-SA 4.0**; Quellen und Pflichten in `THIRD_PARTY_NOTICES.md`. Die App nennt die Quellen unter „Über zBoard“.
+
+## Vorschläge und Autokorrektur
+
+Vorschläge und Korrekturen entstehen aus fünf Quellen. Alle liegen auf dem Gerät, keine ist ein neuronales Netz:
+
+- **Wörterbuch** (`WordDictionary`): wie häufig ein Wort ist.
+- **Sprachmodell** (`NgramModel`): eine Zähltabelle, welches Wort wie oft auf die ein oder zwei Wörter davor folgt.
+  Daraus kommen die Vorhersage des nächsten Worts („Vielen“ → „Dank“), auch am Satzanfang und nach einem Komma, die
+  Reihenfolge der Vorschläge, die Wahl der Korrektur („ich hae“ → „habe“, nicht das häufigere „hat“) und die
+  Großschreibung mehrdeutiger Wörter. Jeder Wert ist eine Zählung und lässt sich nachvollziehen; mehr als zwei Wörter
+  zurück sieht das Modell nicht.
+- **Fingerposition** (`TouchTrace`): Die Tastatur merkt sich zu jedem Buchstaben, wo der Finger die Taste traf. Ein
+  Treffer am Rand zwischen „g“ und „h“ lässt beide Buchstaben fast gleich wahrscheinlich, ein Treffer mitten auf dem
+  „g“ spricht gegen das „h“.
+- **Regeln für typische Fehler**: weggelassene Umlaute und Apostrophe („fur“ → „für“, „dont“ → „don't“), vertauschte
+  Buchstaben, ein fehlendes Leerzeichen („ichhabe“ → „ich habe“), die Leertaste mitten im Wort („da ke“ → „danke“)
+  und zusammengesetzte Substantive, die als richtig gelten und vervollständigt werden.
+- **Gelerntes** (`UserHistory`): Eigene Wörter und Wortfolgen haben Vorrang. Ein Wort, das du mehrfach geschrieben
+  oder nach einer Korrektur wiederhergestellt hast, wird nicht mehr korrigiert. Nach je 5 000 gelernten Wörtern halbieren sich die Zählungen, damit zählt, was du heute schreibst;
+  bekannte Wörter bleiben bekannt.
+
+Ein Wort, das im Wörterbuch steht, bleibt in der Regel stehen. Korrigiert wird es nur in drei Fällen:
+
+1. Es ist die bequeme Schreibweise eines viel häufigeren Worts („fur“, „mussen“, „dont“).
+2. Es ist ein sehr seltener Eintrag direkt neben einem sehr häufigen Wort („yiu“ neben „you“). Die Wortlisten stammen
+   aus Untertiteln und enthalten solche Tippfehler.
+3. Der Finger lag fast auf der Grenze zur Nachbartaste, und das Wort mit dem Nachbarbuchstaben passt viel besser in
+   den Satz („heute drei“ → „frei“).
+
+Löschen direkt nach einer Korrektur stellt das Getippte wieder her, und zBoard merkt es sich.
+
+### Gemessen
+
+`tools/SuggestionEval` tippt rund 1 000 Wörter Alltagstext je Sprache, einmal fehlerfrei und fünfmal mit simulierten
+Tippfehlern:
+
+| | Deutsch 0.11.1 | Deutsch 0.12.0 | Englisch 0.11.1 | Englisch 0.12.0 |
+| --- | --- | --- | --- | --- |
+| Nächstes Wort unter den ersten 3 Vorschlägen (nach einem Wort) | 15,6 % | 28,2 % | 18,2 % | 33,6 % |
+| Wort nach der Hälfte der Buchstaben in der Leiste | 61,1 % | 76,6 % | 71,0 % | 83,7 % |
+| Gesparte Tastendrücke | 42,1 % | 51,0 % | 39,3 % | 49,9 % |
+| Tippfehler richtig korrigiert | 66,3 % | 81,9 % | 60,1 % | 78,9 % |
+| Richtig getippte Wörter, die verändert wurden | 0,0 % | 0,0 % | 1,4 % | 0,0 % |
+| Falsche Wörter im Text nach der Korrektur | 8,8 % | 4,8 % | 8,5 % | 4,3 % |
+| Fehlendes Leerzeichen: richtig getrennt | – | 68,6 % | – | 63,5 % |
+| Leertaste statt Buchstabe: Wort wiederhergestellt | – | 57,4 % | – | 68,3 % |
+
+Die Zahlen stammen aus der Simulation, nicht von echten Fingern. Das gilt besonders für den Gewinn durch die
+Fingerposition: Die Korrektur nimmt dieselbe Art von Streuung an, mit der die Messung tippt. Französisch, Spanisch
+und Italienisch haben Sprachmodelle aus demselben Verfahren, aber noch keine Testsätze. Die Sprachmodelle klingen
+stellenweise nach Wikipedia und Parlament, weil die Quelle wenig Alltagstext enthält.
 
 ## Wischeingabe
 
@@ -182,9 +265,10 @@ von Google werden nicht übernommen. zBoard hat keine Internet-Berechtigung (Rel
 - **Emoji:** Taste ☺ links neben dem Komma. Unten Kategorien, 🕘 zuletzt verwendet, 🔍 Suche. Bei der Suche schreibt
   die Tastatur in das Suchfeld der Leiste („Daumen“, „gut“, „lachen“); Treffer erscheinen daneben. Langer Druck auf
   Personen-Emoji zeigt die Hauttöne. Emoji, die die Schrift des Geräts nicht kennt, werden ausgeblendet.
-- **Werkzeugleiste:** erscheint, wenn es nichts vorzuschlagen gibt: 📋 Zwischenablage, 🎤 Spracheingabe,
-  ✋ Einhandmodus (rechts → links → aus), ⚙ Einstellungen. Eben kopierter Text erscheint dort 90 Sekunden lang
-  als Vorschlag.
+- **Werkzeugleiste:** 📋 Zwischenablage, 🎤 Spracheingabe, ✋ Einhandmodus (rechts → links → aus), ⚙ Einstellungen.
+  Sie erscheint im leeren Feld und wenn es nichts vorzuschlagen gibt; sonst öffnet sie der Pfeil links in der
+  Vorschlagsleiste, und der Pfeil dort oder das Weitertippen führt zurück zu den Vorschlägen. Eben kopierter Text
+  erscheint dort 90 Sekunden lang als Vorschlag.
 - **Sonderzeichen:** langer Druck auf einen Buchstaben. Wie bei Gboard erscheinen die Zeichen im Raster über dem Finger,
   das häufigste (ö auf o, ä auf a, é auf e im Französischen …) ist vorausgewählt.
 - **Plugins:** Funktionen mit Internet als eigene Apps, z. B. **zBoard DeepL** zum Übersetzen
@@ -237,11 +321,13 @@ python3 tools/build_emoji.py --emoji-json unicode-emoji-json/data-by-group.json 
 
 Das Logo, das App-Symbol und die Symbole der Plugin-Apps (Farben von World of Bytes) erzeugt `python3 tools/build_logo.py`, die Play-Store-Grafiken `node tools/render_store_graphics.js`.
 
-Weitere Sprachen für die Wörterbücher: `--extra fr:fr_full.txt:2grams_french.csv` (siehe `tools/build_dictionaries.py --help`).
+Weitere Sprachen für die Wörterbücher: `--extra fr:fr_full.txt` (siehe `tools/build_dictionaries.py --help`).
 
 ## Nächste Schritte
 
-- Test auf echten Geräten: Tippgefühl, Wischerkennung mit echten Spuren, Ladezeit und Speicher der Wörterbücher,
-  Spracheingabe auf Geräten mit und ohne Offline-Erkennung
+- Test auf echten Geräten: Tippgefühl, Wischerkennung mit echten Spuren, Ladezeit und Speicher der Wörterbücher
+  und Sprachmodelle, Spracheingabe auf Geräten mit und ohne Offline-Erkennung
+- Schwellen der Autokorrektur an echtem Tippen prüfen (bisher nur an simuliertem abgestimmt)
+- Testsätze für Französisch, Spanisch und Italienisch; mehr Alltagstext für die Sprachmodelle
 - F-Droid-Metadaten
 - Weitere Sprachen für die Oberfläche (Französisch, Spanisch, Italienisch)
