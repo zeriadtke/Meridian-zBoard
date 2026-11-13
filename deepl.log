@@ -1,0 +1,792 @@
+Der Buildvorgang wurde am 13.11.2026 09:50:10 gestartet.
+     1>Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" auf Knoten "1", Restore Ziel(e).
+     1>_GetAllRestoreProjectPathItems:
+         Wiederherzustellende Projekte werden ermittelt...
+     1>Das Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1) erstellt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1:5) auf Knoten "1", _GenerateRestoreGraphProjectEntry Ziel(e).
+     1>ProcessFrameworkReferences:
+       C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.FrameworkReferenceResolution.targets(191,5): message NETSDK1084: Für den angegebenen RuntimeIdentifier "android-arm64" ist kein Anwendungshost verfügbar. [C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj]
+       C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.FrameworkReferenceResolution.targets(191,5): message NETSDK1084: Für den angegebenen RuntimeIdentifier "android-x64" ist kein Anwendungshost verfügbar. [C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj]
+     1>Die Erstellung von Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" ist abgeschlossen (_GenerateRestoreGraphProjectEntry Ziel(e)).
+     1>Das Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1) erstellt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1:6) auf Knoten "1", _GenerateProjectRestoreGraph Ziel(e).
+     1>AddPrunePackageReferences:
+         Loading prune package data from PrunePackageData folder
+     1>Die Erstellung von Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" ist abgeschlossen (_GenerateProjectRestoreGraph Ziel(e)).
+     1>Restore:
+         Pakete für "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" werden wiederhergestellt...
+           CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+           CACHE https://api.nuget.org/v3-vulnerabilities/2026.11.12.23.26.09/vulnerability.base.json
+           CACHE https://api.nuget.org/v3-vulnerabilities/2026.11.12.23.26.09/2026.11.12.23.26.09/vulnerability.update.json
+         Die MSBuild-Datei "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\ZBoard.DeepL.csproj.nuget.g.props" wird generiert.
+         Die MSBuild-Datei "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\ZBoard.DeepL.csproj.nuget.g.targets" wird generiert.
+         Die Assetdatei wird auf den Datenträger geschrieben. Pfad: C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\project.assets.json
+         "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" wiederhergestellt (in 23 ms.).
+         
+         Verwendete NuGet-Konfigurationsdateien:
+             C:\Users\patri\AppData\Roaming\NuGet\NuGet.Config
+             C:\Program Files (x86)\NuGet\Config\Microsoft.VisualStudio.FallbackLocation.config
+             C:\Program Files (x86)\NuGet\Config\Microsoft.VisualStudio.Offline.config
+         
+         Verwendete Feeds:
+             https://api.nuget.org/v3/index.json
+             C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\
+             C:\Program Files\dotnet\library-packs
+     1>Die Erstellung von Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" ist abgeschlossen (Restore Ziel(e)).
+
+Der Buildvorgang wurde erfolgreich ausgeführt.
+    0 Warnung(en)
+    0 Fehler
+
+Verstrichene Zeit 00:00:00.12
+Der Buildvorgang wurde am 13.11.2026 09:50:10 gestartet.
+     1>Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" auf Knoten "1" (Standardziele).
+     1>_CheckForNETCoreSdkIsPreview:
+       C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.RuntimeIdentifierInference.targets(385,5): message NETSDK1057: Sie verwenden eine Vorschauversion von .NET. Weitere Informationen: https://aka.ms/dotnet-support-policy [C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj]
+       ProcessFrameworkReferences:
+       C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.FrameworkReferenceResolution.targets(191,5): message NETSDK1084: Für den angegebenen RuntimeIdentifier "android-arm64" ist kein Anwendungshost verfügbar. [C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj]
+       C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.FrameworkReferenceResolution.targets(191,5): message NETSDK1084: Für den angegebenen RuntimeIdentifier "android-x64" ist kein Anwendungshost verfügbar. [C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj]
+       _SetupDesignTimeBuildForBuild:
+         Das Verzeichnis "obj\Release\net10.0-android\stamp\" wird erstellt.
+       _ResolveAndroidTooling:
+         Found Java SDK version 21.0.8.
+       _ResolveMonoAndroidSdks:
+         MonoAndroid Tools: C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\tools\
+         Android Platform API level: 36
+         TargetFrameworkVersion: v10.0
+         Android NDK: 
+         Android SDK: C:\Program Files (x86)\Android\android-sdk\
+         Android SDK Build Tools: C:\Program Files (x86)\Android\android-sdk\build-tools\36.0.0\
+         Java SDK: C:\Program Files\Android\openjdk\jdk-21.0.8\
+         Application Java class: android.app.Application
+       _CleanIntermediateIfNeeded:
+         "obj\Release\net10.0-android\stamp\_CleanIntermediateIfNeeded.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_CleanIntermediateIfNeeded.stamp".
+       _ExtractAar:
+       Das _ExtractAar-Ziel wird übersprungen, da es keine Eingaben besitzt.
+       PrepareForBuild:
+         Das Verzeichnis "bin\Release\net10.0-android\" wird erstellt.
+       _SetupDesignerProperties:
+         _OuterIntermediateOutputPath: 
+         IntermediateOutputPath: obj\Release\net10.0-android\
+       _SetupDesignTimeBuildForCompile:
+         Das Verzeichnis "obj\Release\net10.0-android\designtime\" wird erstellt.
+       _ComputeAndroidResourcePaths:
+         Das Verzeichnis "obj\Release\net10.0-android\res\" wird erstellt.
+       _ResolveLibraryProjectImports:
+         "obj\Release\net10.0-android\stamp\_ResolveLibraryProjectImports.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_ResolveLibraryProjectImports.stamp".
+       _BuildLibraryImportsCache:
+         "obj\Release\net10.0-android\stamp\_BuildLibraryImportsCache.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_BuildLibraryImportsCache.stamp".
+       _GenerateResourceCaseMap:
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\case_map.txt".
+       _GenerateResourceDesignerIntermediateClass:
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\__Microsoft.Android.Resource.Designer.cs".
+       _GenerateAndroidResourceDir:
+         "obj\Release\net10.0-android\res.flag" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\res.flag".
+       _GenerateLayoutBindings:
+       Das Ziel "_GenerateLayoutBindings" wird übersprungen, da es keine Ausgaben enthält.
+       _ConvertResourcesCases:
+         Das Verzeichnis "obj\Release\net10.0-android\flata\" wird erstellt.
+         Das Verzeichnis "obj\Release\net10.0-android\flat\" wird erstellt.
+         "obj\Release\net10.0-android\stamp\_ConvertResourcesCases.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_ConvertResourcesCases.stamp".
+       _UpdateAndroidResgen:
+         "obj\Release\net10.0-android\R.cs.flag" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\R.cs.flag".
+       _GenerateSourceLinkFile:
+         Quellverknüpfungsdatei wird 'C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\Release\net10.0-android\ZBoard.DeepL.sourcelink.json' aktualisiert.
+       CoreCompile:
+         Setting DOTNET_ROOT to 'C:\Program Files\dotnet'
+         C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Roslyn\bincore\csc.exe /noconfig /unsafe- /checked- /nowarn:1701,1702,IL2121,CS1573,CS1591,1701,1702,8002 /fullpaths /nostdlib+ /errorreport:prompt /warn:10 /doc:bin\Release\net10.0-android\ZBoard.DeepL.xml /define:TRACE;RELEASE;__XAMARIN_ANDROID_v1_0__;__MOBILE__;__ANDROID__;__ANDROID_1__;__ANDROID_2__;__ANDROID_3__;__ANDROID_4__;__ANDROID_5__;__ANDROID_6__;__ANDROID_7__;__ANDROID_8__;__ANDROID_9__;__ANDROID_10__;__ANDROID_11__;__ANDROID_12__;__ANDROID_13__;__ANDROID_14__;__ANDROID_15__;__ANDROID_16__;__ANDROID_17__;__ANDROID_18__;__ANDROID_19__;__ANDROID_20__;__ANDROID_21__;__ANDROID_22__;__ANDROID_23__;__ANDROID_24__;__ANDROID_25__;__ANDROID_26__;__ANDROID_27__;__ANDROID_28__;__ANDROID_29__;__ANDROID_30__;__ANDROID_31__;__ANDROID_32__;__ANDROID_33__;__ANDROID_34__;__ANDROID_35__;__ANDROID_36__;NET;NET10_0;NETCOREAPP;ANDROID;ANDROID36_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;ANDROID21_0_OR_GREATER;ANDROID22_0_OR_GREATER;ANDROID23_0_OR_GREATER;ANDROID24_0_OR_GREATER;ANDROID25_0_OR_GREATER;ANDROID26_0_OR_GREATER;ANDROID27_0_OR_GREATER;ANDROID28_0_OR_GREATER;ANDROID29_0_OR_GREATER;ANDROID30_0_OR_GREATER;ANDROID31_0_OR_GREATER;ANDROID32_0_OR_GREATER;ANDROID33_0_OR_GREATER;ANDROID34_0_OR_GREATER;ANDROID35_0_OR_GREATER;ANDROID36_0_OR_GREATER /highentropyva+ /nullable:enable /reference:C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\Release\net10.0-android\_Microsoft.Android.Resource.Designer.dll /reference:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\ref\net10.0\Java.Interop.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.CSharp.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.VisualBasic.Core.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.VisualBasic.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.Win32.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.Win32.Registry.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\ref\net10.0\Mono.Android.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\ref\net10.0\Mono.Android.Export.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\ref\net10.0\Mono.Android.Runtime.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\mscorlib.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\netstandard.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.AppContext.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Buffers.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.Concurrent.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.Immutable.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.NonGeneric.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.Specialized.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.Annotations.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.DataAnnotations.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.EventBasedAsync.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.TypeConverter.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Configuration.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Console.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Core.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Data.Common.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Data.DataSetExtensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Data.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Contracts.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Debug.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.DiagnosticSource.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.FileVersionInfo.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Process.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.StackTrace.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.TextWriterTraceListener.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Tools.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.TraceSource.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Tracing.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Drawing.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Drawing.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Dynamic.Runtime.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Formats.Asn1.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Formats.Tar.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Globalization.Calendars.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Globalization.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Globalization.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Compression.Brotli.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Compression.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Compression.FileSystem.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Compression.ZipFile.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.AccessControl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.DriveInfo.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.Watcher.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.IsolatedStorage.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.MemoryMappedFiles.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Pipelines.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Pipes.AccessControl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Pipes.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.UnmanagedMemoryStream.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.AsyncEnumerable.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.Expressions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.Parallel.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.Queryable.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Memory.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Http.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Http.Json.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.HttpListener.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Mail.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.NameResolution.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.NetworkInformation.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Ping.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Quic.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Requests.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Security.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.ServerSentEvents.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.ServicePoint.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Sockets.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebClient.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebHeaderCollection.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebProxy.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebSockets.Client.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebSockets.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Numerics.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Numerics.Vectors.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ObjectModel.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.DispatchProxy.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Emit.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Emit.ILGeneration.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Emit.Lightweight.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Metadata.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.TypeExtensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Resources.Reader.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Resources.ResourceManager.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Resources.Writer.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.CompilerServices.Unsafe.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.CompilerServices.VisualC.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Handles.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.InteropServices.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.InteropServices.JavaScript.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.InteropServices.RuntimeInformation.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Intrinsics.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Loader.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Numerics.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.Formatters.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.Json.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.Xml.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.AccessControl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Claims.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Algorithms.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Cng.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Csp.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Encoding.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.OpenSsl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.X509Certificates.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Principal.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Principal.Windows.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.SecureString.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ServiceModel.Web.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ServiceProcess.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Encoding.CodePages.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Encoding.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Encoding.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Encodings.Web.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Json.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.RegularExpressions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.AccessControl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Channels.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Overlapped.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Tasks.Dataflow.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Tasks.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Tasks.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Tasks.Parallel.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Thread.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.ThreadPool.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Timer.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Transactions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Transactions.Local.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ValueTuple.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Web.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Web.HttpUtility.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Windows.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.Linq.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.ReaderWriter.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.Serialization.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XDocument.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XmlDocument.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XmlSerializer.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XPath.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XPath.XDocument.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\WindowsBase.dll" /features:"InterceptorsNamespaces=;Microsoft.AspNetCore.Http.Generated;Microsoft.Extensions.Configuration.Binder.SourceGeneration;Microsoft.Extensions.Validation.Generated" /debug- /debug:portable /filealign:512 /optimize+ /out:obj\Release\net10.0-android\ZBoard.DeepL.dll /target:library /warnaserror- /utf8output /deterministic+ /sourcelink:C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\Release\net10.0-android\ZBoard.DeepL.sourcelink.json /langversion:14.0 /embed:obj\Release\net10.0-android\ZBoard.DeepL.GlobalUsings.g.cs /embed:obj\Release\net10.0-android\__Microsoft.Android.Resource.Designer.cs /embed:"obj\Release\net10.0-android\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs" /embed:obj\Release\net10.0-android\ZBoard.DeepL.AssemblyInfo.cs /analyzerconfig:obj\Release\net10.0-android\ZBoard.DeepL.GeneratedMSBuildEditorConfig.editorconfig /analyzerconfig:"C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\analyzers\build\config\analysislevel_10_default.globalconfig" /analyzer:"C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\..\analyzers\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" /analyzer:"C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/Microsoft.Interop.ComInterfaceGenerator.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/Microsoft.Interop.JavaScript.JSImportGenerator.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\analyzers/dotnet/cs/Microsoft.Android.Sdk.Analysis.dll" /analyzer:C:\Users\patri\.nuget\packages\microsoft.net.illink.tasks\10.0.14\analyzers\dotnet\cs\ILLink.CodeFixProvider.dll /analyzer:C:\Users\patri\.nuget\packages\microsoft.net.illink.tasks\10.0.14\analyzers\dotnet\cs\ILLink.RoslynAnalyzer.dll DeepLClient.cs DeepLSettings.cs MainActivity.cs PluginService.cs ../../Plugins/PluginContract.cs obj\Release\net10.0-android\ZBoard.DeepL.GlobalUsings.g.cs obj\Release\net10.0-android\__Microsoft.Android.Resource.Designer.cs "obj\Release\net10.0-android\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs" obj\Release\net10.0-android\ZBoard.DeepL.AssemblyInfo.cs /warnaserror+:NU1605,SYSLIB0011
+         Compilation request ZBoard.DeepL (net10.0-android), PathToTool=C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Roslyn\bincore\csc.exe
+         CommandLine = ' /noconfig'
+         BuildResponseFile = '/unsafe- /checked- /nowarn:1701,1702,IL2121,CS1573,CS1591,1701,1702,8002 /fullpaths /nostdlib+ /errorreport:prompt /warn:10 /doc:bin\Release\net10.0-android\ZBoard.DeepL.xml /define:TRACE;RELEASE;__XAMARIN_ANDROID_v1_0__;__MOBILE__;__ANDROID__;__ANDROID_1__;__ANDROID_2__;__ANDROID_3__;__ANDROID_4__;__ANDROID_5__;__ANDROID_6__;__ANDROID_7__;__ANDROID_8__;__ANDROID_9__;__ANDROID_10__;__ANDROID_11__;__ANDROID_12__;__ANDROID_13__;__ANDROID_14__;__ANDROID_15__;__ANDROID_16__;__ANDROID_17__;__ANDROID_18__;__ANDROID_19__;__ANDROID_20__;__ANDROID_21__;__ANDROID_22__;__ANDROID_23__;__ANDROID_24__;__ANDROID_25__;__ANDROID_26__;__ANDROID_27__;__ANDROID_28__;__ANDROID_29__;__ANDROID_30__;__ANDROID_31__;__ANDROID_32__;__ANDROID_33__;__ANDROID_34__;__ANDROID_35__;__ANDROID_36__;NET;NET10_0;NETCOREAPP;ANDROID;ANDROID36_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;ANDROID21_0_OR_GREATER;ANDROID22_0_OR_GREATER;ANDROID23_0_OR_GREATER;ANDROID24_0_OR_GREATER;ANDROID25_0_OR_GREATER;ANDROID26_0_OR_GREATER;ANDROID27_0_OR_GREATER;ANDROID28_0_OR_GREATER;ANDROID29_0_OR_GREATER;ANDROID30_0_OR_GREATER;ANDROID31_0_OR_GREATER;ANDROID32_0_OR_GREATER;ANDROID33_0_OR_GREATER;ANDROID34_0_OR_GREATER;ANDROID35_0_OR_GREATER;ANDROID36_0_OR_GREATER /highentropyva+ /nullable:enable /reference:C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\Release\net10.0-android\_Microsoft.Android.Resource.Designer.dll /reference:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\ref\net10.0\Java.Interop.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.CSharp.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.VisualBasic.Core.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.VisualBasic.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.Win32.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\Microsoft.Win32.Registry.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\ref\net10.0\Mono.Android.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\ref\net10.0\Mono.Android.Export.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\ref\net10.0\Mono.Android.Runtime.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\mscorlib.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\netstandard.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.AppContext.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Buffers.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.Concurrent.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.Immutable.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.NonGeneric.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Collections.Specialized.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.Annotations.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.DataAnnotations.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.EventBasedAsync.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ComponentModel.TypeConverter.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Configuration.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Console.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Core.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Data.Common.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Data.DataSetExtensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Data.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Contracts.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Debug.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.DiagnosticSource.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.FileVersionInfo.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Process.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.StackTrace.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.TextWriterTraceListener.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Tools.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.TraceSource.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Diagnostics.Tracing.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Drawing.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Drawing.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Dynamic.Runtime.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Formats.Asn1.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Formats.Tar.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Globalization.Calendars.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Globalization.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Globalization.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Compression.Brotli.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Compression.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Compression.FileSystem.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Compression.ZipFile.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.AccessControl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.DriveInfo.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.FileSystem.Watcher.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.IsolatedStorage.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.MemoryMappedFiles.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Pipelines.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Pipes.AccessControl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.Pipes.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.IO.UnmanagedMemoryStream.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.AsyncEnumerable.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.Expressions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.Parallel.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Linq.Queryable.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Memory.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Http.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Http.Json.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.HttpListener.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Mail.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.NameResolution.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.NetworkInformation.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Ping.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Quic.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Requests.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Security.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.ServerSentEvents.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.ServicePoint.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.Sockets.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebClient.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebHeaderCollection.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebProxy.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebSockets.Client.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Net.WebSockets.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Numerics.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Numerics.Vectors.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ObjectModel.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.DispatchProxy.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Emit.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Emit.ILGeneration.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Emit.Lightweight.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Metadata.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Reflection.TypeExtensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Resources.Reader.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Resources.ResourceManager.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Resources.Writer.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.CompilerServices.Unsafe.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.CompilerServices.VisualC.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Handles.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.InteropServices.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.InteropServices.JavaScript.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.InteropServices.RuntimeInformation.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Intrinsics.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Loader.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Numerics.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.Formatters.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.Json.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Runtime.Serialization.Xml.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.AccessControl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Claims.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Algorithms.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Cng.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Csp.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Encoding.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.OpenSsl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.Primitives.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Cryptography.X509Certificates.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Principal.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.Principal.Windows.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Security.SecureString.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ServiceModel.Web.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ServiceProcess.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Encoding.CodePages.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Encoding.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Encoding.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Encodings.Web.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.Json.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Text.RegularExpressions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.AccessControl.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Channels.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Overlapped.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Tasks.Dataflow.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Tasks.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Tasks.Extensions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Tasks.Parallel.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Thread.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.ThreadPool.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Threading.Timer.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Transactions.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Transactions.Local.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.ValueTuple.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Web.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Web.HttpUtility.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Windows.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.Linq.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.ReaderWriter.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.Serialization.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XDocument.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XmlDocument.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XmlSerializer.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XPath.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\System.Xml.XPath.XDocument.dll" /reference:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\ref\net10.0\WindowsBase.dll" /features:"InterceptorsNamespaces=;Microsoft.AspNetCore.Http.Generated;Microsoft.Extensions.Configuration.Binder.SourceGeneration;Microsoft.Extensions.Validation.Generated" /debug- /debug:portable /filealign:512 /optimize+ /out:obj\Release\net10.0-android\ZBoard.DeepL.dll /target:library /warnaserror- /utf8output /deterministic+ /sourcelink:C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\Release\net10.0-android\ZBoard.DeepL.sourcelink.json /langversion:14.0 /embed:obj\Release\net10.0-android\ZBoard.DeepL.GlobalUsings.g.cs /embed:obj\Release\net10.0-android\__Microsoft.Android.Resource.Designer.cs /embed:"obj\Release\net10.0-android\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs" /embed:obj\Release\net10.0-android\ZBoard.DeepL.AssemblyInfo.cs /analyzerconfig:obj\Release\net10.0-android\ZBoard.DeepL.GeneratedMSBuildEditorConfig.editorconfig /analyzerconfig:"C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\analyzers\build\config\analysislevel_10_default.globalconfig" /analyzer:"C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\..\analyzers\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" /analyzer:"C:\Program Files\dotnet\sdk\11.0.100-rc.3.26522.148\Sdks\Microsoft.NET.Sdk\targets\..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/Microsoft.Interop.ComInterfaceGenerator.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/Microsoft.Interop.JavaScript.JSImportGenerator.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.14\analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll" /analyzer:"C:\Program Files\dotnet\packs\Microsoft.Android.Ref.36\36.1.118\analyzers/dotnet/cs/Microsoft.Android.Sdk.Analysis.dll" /analyzer:C:\Users\patri\.nuget\packages\microsoft.net.illink.tasks\10.0.14\analyzers\dotnet\cs\ILLink.CodeFixProvider.dll /analyzer:C:\Users\patri\.nuget\packages\microsoft.net.illink.tasks\10.0.14\analyzers\dotnet\cs\ILLink.RoslynAnalyzer.dll DeepLClient.cs DeepLSettings.cs MainActivity.cs PluginService.cs ../../Plugins/PluginContract.cs obj\Release\net10.0-android\ZBoard.DeepL.GlobalUsings.g.cs obj\Release\net10.0-android\__Microsoft.Android.Resource.Designer.cs "obj\Release\net10.0-android\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs" obj\Release\net10.0-android\ZBoard.DeepL.AssemblyInfo.cs /warnaserror+:NU1605,SYSLIB0011'
+         Attempt to open named pipe 'UF1tpb7dertsTaDa6KvffZtRkeI9uUPv_4L24E+oCII'
+         Attempt to connect named pipe 'UF1tpb7dertsTaDa6KvffZtRkeI9uUPv_4L24E+oCII'
+         Named pipe 'UF1tpb7dertsTaDa6KvffZtRkeI9uUPv_4L24E+oCII' connected
+         Begin writing request for ZBoard.DeepL (net10.0-android)
+         End writing request for ZBoard.DeepL (net10.0-android)
+         Begin reading response for ZBoard.DeepL (net10.0-android)
+         End reading response for ZBoard.DeepL (net10.0-android)
+     1>C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\PluginService.cs(38,10): warning CS0108: "PluginService.Handle(Message)" blendet den vererbten Member "Object.Handle" aus. Verwenden Sie das new-Schlüsselwort, wenn das Ausblenden vorgesehen war. [C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj]
+         CompilerServer: server - server processed compilation - ZBoard.DeepL (net10.0-android)
+       CopyFilesToOutputDirectory:
+         Die Datei wird von "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\Release\net10.0-android\ZBoard.DeepL.dll" in "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\bin\Release\net10.0-android\ZBoard.DeepL.dll" kopiert.
+         ZBoard.DeepL -> C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\bin\Release\net10.0-android\ZBoard.DeepL.dll
+         Die Datei wird von "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\Release\net10.0-android\ZBoard.DeepL.pdb" in "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\bin\Release\net10.0-android\ZBoard.DeepL.pdb" kopiert.
+     1>Das Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1) erstellt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1:2) auf Knoten "1", _ComputeFilesToPublishForRuntimeIdentifiers Ziel(e).
+     1>_SetupDesignerProperties:
+         _OuterIntermediateOutputPath: obj\Release\net10.0-android\
+         IntermediateOutputPath: obj\Release\net10.0-android\android-arm64\
+       _SetupDesignTimeBuildForBuild:
+         Das Verzeichnis "obj\Release\net10.0-android\android-arm64\stamp\" wird erstellt.
+       _ResolveAndroidTooling:
+         Found Java SDK version 21.0.8.
+       _ResolveMonoAndroidSdks:
+         MonoAndroid Tools: C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\tools\
+         Android Platform API level: 36
+         TargetFrameworkVersion: v10.0
+         Android NDK: 
+         Android SDK: C:\Program Files (x86)\Android\android-sdk\
+         Android SDK Build Tools: C:\Program Files (x86)\Android\android-sdk\build-tools\36.0.0\
+         Java SDK: C:\Program Files\Android\openjdk\jdk-21.0.8\
+         Application Java class: android.app.Application
+     1>Das Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1) erstellt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1:3) auf Knoten "2", _ComputeFilesToPublishForRuntimeIdentifiers Ziel(e).
+     1>_SetupDesignerProperties:
+         _OuterIntermediateOutputPath: obj\Release\net10.0-android\
+         IntermediateOutputPath: obj\Release\net10.0-android\android-x64\
+       _SetupDesignTimeBuildForBuild:
+         Das Verzeichnis "obj\Release\net10.0-android\android-x64\stamp\" wird erstellt.
+       _ResolveAndroidTooling:
+         Found Java SDK version 21.0.8.
+       _ResolveMonoAndroidSdks:
+         MonoAndroid Tools: C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\tools\
+         Android Platform API level: 36
+         TargetFrameworkVersion: v10.0
+         Android NDK: 
+         Android SDK: C:\Program Files (x86)\Android\android-sdk\
+         Android SDK Build Tools: C:\Program Files (x86)\Android\android-sdk\build-tools\36.0.0\
+         Java SDK: C:\Program Files\Android\openjdk\jdk-21.0.8\
+         Application Java class: android.app.Application
+     1>PrepareForILLink:
+         Das Optimieren der Assembly für die Größe kann das Verhalten der App ändern. Stellen Sie sicher, dass nach der Veröffentlichung Tests durchgeführt werden. Informationen finden Sie unter https://aka.ms/dotnet-illink.
+       _RunILLink:
+         Assemblys werden für die Größe optimiert. Dieser Vorgang kann eine Weile dauern.
+     1>PrepareForILLink:
+         Das Optimieren der Assembly für die Größe kann das Verhalten der App ändern. Stellen Sie sicher, dass nach der Veröffentlichung Tests durchgeführt werden. Informationen finden Sie unter https://aka.ms/dotnet-illink.
+       _RunILLink:
+         Assemblys werden für die Größe optimiert. Dieser Vorgang kann eine Weile dauern.
+     1>_RunILLink:
+         ILLink.Tasks path: C:\Users\patri\.nuget\packages\microsoft.net.illink.tasks\10.0.14\tools\net\illink.dll
+     1>_RunILLink:
+         ILLink.Tasks path: C:\Users\patri\.nuget\packages\microsoft.net.illink.tasks\10.0.14\tools\net\illink.dll
+     1>_RunILLink:
+         C:\Program Files\dotnet\dotnet.exe "C:\Users\patri\.nuget\packages\microsoft.net.illink.tasks\10.0.14\tools\net\illink.dll" -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\Java.Interop.xml"
+         -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\Mono.Android.Runtime.xml"
+         -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\Mono.Android.xml"
+         -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\System.Runtime.InteropServices.xml"
+         -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\System.Runtime.xml"
+         -a "obj\Release\net10.0-android\ZBoard.DeepL.dll" All
+         --singlewarn
+         --trim-mode link
+         --action copy
+         -reference "obj\Release\net10.0-android\_Microsoft.Android.Resource.Designer.dll"
+         --action link "_Microsoft.Android.Resource.Designer"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\Microsoft.CSharp.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\Microsoft.VisualBasic.Core.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\Microsoft.VisualBasic.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\Microsoft.Win32.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\Microsoft.Win32.Registry.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.AppContext.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Buffers.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Collections.Concurrent.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Collections.Immutable.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Collections.NonGeneric.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Collections.Specialized.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Collections.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ComponentModel.Annotations.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ComponentModel.DataAnnotations.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ComponentModel.EventBasedAsync.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ComponentModel.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ComponentModel.TypeConverter.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ComponentModel.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Configuration.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Console.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Core.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Data.Common.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Data.DataSetExtensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Data.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.Contracts.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.Debug.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.DiagnosticSource.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.FileVersionInfo.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.Process.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.StackTrace.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.TextWriterTraceListener.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.Tools.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.TraceSource.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Diagnostics.Tracing.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Drawing.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Drawing.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Dynamic.Runtime.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Formats.Asn1.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Formats.Tar.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Globalization.Calendars.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Globalization.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Globalization.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.Compression.Brotli.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.Compression.FileSystem.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.Compression.ZipFile.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.Compression.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.FileSystem.AccessControl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.FileSystem.DriveInfo.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.FileSystem.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.FileSystem.Watcher.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.FileSystem.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.IsolatedStorage.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.MemoryMappedFiles.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.Pipelines.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.Pipes.AccessControl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.Pipes.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.UnmanagedMemoryStream.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.IO.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Linq.AsyncEnumerable.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Linq.Expressions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Linq.Parallel.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Linq.Queryable.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Linq.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Memory.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.Http.Json.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.Http.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.HttpListener.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.Mail.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.NameResolution.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.NetworkInformation.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.Ping.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.Quic.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.Requests.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.Security.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.ServerSentEvents.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.ServicePoint.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.Sockets.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.WebClient.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.WebHeaderCollection.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.WebProxy.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.WebSockets.Client.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.WebSockets.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Net.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Numerics.Vectors.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Numerics.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ObjectModel.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Private.DataContractSerialization.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Private.Uri.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Private.Xml.Linq.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Private.Xml.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Reflection.DispatchProxy.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Reflection.Emit.ILGeneration.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Reflection.Emit.Lightweight.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Reflection.Emit.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Reflection.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Reflection.Metadata.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Reflection.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Reflection.TypeExtensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Reflection.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Resources.Reader.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Resources.ResourceManager.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Resources.Writer.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.CompilerServices.Unsafe.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.CompilerServices.VisualC.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Handles.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.InteropServices.JavaScript.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.InteropServices.RuntimeInformation.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.InteropServices.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Intrinsics.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Loader.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Numerics.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Serialization.Formatters.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Serialization.Json.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Serialization.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Serialization.Xml.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.Serialization.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Runtime.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.AccessControl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Claims.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Cryptography.Algorithms.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Cryptography.Cng.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Cryptography.Csp.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Cryptography.Encoding.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Cryptography.OpenSsl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Cryptography.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Cryptography.X509Certificates.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Cryptography.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Principal.Windows.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.Principal.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.SecureString.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Security.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ServiceModel.Web.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ServiceProcess.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Text.Encoding.CodePages.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Text.Encoding.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Text.Encoding.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Text.Encodings.Web.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Text.Json.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Text.RegularExpressions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.AccessControl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.Channels.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.Overlapped.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.Tasks.Dataflow.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.Tasks.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.Tasks.Parallel.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.Tasks.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.Thread.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.ThreadPool.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.Timer.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Threading.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Transactions.Local.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Transactions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.ValueTuple.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Web.HttpUtility.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Web.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Windows.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Xml.Linq.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Xml.ReaderWriter.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Xml.Serialization.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Xml.XDocument.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Xml.XPath.XDocument.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Xml.XPath.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Xml.XmlDocument.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Xml.XmlSerializer.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.Xml.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\System.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\WindowsBase.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\mscorlib.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\lib\net10.0\netstandard.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-arm64\10.0.14\runtimes\android-arm64\native\System.Private.CoreLib.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\Java.Interop.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\Mono.Android.Export.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\Mono.Android.Runtime.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\Mono.Android.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\System.IO.Hashing.dll"
+         -reference "obj\Release\net10.0-android\ZBoard.DeepL.dll"
+         --singlewarn- "ZBoard.DeepL"
+         -out "obj\Release\net10.0-android\android-arm64\linked"
+         --nowarn "1701;1702;IL2121"
+         --warn "5"
+         --warnaserror- --warnaserror ";NU1605;SYSLIB0011"
+         --custom-data  AndroidHttpClientHandlerType="Xamarin.Android.Net.AndroidMessageHandler"
+         --custom-data  AndroidCustomViewMapFile="obj\Release\net10.0-android\customview-map.txt"
+         --custom-data  SystemIOHashingAssemblyPath="C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\System.IO.Hashing.dll"
+         --feature Microsoft.Android.Runtime.RuntimeFeature.IsMonoRuntime true
+         --feature Microsoft.Android.Runtime.RuntimeFeature.IsCoreClrRuntime false
+         --feature Microsoft.Extensions.DependencyInjection.VerifyOpenGenericServiceTrimmability false
+         --feature System.ComponentModel.DefaultValueAttribute.IsSupported true
+         --feature System.ComponentModel.Design.IDesignerHost.IsSupported false
+         --feature System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization false
+         --feature System.ComponentModel.TypeDescriptor.IsComObjectDescriptorSupported false
+         --feature System.Data.DataSet.XmlSerializationIsSupported false
+         --feature System.Diagnostics.Debugger.IsSupported false
+         --feature System.Diagnostics.Metrics.Meter.IsSupported false
+         --feature System.Diagnostics.Tracing.EventSource.IsSupported false
+         --feature System.Globalization.Invariant false
+         --feature System.Linq.Enumerable.IsSizeOptimized true
+         --feature System.Net.Http.EnableActivityPropagation false
+         --feature System.Net.Http.UseNativeHttpHandler true
+         --feature System.Net.SocketsHttpHandler.Http3Support false
+         --feature System.Reflection.Metadata.MetadataUpdater.IsSupported false
+         --feature System.Resources.ResourceManager.AllowCustomResourceTypes false
+         --feature System.Resources.UseSystemResourceKeys true
+         --feature System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported true
+         --feature System.Runtime.InteropServices.BuiltInComInterop.IsSupported false
+         --feature System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting false
+         --feature System.Runtime.InteropServices.EnableCppCLIHostActivation false
+         --feature System.Runtime.InteropServices.Marshalling.EnableGeneratedComInterfaceComImportInterop false
+         --feature System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization false
+         --feature System.StartupHookProvider.IsSupported false
+         --feature System.Text.Encoding.EnableUnsafeUTF7Encoding false
+         --feature System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault true
+         --feature System.Threading.Thread.EnableAutoreleasePool false
+         --feature Xamarin.Android.Net.UseNegotiateAuthentication false
+         --feature Switch.System.Reflection.ForceInterpretedInvoke true
+         --feature Microsoft.Extensions.DependencyInjection.DisableDynamicEngine true
+         --feature Microsoft.Android.Runtime.RuntimeFeature.ManagedTypeMap false
+         --custom-step "Microsoft.Android.Sdk.ILLink.PreserveSubStepDispatcher,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "MonoDroid.Tuner.MarkJavaObjects,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "MonoDroid.Tuner.PreserveJavaExceptions,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "MonoDroid.Tuner.PreserveApplications,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "Microsoft.Android.Sdk.ILLink.PreserveRegistrations,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "Microsoft.Android.Sdk.ILLink.PreserveJavaInterfaces,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "MonoDroid.Tuner.FixAbstractMethodsStep,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "+CleanStep:MonoDroid.Tuner.AddKeepAlivesStep,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "+CleanStep:MonoDroid.Tuner.StripEmbeddedLibraries,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "-MarkStep:MonoDroid.Tuner.FixLegacyResourceDesignerStep,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --disable-opt unusedtypechecks --enable-serialization-discovery  --notrimwarn
+         
+     1>_RunILLink:
+         C:\Program Files\dotnet\dotnet.exe "C:\Users\patri\.nuget\packages\microsoft.net.illink.tasks\10.0.14\tools\net\illink.dll" -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\Java.Interop.xml"
+         -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\Mono.Android.Runtime.xml"
+         -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\Mono.Android.xml"
+         -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\System.Runtime.InteropServices.xml"
+         -x "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\PreserveLists\System.Runtime.xml"
+         -a "obj\Release\net10.0-android\ZBoard.DeepL.dll" All
+         --singlewarn
+         --trim-mode link
+         --action copy
+         -reference "obj\Release\net10.0-android\_Microsoft.Android.Resource.Designer.dll"
+         --action link "_Microsoft.Android.Resource.Designer"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\Microsoft.CSharp.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\Microsoft.VisualBasic.Core.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\Microsoft.VisualBasic.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\Microsoft.Win32.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\Microsoft.Win32.Registry.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.AppContext.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Buffers.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Collections.Concurrent.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Collections.Immutable.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Collections.NonGeneric.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Collections.Specialized.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Collections.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ComponentModel.Annotations.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ComponentModel.DataAnnotations.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ComponentModel.EventBasedAsync.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ComponentModel.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ComponentModel.TypeConverter.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ComponentModel.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Configuration.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Console.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Core.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Data.Common.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Data.DataSetExtensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Data.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.Contracts.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.Debug.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.DiagnosticSource.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.FileVersionInfo.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.Process.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.StackTrace.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.TextWriterTraceListener.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.Tools.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.TraceSource.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Diagnostics.Tracing.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Drawing.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Drawing.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Dynamic.Runtime.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Formats.Asn1.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Formats.Tar.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Globalization.Calendars.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Globalization.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Globalization.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.Compression.Brotli.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.Compression.FileSystem.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.Compression.ZipFile.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.Compression.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.FileSystem.AccessControl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.FileSystem.DriveInfo.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.FileSystem.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.FileSystem.Watcher.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.FileSystem.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.IsolatedStorage.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.MemoryMappedFiles.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.Pipelines.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.Pipes.AccessControl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.Pipes.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.UnmanagedMemoryStream.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.IO.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Linq.AsyncEnumerable.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Linq.Expressions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Linq.Parallel.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Linq.Queryable.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Linq.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Memory.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.Http.Json.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.Http.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.HttpListener.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.Mail.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.NameResolution.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.NetworkInformation.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.Ping.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.Quic.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.Requests.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.Security.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.ServerSentEvents.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.ServicePoint.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.Sockets.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.WebClient.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.WebHeaderCollection.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.WebProxy.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.WebSockets.Client.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.WebSockets.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Net.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Numerics.Vectors.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Numerics.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ObjectModel.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Private.DataContractSerialization.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Private.Uri.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Private.Xml.Linq.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Private.Xml.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Reflection.DispatchProxy.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Reflection.Emit.ILGeneration.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Reflection.Emit.Lightweight.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Reflection.Emit.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Reflection.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Reflection.Metadata.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Reflection.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Reflection.TypeExtensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Reflection.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Resources.Reader.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Resources.ResourceManager.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Resources.Writer.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.CompilerServices.Unsafe.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.CompilerServices.VisualC.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Handles.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.InteropServices.JavaScript.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.InteropServices.RuntimeInformation.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.InteropServices.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Intrinsics.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Loader.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Numerics.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Serialization.Formatters.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Serialization.Json.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Serialization.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Serialization.Xml.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.Serialization.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Runtime.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.AccessControl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Claims.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Cryptography.Algorithms.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Cryptography.Cng.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Cryptography.Csp.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Cryptography.Encoding.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Cryptography.OpenSsl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Cryptography.Primitives.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Cryptography.X509Certificates.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Cryptography.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Principal.Windows.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.Principal.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.SecureString.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Security.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ServiceModel.Web.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ServiceProcess.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Text.Encoding.CodePages.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Text.Encoding.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Text.Encoding.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Text.Encodings.Web.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Text.Json.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Text.RegularExpressions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.AccessControl.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.Channels.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.Overlapped.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.Tasks.Dataflow.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.Tasks.Extensions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.Tasks.Parallel.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.Tasks.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.Thread.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.ThreadPool.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.Timer.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Threading.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Transactions.Local.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Transactions.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.ValueTuple.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Web.HttpUtility.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Web.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Windows.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Xml.Linq.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Xml.ReaderWriter.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Xml.Serialization.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Xml.XDocument.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Xml.XPath.XDocument.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Xml.XPath.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Xml.XmlDocument.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Xml.XmlSerializer.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.Xml.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\System.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\WindowsBase.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\mscorlib.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\lib\net10.0\netstandard.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.android-x64\10.0.14\runtimes\android-x64\native\System.Private.CoreLib.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\Java.Interop.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\Mono.Android.Export.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\Mono.Android.Runtime.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\Mono.Android.dll"
+         -reference "C:\Program Files\dotnet\packs\Microsoft.Android.Runtime.36.android\36.1.118\runtimes\android\lib\net10.0\System.IO.Hashing.dll"
+         -reference "obj\Release\net10.0-android\ZBoard.DeepL.dll"
+         --singlewarn- "ZBoard.DeepL"
+         -out "obj\Release\net10.0-android\android-x64\linked"
+         --nowarn "1701;1702;IL2121"
+         --warn "5"
+         --warnaserror- --warnaserror ";NU1605;SYSLIB0011"
+         --custom-data  AndroidHttpClientHandlerType="Xamarin.Android.Net.AndroidMessageHandler"
+         --custom-data  AndroidCustomViewMapFile="obj\Release\net10.0-android\customview-map.txt"
+         --custom-data  SystemIOHashingAssemblyPath="C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\System.IO.Hashing.dll"
+         --feature Microsoft.Android.Runtime.RuntimeFeature.IsMonoRuntime true
+         --feature Microsoft.Android.Runtime.RuntimeFeature.IsCoreClrRuntime false
+         --feature Microsoft.Extensions.DependencyInjection.VerifyOpenGenericServiceTrimmability false
+         --feature System.ComponentModel.DefaultValueAttribute.IsSupported true
+         --feature System.ComponentModel.Design.IDesignerHost.IsSupported false
+         --feature System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization false
+         --feature System.ComponentModel.TypeDescriptor.IsComObjectDescriptorSupported false
+         --feature System.Data.DataSet.XmlSerializationIsSupported false
+         --feature System.Diagnostics.Debugger.IsSupported false
+         --feature System.Diagnostics.Metrics.Meter.IsSupported false
+         --feature System.Diagnostics.Tracing.EventSource.IsSupported false
+         --feature System.Globalization.Invariant false
+         --feature System.Linq.Enumerable.IsSizeOptimized true
+         --feature System.Net.Http.EnableActivityPropagation false
+         --feature System.Net.Http.UseNativeHttpHandler true
+         --feature System.Net.SocketsHttpHandler.Http3Support false
+         --feature System.Reflection.Metadata.MetadataUpdater.IsSupported false
+         --feature System.Resources.ResourceManager.AllowCustomResourceTypes false
+         --feature System.Resources.UseSystemResourceKeys true
+         --feature System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported true
+         --feature System.Runtime.InteropServices.BuiltInComInterop.IsSupported false
+         --feature System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting false
+         --feature System.Runtime.InteropServices.EnableCppCLIHostActivation false
+         --feature System.Runtime.InteropServices.Marshalling.EnableGeneratedComInterfaceComImportInterop false
+         --feature System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization false
+         --feature System.StartupHookProvider.IsSupported false
+         --feature System.Text.Encoding.EnableUnsafeUTF7Encoding false
+         --feature System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault true
+         --feature System.Threading.Thread.EnableAutoreleasePool false
+         --feature Xamarin.Android.Net.UseNegotiateAuthentication false
+         --feature Switch.System.Reflection.ForceInterpretedInvoke true
+         --feature Microsoft.Extensions.DependencyInjection.DisableDynamicEngine true
+         --feature Microsoft.Android.Runtime.RuntimeFeature.ManagedTypeMap false
+         --custom-step "Microsoft.Android.Sdk.ILLink.PreserveSubStepDispatcher,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "MonoDroid.Tuner.MarkJavaObjects,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "MonoDroid.Tuner.PreserveJavaExceptions,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "MonoDroid.Tuner.PreserveApplications,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "Microsoft.Android.Sdk.ILLink.PreserveRegistrations,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "Microsoft.Android.Sdk.ILLink.PreserveJavaInterfaces,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "MonoDroid.Tuner.FixAbstractMethodsStep,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "+CleanStep:MonoDroid.Tuner.AddKeepAlivesStep,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "+CleanStep:MonoDroid.Tuner.StripEmbeddedLibraries,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --custom-step "-MarkStep:MonoDroid.Tuner.FixLegacyResourceDesignerStep,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --disable-opt unusedtypechecks --enable-serialization-discovery  --notrimwarn
+         
+         "obj\Release\net10.0-android\android-x64\linked\Link.semaphore" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\android-x64\linked\Link.semaphore".
+       _TouchAndroidLinkFlag:
+         "obj\Release\net10.0-android\android-x64\link.flag" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\android-x64\link.flag".
+     1>Die Erstellung von Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" ist abgeschlossen (_ComputeFilesToPublishForRuntimeIdentifiers Ziel(e)).
+     1>_RunILLink:
+         "obj\Release\net10.0-android\android-arm64\linked\Link.semaphore" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\android-arm64\linked\Link.semaphore".
+       _TouchAndroidLinkFlag:
+         "obj\Release\net10.0-android\android-arm64\link.flag" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\android-arm64\link.flag".
+     1>Die Erstellung von Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" ist abgeschlossen (_ComputeFilesToPublishForRuntimeIdentifiers Ziel(e)).
+     1>_CreatePackageWorkspace:
+         Das Verzeichnis "obj\Release\net10.0-android\android\assets\" wird erstellt.
+       _AfterILLinkAdditionalSteps:
+         "obj\Release\net10.0-android\stamp\_AdditionalPostLinkerSteps.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_AdditionalPostLinkerSteps.stamp".
+       _GenerateJavaStubs:
+         "obj\Release\net10.0-android\stamp\_GenerateJavaStubs.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_GenerateJavaStubs.stamp".
+     1>Das Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1) erstellt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1:5) auf Knoten "2", _AndroidAotAndComputeFilesToPublishForRuntimeIdentifiers Ziel(e).
+     1>_AndroidAotCompilation:
+         [1/26] _Microsoft.Android.Resource.Designer.dll -> _Microsoft.Android.Resource.Designer.dll.so
+     1>Das Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1) erstellt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (1:4) auf Knoten "1", _AndroidAotAndComputeFilesToPublishForRuntimeIdentifiers Ziel(e).
+     1>_AndroidAotCompilation:
+         [1/26] System.Formats.Asn1.dll -> System.Formats.Asn1.dll.so
+         [2/26] System.Collections.dll -> System.Collections.dll.so
+         [3/26] System.Collections.NonGeneric.dll -> System.Collections.NonGeneric.dll.so
+         [4/26] System.Collections.Concurrent.dll -> System.Collections.Concurrent.dll.so
+         [5/26] System.Memory.dll -> System.Memory.dll.so
+         [6/26] System.Net.Primitives.dll -> System.Net.Primitives.dll.so
+         [7/26] System.IO.Compression.Brotli.dll -> System.IO.Compression.Brotli.dll.so
+         [8/26] System.IO.Pipelines.dll -> System.IO.Pipelines.dll.so
+         [9/26] System.Net.Requests.dll -> System.Net.Requests.dll.so
+         [10/26] _Microsoft.Android.Resource.Designer.dll -> _Microsoft.Android.Resource.Designer.dll.so
+         [11/26] System.Console.dll -> System.Console.dll.so
+         [12/26] System.IO.Compression.dll -> System.IO.Compression.dll.so
+         [13/26] System.Linq.dll -> System.Linq.dll.so
+         [14/26] ZBoard.DeepL.dll -> ZBoard.DeepL.dll.so
+         [15/26] System.Private.Uri.dll -> System.Private.Uri.dll.so
+     1>_AndroidAotCompilation:
+         [2/26] ZBoard.DeepL.dll -> ZBoard.DeepL.dll.so
+     1>_AndroidAotCompilation:
+         [16/26] System.Runtime.dll -> System.Runtime.dll.so
+         [17/26] System.Runtime.InteropServices.dll -> System.Runtime.InteropServices.dll.so
+         [18/26] System.Security.Cryptography.dll -> System.Security.Cryptography.dll.so
+         [19/26] System.Runtime.Numerics.dll -> System.Runtime.Numerics.dll.so
+         [20/26] Mono.Android.Runtime.dll -> Mono.Android.Runtime.dll.so
+         [21/26] System.Text.Json.dll -> System.Text.Json.dll.so
+         [22/26] System.Text.Encodings.Web.dll -> System.Text.Encodings.Web.dll.so
+         [23/26] System.Net.Http.dll -> System.Net.Http.dll.so
+     1>_AndroidAotCompilation:
+         [3/26] System.Collections.Concurrent.dll -> System.Collections.Concurrent.dll.so
+     1>_AndroidAotCompilation:
+         [24/26] Java.Interop.dll -> Java.Interop.dll.so
+     1>_AndroidAotCompilation:
+         [4/26] System.Collections.NonGeneric.dll -> System.Collections.NonGeneric.dll.so
+         [5/26] System.Collections.dll -> System.Collections.dll.so
+     1>_AndroidAotCompilation:
+         [25/26] Mono.Android.dll -> Mono.Android.dll.so
+     1>_AndroidAotCompilation:
+         [6/26] System.Console.dll -> System.Console.dll.so
+         [7/26] System.Formats.Asn1.dll -> System.Formats.Asn1.dll.so
+         [8/26] System.IO.Compression.Brotli.dll -> System.IO.Compression.Brotli.dll.so
+         [9/26] System.IO.Compression.dll -> System.IO.Compression.dll.so
+         [10/26] System.IO.Pipelines.dll -> System.IO.Pipelines.dll.so
+         [11/26] System.Linq.dll -> System.Linq.dll.so
+         [12/26] System.Memory.dll -> System.Memory.dll.so
+         [13/26] System.Net.Http.dll -> System.Net.Http.dll.so
+         [14/26] System.Net.Primitives.dll -> System.Net.Primitives.dll.so
+         [15/26] System.Net.Requests.dll -> System.Net.Requests.dll.so
+     1>_AndroidAotCompilation:
+         [26/26] System.Private.CoreLib.dll -> System.Private.CoreLib.dll.so
+     1>Die Erstellung von Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" ist abgeschlossen (_AndroidAotAndComputeFilesToPublishForRuntimeIdentifiers Ziel(e)).
+     1>_AndroidAotCompilation:
+         [16/26] System.Private.Uri.dll -> System.Private.Uri.dll.so
+         [17/26] System.Runtime.InteropServices.dll -> System.Runtime.InteropServices.dll.so
+         [18/26] System.Runtime.Numerics.dll -> System.Runtime.Numerics.dll.so
+         [19/26] System.Runtime.dll -> System.Runtime.dll.so
+         [20/26] System.Security.Cryptography.dll -> System.Security.Cryptography.dll.so
+         [21/26] System.Text.Encodings.Web.dll -> System.Text.Encodings.Web.dll.so
+         [22/26] System.Text.Json.dll -> System.Text.Json.dll.so
+         [23/26] Java.Interop.dll -> Java.Interop.dll.so
+         [24/26] Mono.Android.Runtime.dll -> Mono.Android.Runtime.dll.so
+         [25/26] Mono.Android.dll -> Mono.Android.dll.so
+         [26/26] System.Private.CoreLib.dll -> System.Private.CoreLib.dll.so
+     1>Die Erstellung von Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" ist abgeschlossen (_AndroidAotAndComputeFilesToPublishForRuntimeIdentifiers Ziel(e)).
+     1>_ManifestMerger:
+         C:\Program Files\Android\openjdk\jdk-21.0.8\bin\java.exe -cp "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\tools\manifestmerger.jar" com.xamarin.manifestmerger.Main obj\Release\net10.0-android\android\manifestmerger.rsp 
+       _ConvertCustomView:
+         "obj\Release\net10.0-android\stamp\_ConvertCustomView.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_ConvertCustomView.stamp".
+       _AddStaticResources:
+         "obj\Release\net10.0-android\static.flag" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\static.flag".
+       _GenerateEmptyAndroidRemapNativeCode:
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\android\jni_remap.arm64-v8a.ll".
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\android\jni_remap.x86_64.ll".
+       _GeneratePackageManagerJava:
+         "obj\Release\net10.0-android\stamp\_GeneratePackageManagerJava.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_GeneratePackageManagerJava.stamp".
+       _GenerateAndroidAssetsDir:
+       Das Ziel "_GenerateAndroidAssetsDir" wird übersprungen, da es keine Ausgaben enthält.
+       _CreateBaseApkWithAapt2:
+         Das Verzeichnis "obj\Release\net10.0-android\android\bin" wird erstellt.
+       _CreateBaseApk:
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\android\bin\packaged_resources".
+       _CompileJava:
+         C:\Program Files\Android\openjdk\jdk-21.0.8\bin\javac.exe -J-Dfile.encoding=UTF8 "@C:\Users\patri\AppData\Local\Temp\tmpgvgxuc.tmp" -target 1.8 -source 1.8 -Xlint:-options 
+         Hinweis: Einige Eingabedateien verwenden nicht gepr³fte oder unsichere Vorgõnge.
+         Hinweis: Wiederholen Sie die Kompilierung mit -Xlint:unchecked, um Details zu erhalten.
+         "obj\Release\net10.0-android\stamp\_CompileJava.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_CompileJava.stamp".
+       _CompileToDalvik:
+         C:\Program Files\Android\openjdk\jdk-21.0.8\bin\java.exe -Xmx1G -classpath "C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\tools\r8.jar" com.android.tools.r8.D8 "@C:\Users\patri\AppData\Local\Temp\tmpa0hng3.tmp" 
+         "obj\Release\net10.0-android\stamp\_CompileToDalvik.stamp" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\stamp\_CompileToDalvik.stamp".
+       _RemoveRegisterAttribute:
+         Das Verzeichnis "obj\Release\net10.0-android\android\assets\shrunk" wird erstellt.
+         "obj\Release\net10.0-android\android\assets\shrunk\shrunk.flag" wird erstellt, da "AlwaysCreate" angegeben wurde.
+         Aktualisieren des Timestamps von "obj\Release\net10.0-android\android\assets\shrunk\shrunk.flag".
+       _BuildApkEmbed:
+         Das Verzeichnis "obj\Release\net10.0-android\android-arm64\wrapped" wird entfernt.
+         Das Verzeichnis "obj\Release\net10.0-android\android-x64\wrapped" wird entfernt.
+       _CopyPackage:
+         Die Datei wird von "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\obj\Release\net10.0-android\android\bin\de.World_of_Bytes.zBoard.DeepL.apk" in "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\bin\Release\net10.0-android\de.World_of_Bytes.zBoard.DeepL.apk" kopiert.
+       _Sign:
+         C:\Program Files (x86)\Android\android-sdk\build-tools\36.0.0\zipalign.exe -p 16 "obj\Release\net10.0-android\android\bin\de.World_of_Bytes.zBoard.DeepL.apk" "bin\Release\net10.0-android\\de.World_of_Bytes.zBoard.DeepL-Signed.apk" 
+         C:\Program Files\Android\openjdk\jdk-21.0.8\bin\java.exe -jar "C:\Program Files (x86)\Android\android-sdk\build-tools\36.0.0\lib\apksigner.jar" sign --ks C:\keys\zhealth-meridian.jks --ks-pass env:MERIDIAN_KEYSTORE_PASSWORD --ks-key-alias zhealth --key-pass env:MERIDIAN_KEY_PASSWORD --min-sdk-version 26 --max-sdk-version 36  bin\Release\net10.0-android\de.World_of_Bytes.zBoard.DeepL-Signed.apk 
+         Signed android package 'bin\Release\net10.0-android\de.World_of_Bytes.zBoard.DeepL-Signed.apk'
+     1>Die Erstellung von Projekt "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" ist abgeschlossen (Standardziele).
+
+Der Buildvorgang wurde erfolgreich ausgeführt.
+
+       "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj" (Standardziel) (1) ->
+       (CoreCompile Ziel) -> 
+         C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\PluginService.cs(38,10): warning CS0108: "PluginService.Handle(Message)" blendet den vererbten Member "Object.Handle" aus. Verwenden Sie das new-Schlüsselwort, wenn das Ausblenden vorgesehen war. [C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\plugin-apps\DeepL\ZBoard.DeepL.csproj]
+
+    1 Warnung(en)
+    0 Fehler
+
+Verstrichene Zeit 00:00:21.33
