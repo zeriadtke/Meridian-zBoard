@@ -23,6 +23,7 @@ public sealed partial class ZBoardImeService
     {
         _lastEditUptime = SystemClock.UptimeMillis();
         _reselect = null;
+        _toolbarOpen = false; // Tippen bringt die Vorschläge zurück
     }
 
     static bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c is '\'' or '-';

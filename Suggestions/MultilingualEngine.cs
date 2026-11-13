@@ -75,14 +75,18 @@ public sealed class MultilingualEngine
     }
 
     /// <summary>Vorschläge für das gerade getippte Wort aus allen Sprachen.</summary>
-    public SuggestionResult Suggest(string typed, string? previousWord = null, int max = 3)
+    public SuggestionResult Suggest(string typed, string? previousWord = null, int max = 3) =>
+        Suggest(typed, new WordContext(previousWord), max);
+
+    /// <inheritdoc cref="Suggest(string, string?, int)"/>
+    public SuggestionResult Suggest(string typed, WordContext sentence, int max = 3, TouchTrace? touches = null)
     {
-        if (!IsMultilingual) return Primary.Suggest(typed, previousWord, max);
+        if (!IsMultilingual) return Primary.Suggest(typed, sentence, max, touches);
         if (string.IsNullOrWhiteSpace(typed)) return SuggestionResult.Empty;
 
-        int context = ContextLanguage(previousWord);
+        int context = ContextLanguage(sentence.PreviousWord);
         var proximity = Primary.Proximity;
-        var analyses = _engines.Select(e => e.Engine.Analyze(typed, previousWord, proximity, max)).ToArray();
+        var analyses = _engines.Select(e => e.Engine.Analyze(typed, sentence, proximity, max, touches)).ToArray();
 
         var ranked = analyses
             .SelectMany((a, i) => a.Candidates.Select(c => (c.Word, Language: i, Score: c.Score * Weight(i, context))))
@@ -117,7 +121,10 @@ public sealed class MultilingualEngine
                 if (best == null || score > best.Value.Score) best = (c.Word, score);
             }
 
-            if (!typedIsWord && best is { } correction && typed.Length >= 2)
+            // Richtig geschrieben ist das Getippte, wenn eine Sprache es kennt und es dort nicht nur ein seltener
+            // Eintrag neben einem viel wahrscheinlicheren Wort ist ("fur" neben "für").
+            bool solid = analyses.Where((a, i) => a.TypedLearned || IsWordIn(a, i) && !a.CorrectionOverrides).Any();
+            if (!solid && best is { } correction && typed.Length >= 2)
             {
                 autoCorrection = SuggestionEngine.MatchCase(correction.Word, typed);
             }
@@ -144,13 +151,21 @@ public sealed class MultilingualEngine
         IReadOnlyList<Vector2> path,
         IReadOnlyDictionary<char, Vector2> keys,
         string? previousWord = null,
+        int max = 4) =>
+        Glide(path, keys, new WordContext(previousWord), max);
+
+    /// <inheritdoc cref="Glide(IReadOnlyList{Vector2}, IReadOnlyDictionary{char, Vector2}, string?, int)"/>
+    public IReadOnlyList<string> Glide(
+        IReadOnlyList<Vector2> path,
+        IReadOnlyDictionary<char, Vector2> keys,
+        WordContext sentence,
         int max = 4)
     {
-        if (!IsMultilingual) return Primary.Glide(path, keys, previousWord, max);
+        if (!IsMultilingual) return [.. Primary.GlideScored(path, keys, sentence, max).Select(r => r.Word)];
 
-        int context = ContextLanguage(previousWord);
+        int context = ContextLanguage(sentence.PreviousWord);
         return _engines
-            .SelectMany((e, i) => e.Engine.GlideScored(path, keys, previousWord, max)
+            .SelectMany((e, i) => e.Engine.GlideScored(path, keys, sentence, max)
                 .Select(r => (r.Word, Score: r.Score + Math.Log(Weight(i, context)))))
             .OrderByDescending(r => r.Score)
             .Select(r => r.Word)
@@ -160,13 +175,44 @@ public sealed class MultilingualEngine
     }
 
     /// <summary>Nächstes Wort nach <paramref name="previousWord"/> aus allen Sprachen.</summary>
-    public IReadOnlyList<string> Predict(string previousWord, int max = 3)
-    {
-        if (!IsMultilingual) return Primary.Predict(previousWord, max);
+    public IReadOnlyList<string> Predict(string previousWord, int max = 3) =>
+        Predict(new WordContext(previousWord), max);
 
-        int context = ContextLanguage(previousWord);
+    /// <summary>Nimmt ein eben gelerntes Wort in allen Sprachen zurück (es war Teil eines Tippfehlers).</summary>
+    public void Unlearn(string? previous, string word)
+    {
+        foreach (var (_, engine) in _engines) engine.Unlearn(previous, word);
+    }
+
+    /// <inheritdoc cref="SuggestionEngine.JoinAcrossSpace"/>
+    public string? JoinAcrossSpace(string previousTyped, string typed, WordContext sentence)
+    {
+        var proximity = Primary.Proximity;
+        (string Word, double Score)? best = null;
+        // Sind beide Stücke in irgendeiner der Sprachen gängige Wörter, bleibt alles, wie es ist.
+        if (_engines.Any(e => e.Engine.IsCommonWord(previousTyped)) && _engines.Any(e => e.Engine.IsCommonWord(typed))) return null;
+
+        foreach (var (_, engine) in _engines)
+        {
+            if (engine.JoinAcrossSpace(previousTyped, typed, sentence, proximity) is { } joined
+                && (best == null || joined.Score > best.Value.Score))
+            {
+                best = joined;
+            }
+        }
+
+        return best?.Word;
+    }
+
+    /// <summary>Nächstes Wort an dieser Stelle im Satz aus allen Sprachen.</summary>
+    public IReadOnlyList<string> Predict(WordContext sentence, int max = 3)
+    {
+        if (!IsMultilingual) return Primary.Predict(sentence, max);
+
+        // Am Satzanfang und nach einem Komma verrät kein Wort die Sprache: die des Layouts zuerst.
+        int context = sentence.PreviousWord == null ? 0 : ContextLanguage(sentence.PreviousWord);
         return _engines
-            .SelectMany((e, i) => e.Engine.PredictScored(previousWord, max)
+            .SelectMany((e, i) => e.Engine.PredictScored(sentence, max)
                 .Select(p => (p.Word, Score: p.Score * Weight(i, context))))
             .OrderByDescending(p => p.Score)
             .Select(p => p.Word)

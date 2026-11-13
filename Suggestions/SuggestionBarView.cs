@@ -35,6 +35,12 @@ public sealed class SuggestionBarView : View
     public const string ChoicePrefix = "choice:";
     public const string ChoiceCloseId = "choice-close";
 
+    /// <summary>Pfeil links neben den Vorschlägen: Werkzeugleiste öffnen; dort der Pfeil zurück zu den Vorschlägen.</summary>
+    public const string ToolbarOpenId = "toolbar-open";
+    public const string ToolbarCloseId = "toolbar-close";
+
+    const float ToggleWidthDp = 40;
+
     enum Mode
     {
         Suggestions,
@@ -59,6 +65,7 @@ public sealed class SuggestionBarView : View
 
     Mode _mode = Mode.Toolbar;
     string? _clipChip;
+    bool _toolbarClosable;
     string _searchQuery = string.Empty;
     IReadOnlyList<string> _searchResults = [];
     string _status = string.Empty;
@@ -117,10 +124,12 @@ public sealed class SuggestionBarView : View
     }
 
     /// <summary>Werkzeugleiste, optional mit dem zuletzt kopierten Text als Vorschlag.</summary>
-    public void Clear(string? clipChip = null)
+    /// <param name="closable">Über den Pfeil geöffnet: links ein Pfeil zurück zu den Vorschlägen.</param>
+    public void Clear(string? clipChip = null, bool closable = false)
     {
         Array.Clear(_slots);
         _clipChip = clipChip;
+        _toolbarClosable = closable;
         _mode = Mode.Toolbar;
         Reset();
     }
@@ -214,12 +223,16 @@ public sealed class SuggestionBarView : View
             return;
         }
 
+        // Wie bei Gboard: ganz links ein Pfeil zur Werkzeugleiste, denn Vorschläge gibt es fast immer.
+        float toggle = ToggleWidthDp * _dp;
+        _targets.Add((new RectF(0, 0, toggle, Height), ToolbarOpenId, string.Empty, Resource.Drawable.ms_arrow_forward));
+
         // Eine Wortfolge rechts bekommt mehr Platz, damit sie lesbar bleibt
         float[] share = _slots[2]?.IsPhrase == true ? [0.27f, 0.31f, 0.42f] : [1 / 3f, 1 / 3f, 1 / 3f];
-        float x = 0;
+        float x = toggle;
         for (int i = 0; i < 3; i++)
         {
-            float w = Width * share[i];
+            float w = (Width - toggle) * share[i];
             if (_slots[i] is { } slot) _targets.Add((new RectF(x, 0, x + w, Height), $"slot{i}", slot.Display, 0));
             x += w;
         }
@@ -237,11 +250,17 @@ public sealed class SuggestionBarView : View
         }
 
         float x = 0;
+        if (_toolbarClosable)
+        {
+            x = ToggleWidthDp * _dp;
+            _targets.Add((new RectF(0, 0, x, Height), ToolbarCloseId, string.Empty, Resource.Drawable.ms_arrow_back));
+        }
+
         if (_clipChip != null)
         {
             float chipWidth = Width * 0.45f;
-            _targets.Add((new RectF(0, 0, chipWidth, Height), ClipChipId, Shorten(_clipChip), Resource.Drawable.ms_content_paste));
-            x = chipWidth;
+            _targets.Add((new RectF(x, 0, x + chipWidth, Height), ClipChipId, Shorten(_clipChip), Resource.Drawable.ms_content_paste));
+            x += chipWidth;
         }
 
         var leading = ToolbarItems.Where(t => !t.Trailing).ToList();
@@ -295,7 +314,7 @@ public sealed class SuggestionBarView : View
             var r = new RectF(bounds.Left + 6 * _dp, bounds.Top + 6 * _dp, bounds.Right - 6 * _dp, bounds.Bottom - 6 * _dp);
             canvas.DrawRoundRect(r, r.Height() / 2, r.Height() / 2, _fill);
         }
-        else if (_mode == Mode.Toolbar && label.Length == 0)
+        else if ((_mode == Mode.Toolbar || id == ToolbarOpenId) && label.Length == 0)
         {
             // Symbol: runde Fläche beim Drücken, das Mikrofon dauerhaft im Kreis
             bool trailing = ToolbarItems.Any(t => t.Id == id && t.Trailing);
@@ -305,7 +324,8 @@ public sealed class SuggestionBarView : View
                 canvas.DrawCircle(bounds.CenterX(), bounds.CenterY(), Math.Min(bounds.Height(), bounds.Width()) * 0.42f, _fill);
             }
 
-            _icons.Draw(canvas, icon, bounds.CenterX(), bounds.CenterY(), 24 * _dp, Theme.Text);
+            bool arrow = id is ToolbarOpenId or ToolbarCloseId;
+            _icons.Draw(canvas, icon, bounds.CenterX(), bounds.CenterY(), (arrow ? 20 : 24) * _dp, arrow ? Theme.HintText : Theme.Text);
             return;
         }
         else if (pressed)
@@ -314,7 +334,7 @@ public sealed class SuggestionBarView : View
             canvas.DrawRect(bounds, _fill);
         }
 
-        if (_mode == Mode.Suggestions && index > 0)
+        if (_mode == Mode.Suggestions && index > 0 && _targets[index - 1].Id != ToolbarOpenId)
         {
             _line.Color = Theme.HintText;
             canvas.DrawLine(bounds.Left, Height * 0.3f, bounds.Left, Height * 0.7f, _line);

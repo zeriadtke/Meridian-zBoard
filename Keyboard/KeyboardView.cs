@@ -70,6 +70,10 @@ public sealed class KeyboardView : View
         public int PointerId { get; } = pointerId;
         public float StartX { get; } = startX;
         public float StartY { get; } = startY;
+
+        /// <summary>Wo der Finger die Taste getroffen hat, die am Ende gilt (beim Rutschen auf eine andere: dort).</summary>
+        public float TapX { get; set; } = startX;
+        public float TapY { get; set; } = startY;
         public bool CursorMode { get; set; }
         public float CursorAnchorX { get; set; }
         public bool Gliding { get; set; }
@@ -119,6 +123,15 @@ public sealed class KeyboardView : View
     readonly Java.Lang.Runnable _repeatRunnable;
     readonly List<PlacedKey> _keys = [];
     readonly Dictionary<char, Vector2> _keyCenters = [];
+
+    /// <summary>Mitten der Buchstabentasten in Tastenbreiten (dieselben Einheiten wie <see cref="TapPoint"/>).</summary>
+    public IReadOnlyDictionary<char, Vector2> KeyCenters => _keyCenters;
+
+    /// <summary>
+    /// Nur während <see cref="IKeyboardActionListener.OnText"/> für eine angetippte Zeichentaste gesetzt: wo der Finger
+    /// die Taste getroffen hat, in Tastenbreiten. Für Zeichen aus dem Popup und alles andere null.
+    /// </summary>
+    public Vector2? TapPoint { get; private set; }
 
     KeyboardLayout? _layout;
     Press? _press;
@@ -868,6 +881,7 @@ public sealed class KeyboardView : View
             if (pk != null && pk != p.Key && pk.Key.IsCharacter)
             {
                 p.Key = pk;
+                (p.TapX, p.TapY) = (x, y);
                 _handler.RemoveCallbacks(_longPressRunnable);
                 if (pk.Key.Alternates.Count > 0) _handler.PostDelayed(_longPressRunnable, LongPressMs);
                 Invalidate();
@@ -925,7 +939,9 @@ public sealed class KeyboardView : View
             {
                 case KeyAction.Character:
                     output = Shifted(key.Label);
+                    TapPoint = ToUnits(p.TapX, p.TapY);
                     Listener?.OnText(output);
+                    TapPoint = null;
                     break;
                 case KeyAction.Space:
                     if (!p.CursorMode)

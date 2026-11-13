@@ -15,7 +15,8 @@
     <Compile Include="../../Suggestions/WordDictionary.cs" Link="Core/WordDictionary.cs" />
     <Compile Include="../../Suggestions/KeyProximity.cs" Link="Core/KeyProximity.cs" />
     <Compile Include="../../Suggestions/SuggestionEngine.cs" Link="Core/SuggestionEngine.cs" />
-    <Compile Include="../../Suggestions/BigramModel.cs" Link="Core/BigramModel.cs" />
+    <Compile Include="../../Suggestions/NgramModel.cs" Link="Core/NgramModel.cs" />
+    <Compile Include="../../Suggestions/TouchTrace.cs" Link="Core/TouchTrace.cs" />
     <Compile Include="../../Suggestions/UserHistory.cs" Link="Core/UserHistory.cs" />
     <Compile Include="../../Suggestions/GlideDecoder.cs" Link="Core/GlideDecoder.cs" />
     <Compile Include="../../Suggestions/MultilingualEngine.cs" Link="Core/MultilingualEngine.cs" />

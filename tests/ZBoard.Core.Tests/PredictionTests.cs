@@ -26,19 +26,19 @@ public class PredictionTests
     }
 
     [Fact]
-    public void Predict_UsesBigrams()
+    public void Predict_UsesLanguageModel()
     {
-        var bigrams = BigramModel.Load(new MemoryStream(Encoding.UTF8.GetBytes(
-            "# Test\nich\thabe\t100\nich\tbin\t80\nich\tkann\t60\ndu\tbist\t50\n")));
-        var engine = new SuggestionEngine(Dictionary(("ich", 10)), Proximity(), bigrams);
+        var model = new NgramModel.Builder()
+            .Add("ich", "habe", 100).Add("ich", "bin", 80).Add("ich", "kann", 60).Add("du", "bist", 50).Build();
+        var engine = new SuggestionEngine(Dictionary(("ich", 10)), Proximity(), model);
 
         Assert.Equal(new[] { "habe", "bin", "kann" }, engine.Predict("Ich"));
     }
 
     [Fact]
-    public void Predict_LearnedSequence_WinsOverBigrams()
+    public void Predict_LearnedSequence_WinsOverLanguageModel()
     {
-        var bigrams = BigramModel.Load(new MemoryStream(Encoding.UTF8.GetBytes("guten\tTag\t100\nguten\tMorgen\t90\n")));
+        var bigrams = new NgramModel.Builder().Add("guten", "Tag", 100).Add("guten", "Morgen", 90).Build();
         var history = new UserHistory();
         history.Learn("guten", "Abend");
         history.Learn("guten", "Abend");
@@ -65,8 +65,9 @@ public class PredictionTests
     [Fact]
     public void Context_PrefersFollowerOfPreviousWord()
     {
-        var bigrams = BigramModel.Load(new MemoryStream(Encoding.UTF8.GetBytes("ich\tbin\t100\n")));
-        var engine = new SuggestionEngine(Dictionary(("bis", 300), ("bin", 100)), Proximity(), bigrams);
+        var model = new NgramModel.Builder()
+            .Add("ich", "bin", 100).Add("ich", "habe", 100).Add("wir", "sind", 400).Add("er", "bis", 300).Add("es", "ist", 2000).Build();
+        var engine = new SuggestionEngine(Dictionary(("bis", 300), ("bin", 100)), Proximity(), model);
 
         Assert.Equal("bis", engine.Suggest("bi").Candidates[0]);
         Assert.Equal("bin", engine.Suggest("bi", previousWord: "ich").Candidates[0]);

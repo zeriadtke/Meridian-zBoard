@@ -9,7 +9,7 @@ namespace ZBoard.Suggestions;
 public sealed class KeyProximity
 {
     const float NeighborCost = 0.5f;
-    const float VariantCost = 0.3f;
+    public const float VariantCost = 0.3f;
     const float DefaultCost = 1f;
 
     static readonly (char A, char B)[] Variants =
@@ -19,6 +19,58 @@ public sealed class KeyProximity
     };
 
     readonly Dictionary<char, (int Row, float X)> _positions = new();
+
+    /// <summary>
+    /// Ist <paramref name="typed"/> nur eine bequeme Schreibweise von <paramref name="word"/> – ohne Umlaute, Akzente
+    /// oder Apostroph getippt ("fur" für "für", "strasse" für "Straße", "dont" für "don't")? Solche Formen entstehen
+    /// nicht durch Danebentippen, sondern mit Absicht, und kommen deshalb viel häufiger vor als andere Fehler.
+    /// Die Richtung zählt: Wer "ändere" tippt, hat den Umlaut bewusst gewählt und meint nicht "andere".
+    /// </summary>
+    public static bool IsLazySpelling(string typed, string word)
+    {
+        if (Fold(typed, "s") != Fold(word, "s") && Fold(typed, "ss") != Fold(word, "ss")) return false;
+
+        // Jedes Sonderzeichen der Eingabe muss auch im Wort stehen (in derselben Reihenfolge), und das Wort hat mehr.
+        string typedMarks = Marks(typed), wordMarks = Marks(word);
+        if (typedMarks.Length >= wordMarks.Length) return false;
+        int i = 0;
+        foreach (char mark in wordMarks)
+        {
+            if (i < typedMarks.Length && typedMarks[i] == mark) i++;
+        }
+
+        return i == typedMarks.Length;
+    }
+
+    /// <summary>Die Umlaute, Akzentbuchstaben und Apostrophe eines Worts in ihrer Reihenfolge.</summary>
+    static string Marks(string text) =>
+        string.Concat(text.Select(char.ToLowerInvariant).Where(c => c == '\'' || Variants.Any(v => v.B == c)));
+
+    /// <summary>Kleinbuchstaben ohne Umlaute, Akzente und Apostrophe; ß wird zu <paramref name="eszett"/>.</summary>
+    static string Fold(string text, string eszett)
+    {
+        var folded = new System.Text.StringBuilder(text.Length + 2);
+        foreach (char raw in text)
+        {
+            char c = char.ToLowerInvariant(raw);
+            if (c == '\'') continue;
+            if (c == 'ß')
+            {
+                folded.Append(eszett);
+                continue;
+            }
+
+            char plain = c;
+            foreach (var (va, vb) in Variants)
+            {
+                if (vb == c) plain = va;
+            }
+
+            folded.Append(plain);
+        }
+
+        return folded.ToString();
+    }
 
     public static KeyProximity FromLayout(KeyboardLayout layout)
     {
@@ -40,6 +92,17 @@ public sealed class KeyProximity
         }
 
         return proximity;
+    }
+
+    /// <summary>Buchstaben der untersten Reihe: Sie liegen direkt über der Leertaste und werden mit ihr verwechselt.</summary>
+    public IReadOnlyList<char> BottomRowLetters
+    {
+        get
+        {
+            if (_positions.Count == 0) return [];
+            int bottom = _positions.Values.Max(p => p.Row);
+            return [.. _positions.Where(p => p.Value.Row == bottom).Select(p => p.Key).Order()];
+        }
     }
 
     public float SubstitutionCost(char a, char b)

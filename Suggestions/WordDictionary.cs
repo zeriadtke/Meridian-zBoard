@@ -172,17 +172,31 @@ public sealed class WordDictionary
         return best.ToArray();
     }
 
+    /// <summary>Ein weggelassener Apostroph ("dont" für "don't") kostet so wenig wie ein weggelassener Umlaut.</summary>
+    public const float MissingApostropheCost = 0.3f;
+
     /// <summary>
     /// Wörter mit gewichteter Editierdistanz ≤ <paramref name="maxDistance"/> zu <paramref name="input"/>.
     /// Damerau-Levenshtein (mit vertauschten Nachbarbuchstaben) über die sortierte Liste: Zeilen gemeinsamer
     /// Präfixe werden wiederverwendet und aussichtslose Präfixe komplett übersprungen (wie die Suche in einem Trie).
     /// </summary>
     public List<(string Word, int Freq, float Distance)> FindSimilar(
-        string input, float maxDistance, Func<char, char, float> substitutionCost, float transpositionCost = 0.6f)
+        string input, float maxDistance, Func<char, char, float> substitutionCost, float transpositionCost = 0.6f) =>
+        FindSimilar(input, maxDistance, (_, typed, candidate) => substitutionCost(typed, candidate), transpositionCost);
+
+    /// <summary>
+    /// Wie <see cref="FindSimilar(string, float, Func{char, char, float}, float)"/>; die Ersetzungskosten hängen
+    /// zusätzlich von der Stelle im getippten Wort ab (Position, getippter Buchstabe, Buchstabe des Kandidaten).
+    /// </summary>
+    public List<(string Word, int Freq, float Distance)> FindSimilar(
+        string input, float maxDistance, Func<int, char, char, float> substitutionCost, float transpositionCost = 0.6f)
     {
         var target = input.ToLowerInvariant();
         int n = target.Length;
-        int maxLen = n + (int)Math.Floor(maxDistance);
+        // Länger als die Eingabe darf ein Wort um die erlaubten Einfügungen sein – und um einen Apostroph, wenn der
+        // Rest der Distanz dafür reicht ("im" → "I'm" bei maxDistance 0,3).
+        float whole = MathF.Floor(maxDistance);
+        int maxLen = n + (int)whole + (maxDistance - whole >= MissingApostropheCost ? 1 : 0);
         List<(string, int, float)> results = [];
         if (_keys.Length == 0) return results;
 
@@ -205,13 +219,13 @@ public sealed class WordDictionary
                 var prev = rows[depth - 1];
                 var row = rows[depth];
                 char ch = key[depth - 1];
-                row[0] = prev[0] + 1;
+                row[0] = prev[0] + (ch == '\'' ? MissingApostropheCost : 1);
                 float rowMin = row[0];
                 for (int j = 1; j <= n; j++)
                 {
                     float insert = row[j - 1] + 1;
-                    float delete = prev[j] + 1;
-                    float replace = prev[j - 1] + (target[j - 1] == ch ? 0 : substitutionCost(target[j - 1], ch));
+                    float delete = prev[j] + (ch == '\'' ? MissingApostropheCost : 1); // Buchstabe des Worts fehlt in der Eingabe
+                    float replace = prev[j - 1] + (target[j - 1] == ch ? 0 : substitutionCost(j - 1, target[j - 1], ch));
                     float v = Math.Min(Math.Min(insert, delete), replace);
                     if (depth >= 2 && j >= 2 && target[j - 1] == key[depth - 2] && target[j - 2] == ch)
                     {

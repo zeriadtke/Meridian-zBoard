@@ -21,18 +21,21 @@ beide Schreibweisen aufgenommen.
 Wer diese Wortlisten verändert und weitergibt, muss sie ebenfalls unter CC BY-SA 4.0 weitergeben.
 Für den Code von zBoard gilt diese Pflicht nicht.
 
-## Assets/dict/de.bigrams.txt und Assets/dict/en.bigrams.txt
+## Assets/dict/*.ngrams.bin
 
-**Lizenz:** [Creative Commons Attribution 3.0 Unported (CC BY 3.0)](https://creativecommons.org/licenses/by/3.0/)
+**Lizenz:** [Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/),
+wie die Wortlisten, deren Wörter und Schreibweisen die Modelle übernehmen.
 
-Die 5 000 häufigsten Wortpaare je Sprache aus dem [Google Books Ngram Corpus](https://books.google.com/ngrams)
-(Bücher von 2010 bis 2019), aufbereitet von [orgtre/google-books-ngram-frequency](https://github.com/orgtre/google-books-ngram-frequency).
-Änderung: Paare mit Satzzeichen oder Ziffern entfernt, in das Format `erstes<TAB>zweites<TAB>häufigkeit` gebracht.
+Sprachmodelle für die Vorhersage: die 200 000 häufigsten Zweier- und 150 000 häufigsten Dreierfolgen von Wörtern je
+Sprache mit ihrer Wahrscheinlichkeit, erstellt mit `tools/NgramBuilder` aus der Satzsammlung von
+[Mozilla Common Voice](https://github.com/common-voice/common-voice) (`server/data/<Sprache>/`): eingesandte Sätze,
+Sätze aus Wikipedia und, für Deutsch, aus den Protokollen des Europäischen Parlaments. Common Voice gibt diese Sätze
+gemeinfrei unter [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) weiter. Die Modelle enthalten keine
+Sätze, nur gezählte Wortfolgen.
 
-## Assets/dict/fr.*, es.*, it.*
+## Assets/dict/fr.txt, es.txt, it.txt
 
-Französisch, Spanisch und Italienisch aus denselben Quellen wie oben: Wortlisten aus FrequencyWords (CC BY-SA 4.0),
-Wortpaare aus dem Google Books Ngram Corpus via orgtre/google-books-ngram-frequency (CC BY 3.0).
+Französisch, Spanisch und Italienisch aus derselben Quelle wie oben: Wortlisten aus FrequencyWords (CC BY-SA 4.0).
 Änderung: auf 80 000 Wörter gekürzt, Tippfehler gefiltert.
 
 ## Assets/emoji/
