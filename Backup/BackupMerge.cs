@@ -3,8 +3,9 @@ namespace ZBoard.Backup;
 /// <summary>
 /// Regeln für die Synchronisation zwischen Geräten. Plattformunabhängig.
 /// <list type="bullet">
-/// <item>Gelernte Wörter, Wortfolgen und E-Mail-Adressen werden vereint (je Eintrag die höhere Anzahl), siehe
-/// <c>UserHistory.MergeFrom</c> und <c>EmailMemory.MergeFrom</c>.</item>
+/// <item>Gelernte Wörter, Wortfolgen, bei Pinyin gewählte Schriftzeichen und E-Mail-Adressen werden vereint (je
+/// Eintrag die höhere Anzahl), siehe <c>UserHistory.MergeFrom</c>, <c>PinyinLearned.MergeFrom</c> und
+/// <c>EmailMemory.MergeFrom</c>.</item>
 /// <item>Einstellungen: die zuletzt geänderten gewinnen als Ganzes. Gerätebezogene Werte (<see cref="IsDeviceKey"/>)
 /// bleiben immer beim Gerät.</item>
 /// </list>

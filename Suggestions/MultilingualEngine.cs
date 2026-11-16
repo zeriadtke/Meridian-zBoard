@@ -57,11 +57,17 @@ public sealed class MultilingualEngine
 
     public bool IsMultilingual => _engines.Length > 1;
 
-    /// <summary>Die aktiven Sprachen für die Eingabe: <paramref name="current"/> zuerst, dann die übrigen in Reihenfolge.</summary>
+    /// <summary>
+    /// Die aktiven Sprachen für die Eingabe: <paramref name="current"/> zuerst, dann die übrigen in Reihenfolge.
+    /// Wie bei Gboard nur Sprachen derselben Schrift (Deutsch + Polnisch, Russisch + Ukrainisch): Mit kyrillischen
+    /// Tasten entsteht kein lateinisches Wort. Chinesisch (Pinyin) steht immer allein.
+    /// </summary>
     public static IReadOnlyList<string> ActiveLanguages(string current, IReadOnlyList<string> enabled, bool multilingual)
     {
-        if (!multilingual) return [current];
-        return [.. enabled.Where(l => l != current).Prepend(current).Distinct(StringComparer.Ordinal).Take(MaxLanguages)];
+        if (!multilingual || current == Keyboard.Layouts.Chinese) return [current];
+        string script = Keyboard.Layouts.Script(current);
+        return [.. enabled.Where(l => l != current && Keyboard.Layouts.Script(l) == script).Prepend(current)
+            .Distinct(StringComparer.Ordinal).Take(MaxLanguages)];
     }
 
     /// <summary>Beschriftung der Leertaste: „DE · EN“ bei mehreren Sprachen.</summary>
@@ -126,7 +132,7 @@ public sealed class MultilingualEngine
             bool solid = analyses.Where((a, i) => a.TypedLearned || IsWordIn(a, i) && !a.CorrectionOverrides).Any();
             if (!solid && best is { } correction && typed.Length >= 2)
             {
-                autoCorrection = SuggestionEngine.MatchCase(correction.Word, typed);
+                autoCorrection = SuggestionEngine.MatchCase(correction.Word, typed, Primary.Language);
             }
             else
             {

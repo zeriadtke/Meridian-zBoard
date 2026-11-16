@@ -67,6 +67,8 @@ public sealed partial class ZBoardImeService
                 }
             }
 
+            var pinyin = parts.HasFlag(BackupParts.Learned) ? CurrentPinyinLearned(context) : null;
+
             return new BackupData
             {
                 AppVersion = appVersion,
@@ -75,6 +77,7 @@ public sealed partial class ZBoardImeService
                 SettingsModified = settings.SettingsModifiedMs,
                 PinnedClips = parts.HasFlag(BackupParts.PinnedClips) ? settings.PinnedClips : null,
                 Learned = learned,
+                Pinyin = pinyin,
                 Emails = parts.HasFlag(BackupParts.Emails) ? Emails(context) : null,
             };
         }
@@ -88,7 +91,11 @@ public sealed partial class ZBoardImeService
     {
         lock (BackupLock)
         {
-            if (data.Learned != null) RestoreLearned(context, data.Learned);
+            if (data.Learned != null)
+            {
+                RestoreLearned(context, data.Learned);
+                RestorePinyinLearned(context, data.Pinyin ?? new PinyinLearned());
+            }
 
             if (data.Emails != null)
             {
@@ -153,6 +160,7 @@ public sealed partial class ZBoardImeService
             Settings = BackupMerge.SyncedSettings(all.Settings!),
             SettingsModified = new ZBoardSettings(context).SettingsModifiedMs,
             Learned = all.Learned,
+            Pinyin = all.Pinyin,
             Emails = all.Emails,
         };
     }
@@ -173,6 +181,8 @@ public sealed partial class ZBoardImeService
                     if (BackupArchive.IsLanguageCode(language)) MergeLearned(context, language, theirs);
                 }
             }
+
+            if (remote.Pinyin != null) MergePinyinLearned(context, remote.Pinyin);
 
             if (remote.Emails != null)
             {

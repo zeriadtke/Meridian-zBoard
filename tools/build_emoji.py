@@ -43,11 +43,36 @@ def load_annotations(cldr, lang):
     return names, keywords
 
 
+PINYIN_TONES = str.maketrans("āáǎàēéěèīíǐìōóǒòūúǔùüǖǘǚǜńňǹ", "aaaaeeeeiiiioooouuuuvvvvvnnn")
+
+
+def load_pinyin(pinyin_data):
+    """Schriftzeichen -> häufigste Lesung ohne Tonzeichen (ü als v, wie auf QWERTY getippt)."""
+    chars = {}
+    for name in ("pinyin.txt", "kMandarin_8105.txt"):  # die zweite Datei nennt die gebräuchlichste Lesung
+        with open(os.path.join(pinyin_data, name), encoding="utf-8") as src:
+            for line in src:
+                line = line.split("#")[0].strip()
+                if line.startswith("U+"):
+                    code, readings = line.split(":", 1)
+                    plain = readings.split(",")[0].strip().translate(PINYIN_TONES)
+                    if plain.isascii() and plain.isalpha():
+                        chars[chr(int(code[2:], 16))] = plain
+    return chars
+
+
+def pinyin_of(text, chars):
+    """Pinyin eines Stichworts aus Schriftzeichen ("笑脸" -> "xiaolian"); None, wenn anderes darin steht."""
+    return "".join(chars[c] for c in text) if text and all(c in chars for c in text) else None
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--emoji-json", required=True)
     p.add_argument("--cldr", required=True)
-    p.add_argument("--languages", default="de,en,fr,es,it")
+    p.add_argument("--languages", default="de,en,fr,es,it,nl,pl,cs,hu,ro,tr,vi,el,ru,uk,bg,ar,zh")
+    p.add_argument("--pinyin-data", help="für zh: https://github.com/mozillazg/pinyin-data (MIT); ergänzt die Stichwörter "
+                   "um ihre Pinyin-Schreibweise, damit die Suche mit der Pinyin-Tastatur trifft")
     p.add_argument("--out-dir", default="Assets/emoji")
     args = p.parse_args()
 
@@ -63,6 +88,7 @@ def main():
                 emojis.append(e)
     print(f"emoji.txt: {len(emojis)} Emoji")
 
+    chars = load_pinyin(args.pinyin_data) if args.pinyin_data else {}
     for lang in args.languages.split(","):
         names, keywords = load_annotations(args.cldr, lang)
         count = 0
@@ -72,6 +98,9 @@ def main():
                 k = key(e["emoji"])
                 name = names.get(k) or e["name"]
                 words = keywords.get(k, [])
+                if lang == "zh" and args.pinyin_data:
+                    readings = [pinyin_of(w, chars) for w in [name] + words]
+                    words = words + list(dict.fromkeys(r for r in readings if r and r not in words))
                 out.write(f"{e['emoji']}\t{name}\t{'|'.join(words)}\n")
                 count += k in names
         print(f"keywords.{lang}.txt: {count} von {len(emojis)} mit Namen in der Sprache")

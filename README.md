@@ -11,7 +11,8 @@
 
 zBoard is a free Android keyboard modelled on Gboard in look, feel and features:
 word suggestions and autocorrect that take the sentence into account, glide typing, next-word prediction, phrase
-suggestions, email suggestions, emoji, clipboard and voice typing for German, English, French, Spanish and Italian.
+suggestions, email suggestions, emoji, clipboard and voice typing in 18 languages – from German and English to Russian,
+Greek, Arabic and Chinese (Pinyin).
 Unlike Gboard, zBoard works completely offline and has no internet permission; whatever it learns from your typing
 stays on your device. Features that need the internet (such as translating with DeepL) come as separate
 plugin apps – only people who install them give them internet access. zBoard is written in C# with .NET 10 for Android.
@@ -25,7 +26,7 @@ Status: **all five milestones done** – testing on real devices, not yet publis
 | License | proprietary, source code not public | BSD 2-Clause (code), word lists and language models CC BY-SA 4.0 |
 | Internet access | yes (GIFs, translation, sync and more) | no internet permission; online features only via separate plugin apps |
 | Learning from your typing | yes, models are improved with Google's servers via federated learning | yes, only on the device, can be turned off and deleted; what you stop using loses weight over time |
-| Languages | a great many languages and layouts | German (QWERTZ), English, Spanish, Italian (QWERTY), French (AZERTY) |
+| Languages | a great many languages and layouts | 18 languages: German, Czech, Hungarian (QWERTZ); English, Spanish, Italian, Dutch, Polish, Romanian, Turkish, Vietnamese (QWERTY); French (AZERTY); Greek; Russian, Ukrainian, Bulgarian (Cyrillic); Arabic; Chinese (Pinyin, simplified characters) |
 | Typing, shift, symbols, long press for accented characters | ✓ | ✓ in Gboard's order, most frequent character preselected |
 | Word suggestions and autocorrect | ✓ | ✓ 120,000 German, 100,000 English words; uses where the finger hit each key; swapped letters, left-out umlauts and apostrophes |
 | Language model | neural network, sees the whole sentence | count table of frequent word sequences, sees the two words before; every value traceable, about 2.4 MB per language |
@@ -43,7 +44,7 @@ Status: **all five milestones done** – testing on real devices, not yet publis
 | Cursor control via space bar, deleting words by swiping | ✓ | ✓ |
 | Key preview, vibration, sound | ✓ | ✓ |
 | Themes | ✓ | light, dark, Material You (colours from the wallpaper) |
-| Emoji keyboard | ✓ | ✓ with categories, skin tones, "recently used" and search in all five languages |
+| Emoji keyboard | ✓ | ✓ with categories, skin tones, "recently used" and search in all 18 languages |
 | Clipboard history | ✓ | ✓ one hour, pinning, sensitive content excluded |
 | Backup & restore (settings, learned words, email addresses, pinned clips) | partly: learned words only via sync with the Google account, personal dictionary export; no settings backup | ✓ as a ZIP file you store wherever you like, no account needed |
 | GIFs and stickers | ✓ | deliberately not (would need internet access) |
@@ -297,6 +298,22 @@ used. zBoard has no internet permission (release build).
   under Settings → Backup & restore. Learned data is united, for settings the most recently changed side wins;
   device-specific things (current language, emoji history, clipboard, plugins) stay on the device. Syncing happens when
   the keyboard opens and closes, at most every 15 minutes.
+- **Languages:** each of the 18 languages comes with its layout, a word list, a language model for prediction and
+  emoji search. Turkish capitalizes i/İ and ı/I correctly; Arabic has no shift key and its own punctuation (، ؟);
+  typing without accents suggests or inserts the right spelling in every language ("dziekuje" → "dziękuję",
+  "ευχαριστω" → "ευχαριστώ", "khong" → "không").
+- **Vietnamese (Telex):** as in Gboard, marks and tones are typed with letters: aa → â, aw → ă, ee → ê, oo → ô,
+  ow → ơ, uw → ư, dd → đ; s, f, r, x, j set the tone ("tieengs" → "tiếng", "dduowcj" → "được"), z removes it. The
+  tone lands on the right vowel by itself ("toans" → "toán", "hoaf" → "hòa"). The same key again takes the change
+  back ("ass" → "as"); words of several syllables ("online") stay as typed. Can be turned off under
+  Settings → Languages; every character is still available by long press.
+- **Chinese (Pinyin):** type Pinyin without tone marks on QWERTY (ü as v); what you type is underlined in the text
+  and the bar shows the simplified characters – words spelled exactly like that, whole sentences from the longest
+  matching words ("womenshipengyou" → 我们是朋友), words you have started and shorter words for the beginning of your
+  input. The row scrolls sideways with your finger; space takes the first (bold) candidate, Enter keeps the letters.
+  zBoard remembers your choices on the device: a candidate chosen once moves to second place, chosen twice to
+  first – whole sentences too. Your choices belong to the learned words: they are part of the backup
+  (`learning/zh.pinyin.tsv`) and are merged with those of other devices when syncing. After a word is inserted, zBoard predicts the next one. Emoji search understands Pinyin ("xiaolian" → 😀).
 - **Multilingual typing:** Like Gboard, zBoard uses the dictionaries of all active languages at once (up to three); the
   space bar then shows e.g. “DE · EN”. An English word in a German sentence is not “corrected”, typos are corrected into
   the matching language, and what you write is learned in the language the word belongs to. If the previous word clearly
@@ -319,13 +336,31 @@ python3 tools/build_emoji.py --emoji-json unicode-emoji-json/data-by-group.json 
 
 The logo, the app icon and the icons of the plugin apps (World of Bytes colours) are generated by `python3 tools/build_logo.py`; the Play Store graphics by `node tools/render_store_graphics.js`.
 
-More dictionary languages: `--extra fr:fr_full.txt` (see `tools/build_dictionaries.py --help`).
+More dictionary languages: `--extra fr:fr_full.txt` (see `tools/build_dictionaries.py --help`); without
+`--freq-de`/`--freq-en` only those are built. Chinese including the Pinyin table:
+
+```bash
+git clone --depth 1 https://github.com/mozillazg/pinyin-data
+git clone --depth 1 https://github.com/mozillazg/phrase-pinyin-data
+python3 tools/build_dictionaries.py --freq-zh FrequencyWords/content/2018/zh_cn/zh_cn_full.txt \
+  --pinyin-data pinyin-data --phrase-pinyin-data phrase-pinyin-data
+```
+
+For the Chinese language model the sentences must be split into words first (one space between words, e.g. with
+[jieba](https://github.com/fxsjy/jieba)); pass that file to `tools/NgramBuilder` with `--source`. For
+`keywords.zh.txt`, `tools/build_emoji.py --pinyin-data pinyin-data` adds the Pinyin spelling of the keywords.
+
+A new language needs: layout, name, script and locale in `Keyboard/Layouts.cs`, a word list and language model in
+`Assets/dict/`, and `Assets/emoji/keywords.<language>.txt`. `LanguagesTests` then checks, among other things, that
+the 3000 most frequent words can be typed with the layout.
 
 ## Next steps
 
 - Testing on real devices: typing feel, glide recognition with real paths, loading time and memory of the
   dictionaries and language models, voice typing on devices with and without offline recognition
 - Checking the autocorrect thresholds against real typing (so far tuned on simulated typing only)
-- Test sentences for French, Spanish and Italian; more everyday text for the language models
+- Test sentences for every language except German and English; more everyday text for the language models (Greek,
+  Vietnamese and Romanian have only a few thousand sentences so far)
+- Checking the 13 new languages on real devices, especially Arabic (right-to-left) and Chinese
 - F-Droid metadata
 - More user-interface languages (French, Spanish, Italian)

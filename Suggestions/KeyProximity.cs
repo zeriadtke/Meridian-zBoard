@@ -12,11 +12,25 @@ public sealed class KeyProximity
     public const float VariantCost = 0.3f;
     const float DefaultCost = 1f;
 
-    static readonly (char A, char B)[] Variants =
+    /// <summary>
+    /// Buchstaben mit Zusatzzeichen und ihr Grundbuchstabe, paarweise hintereinander ("äa", "ęe", "ắa", "άα", "ёе" …):
+    /// alle lateinischen und griechischen Kleinbuchstaben, die Unicode in Grundbuchstabe und Zeichen zerlegt, dazu
+    /// ł, đ, ı, ø, kyrillisch ё, ґ, ѝ und die arabischen Alif-Formen. ß steht für sich (siehe <see cref="Fold"/>).
+    /// </summary>
+    const string VariantPairs =
+        "àaáaâaãaäaåaçcèeéeêeëeìiíiîiïiñnòoóoôoõoöoøoùuúuûuüuýyÿyāaăaąaćcĉcċcčcďdđdēeĕeėeęeěeĝgğgġgģgĥhĩiīiĭiįiıiĵjķkĺlļlľlłlńnņnňnōoŏoőoŕrŗrřrśsŝsşsšsţtťtũuūuŭuůuűuųuŵwŷyźzżzžzơoưuǎaǐiǒoǔuǖuǘuǚuǜuǟaǡaǧgǩkǫoǭoǰjǵgǹnǻaȁaȃaȅeȇeȉiȋiȍoȏoȑrȓrȕuȗușsțtȟhȧaȩeȫoȭoȯoȱoȳyΐιάαέεήηίιΰυϊιϋυόούυώωёеѝиґгآاأاإاٱاḁaḃbḅbḇbḉcḋdḍdḏdḑdḓdḕeḗeḙeḛeḝeḟfḡgḣhḥhḧhḩhḫhḭiḯiḱkḳkḵkḷlḹlḻlḽlḿmṁmṃmṅnṇnṉnṋnṍoṏoṑoṓoṕpṗpṙrṛrṝrṟrṡsṣsṥsṧsṩsṫtṭtṯtṱtṳuṵuṷuṹuṻuṽvṿvẁwẃwẅwẇwẉwẋxẍxẏyẑzẓzẕzẖhẗtẘwẙyạaảaấaầaẩaẫaậaắaằaẳaẵaặaẹeẻeẽeếeềeểeễeệeỉiịiọoỏoốoồoổoỗoộoớoờoởoỡoợoụuủuứuừuửuữuựuỳyỵyỷyỹy";
+
+    static readonly Dictionary<char, char> BaseLetters = BuildBaseLetters();
+
+    static Dictionary<char, char> BuildBaseLetters()
     {
-        ('a', 'ä'), ('o', 'ö'), ('u', 'ü'), ('s', 'ß'),
-        ('e', 'é'), ('e', 'è'), ('a', 'à'), ('c', 'ç'), ('n', 'ñ'),
-    };
+        var map = new Dictionary<char, char>(VariantPairs.Length / 2);
+        for (int i = 0; i + 1 < VariantPairs.Length; i += 2) map[VariantPairs[i]] = VariantPairs[i + 1];
+        return map;
+    }
+
+    /// <summary>Der Buchstabe ohne Umlaut, Akzent oder Tonzeichen ("ä" → "a", "ệ" → "e"); sonst der Buchstabe selbst.</summary>
+    public static char BaseLetter(char c) => BaseLetters.TryGetValue(c, out char plain) ? plain : c;
 
     readonly Dictionary<char, (int Row, float X)> _positions = new();
 
@@ -44,7 +58,7 @@ public sealed class KeyProximity
 
     /// <summary>Die Umlaute, Akzentbuchstaben und Apostrophe eines Worts in ihrer Reihenfolge.</summary>
     static string Marks(string text) =>
-        string.Concat(text.Select(char.ToLowerInvariant).Where(c => c == '\'' || Variants.Any(v => v.B == c)));
+        string.Concat(text.Select(char.ToLowerInvariant).Where(c => c == '\'' || c == 'ß' || BaseLetters.ContainsKey(c)));
 
     /// <summary>Kleinbuchstaben ohne Umlaute, Akzente und Apostrophe; ß wird zu <paramref name="eszett"/>.</summary>
     static string Fold(string text, string eszett)
@@ -60,13 +74,7 @@ public sealed class KeyProximity
                 continue;
             }
 
-            char plain = c;
-            foreach (var (va, vb) in Variants)
-            {
-                if (vb == c) plain = va;
-            }
-
-            folded.Append(plain);
+            folded.Append(BaseLetter(c));
         }
 
         return folded.ToString();
@@ -108,10 +116,8 @@ public sealed class KeyProximity
     public float SubstitutionCost(char a, char b)
     {
         if (a == b) return 0f;
-        foreach (var (va, vb) in Variants)
-        {
-            if ((a == va && b == vb) || (a == vb && b == va)) return VariantCost;
-        }
+        if ((a == 's' && b == 'ß') || (a == 'ß' && b == 's')) return VariantCost;
+        if (BaseLetter(a) == BaseLetter(b)) return VariantCost; // "a"/"ä", aber auch "é"/"è"
 
         if (_positions.TryGetValue(a, out var pa) && _positions.TryGetValue(b, out var pb))
         {

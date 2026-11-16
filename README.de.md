@@ -11,7 +11,8 @@
 
 zBoard ist eine freie Android-Tastatur, die sich in Bedienung und Funktionsumfang an Gboard orientiert:
 Wortvorschläge und Autokorrektur mit Satzkontext, Wischeingabe, Nächstes-Wort-Vorhersage, Wortfolgen,
-E-Mail-Vorschläge, Emoji, Zwischenablage und Spracheingabe für Deutsch, Englisch, Französisch, Spanisch und Italienisch.
+E-Mail-Vorschläge, Emoji, Zwischenablage und Spracheingabe in 18 Sprachen – von Deutsch und Englisch über Russisch,
+Griechisch und Arabisch bis Chinesisch (Pinyin).
 Anders als Gboard arbeitet zBoard vollständig offline und ohne Internetberechtigung; was es aus deinen Eingaben
 lernt, bleibt auf dem Gerät. Funktionen, die Internet brauchen (etwa Übersetzen mit DeepL), kommen als eigene
 Plugin-Apps dazu – nur wer sie installiert, gibt ihnen Internetzugriff. Geschrieben ist zBoard in C# mit .NET 10 for Android.
@@ -25,7 +26,7 @@ Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, 
 | Lizenz | proprietär, Quellcode nicht öffentlich | BSD 2-Clause (Code), Wortlisten und Sprachmodelle CC BY-SA 4.0 |
 | Internetzugriff | ja (u. a. GIFs, Übersetzen, Synchronisation) | keine Internetberechtigung; Internet-Funktionen nur über eigene Plugin-Apps |
 | Lernen aus Eingaben | ja, Modelle werden per Federated Learning mit Google-Servern verbessert | ja, ausschließlich auf dem Gerät, abschaltbar und löschbar; lange nicht Benutztes verliert an Gewicht |
-| Sprachen | sehr viele Sprachen und Layouts | Deutsch (QWERTZ), Englisch, Spanisch, Italienisch (QWERTY), Französisch (AZERTY) |
+| Sprachen | sehr viele Sprachen und Layouts | 18 Sprachen: Deutsch, Tschechisch, Ungarisch (QWERTZ); Englisch, Spanisch, Italienisch, Niederländisch, Polnisch, Rumänisch, Türkisch, Vietnamesisch (QWERTY); Französisch (AZERTY); Griechisch; Russisch, Ukrainisch, Bulgarisch (kyrillisch); Arabisch; Chinesisch (Pinyin, vereinfachte Schriftzeichen) |
 | Tippen, Umschalt, Symbole, langer Druck für Sonderzeichen | ✓ | ✓ in Gboard-Reihenfolge, häufigstes Zeichen vorausgewählt |
 | Wortvorschläge und Autokorrektur | ✓ | ✓ 120 000 deutsche, 100 000 englische Wörter; rechnet mit der Stelle, an der der Finger die Taste traf; Vertauschungen, weggelassene Umlaute und Apostrophe |
 | Sprachmodell | neuronales Netz, sieht den ganzen Satz | Zähltabelle häufiger Wortfolgen, sieht die zwei Wörter davor; jeder Wert nachvollziehbar, rund 2,4 MB je Sprache |
@@ -43,7 +44,7 @@ Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, 
 | Cursor per Leertaste, Wort-Löschen per Wischen | ✓ | ✓ |
 | Tastenvorschau, Vibration, Ton | ✓ | ✓ |
 | Designs | ✓ | hell, dunkel, Material You (Farben aus dem Hintergrundbild) |
-| Emoji-Tastatur | ✓ | ✓ mit Kategorien, Hauttönen, „Zuletzt verwendet“ und Suche in allen fünf Sprachen |
+| Emoji-Tastatur | ✓ | ✓ mit Kategorien, Hauttönen, „Zuletzt verwendet“ und Suche in allen 18 Sprachen |
 | Zwischenablage-Verlauf | ✓ | ✓ eine Stunde, Anheften, vertrauliche Inhalte ausgenommen |
 | Sichern & wiederherstellen (Einstellungen, gelernte Wörter, E-Mail-Adressen, angeheftete Zwischenablage) | teilweise: gelernte Wörter nur per Synchronisation mit dem Google-Konto, Export des persönlichen Wörterbuchs; keine Sicherung der Einstellungen | ✓ als ZIP-Datei, die du ablegst, wo du willst – ohne Konto |
 | GIFs und Sticker | ✓ | bewusst nicht (bräuchte Internetzugriff) |
@@ -298,6 +299,22 @@ von Google werden nicht übernommen. zBoard hat keine Internet-Berechtigung (Rel
   Nextcloud …). Einschalten unter Einstellungen → Sichern & wiederherstellen. Gelerntes wird vereint, bei Einstellungen
   gewinnt die zuletzt geänderte Seite; Gerätebezogenes (aktuelle Sprache, Emoji-Verlauf, Zwischenablage, Plugins) bleibt
   auf dem Gerät. Abgeglichen wird beim Öffnen und Schließen der Tastatur, höchstens alle 15 Minuten.
+- **Sprachen:** Jede der 18 Sprachen bringt ihr Layout, eine Wortliste, ein Sprachmodell für die Vorhersage und die
+  Emoji-Suche mit. Türkisch schreibt i/İ und ı/I richtig groß und klein; Arabisch hat keine Umschalttaste und eigene
+  Satzzeichen (، ؟); wer ohne Akzente tippt, bekommt in allen Sprachen die richtige Schreibweise vorgeschlagen bzw. eingesetzt
+  („dziekuje“ → „dziękuję“, „ευχαριστω“ → „ευχαριστώ“, „khong“ → „không“).
+- **Vietnamesisch (Telex):** wie bei Gboard entstehen Zusatz- und Tonzeichen durch Buchstaben: aa → â, aw → ă, ee → ê,
+  oo → ô, ow → ơ, uw → ư, dd → đ; s, f, r, x, j setzen den Ton („tieengs“ → „tiếng“, „dduowcj“ → „được“), z entfernt
+  ihn. Der Ton steht von selbst an der richtigen Stelle („toans“ → „toán“, „hoaf“ → „hòa“). Dieselbe Taste noch einmal
+  nimmt die Umwandlung zurück („ass“ → „as“); Wörter mit mehreren Silben („online“) bleiben unverändert. Abschaltbar
+  unter Einstellungen → Sprachen; alle Zeichen gibt es weiterhin per langem Druck.
+- **Chinesisch (Pinyin):** Pinyin ohne Tonzeichen auf QWERTY tippen (ü als v); das Getippte steht unterstrichen im
+  Text, die Leiste zeigt die vereinfachten Schriftzeichen – Wörter, die genau so geschrieben werden, ganze Sätze aus
+  den längsten passenden Wörtern („womenshipengyou“ → 我们是朋友), angefangene Wörter und kürzere Wörter für den Anfang
+  der Eingabe. Die Zeile lässt sich mit dem Finger seitlich schieben; die Leertaste nimmt den ersten (fetten) Vorschlag, Enter
+  die Buchstaben. Was du wählst, merkt sich zBoard auf dem Gerät: Einmal Gewähltes rückt auf den zweiten Platz, beim
+  zweiten Mal auf den ersten – auch ganze Sätze. Die gewählten Zeichen gehören zu den gelernten Wörtern: Sie stehen
+  in der Sicherung (`learning/zh.pinyin.tsv`) und werden bei der Synchronisation mit denen anderer Geräte vereint. Nach einem eingesetzten Wort sagt zBoard das nächste vorher. Die Emoji-Suche versteht Pinyin („xiaolian“ → 😀).
 - **Mehrsprachige Eingabe:** Wie bei Gboard gelten die Wörterbücher aller aktiven Sprachen gleichzeitig (bis zu drei),
   auf der Leertaste steht dann z. B. „DE · EN“. Ein englisches Wort wird in einem deutschen Satz nicht „korrigiert“,
   Tippfehler werden in die passende Sprache korrigiert, und was du schreibst, lernt zBoard in der Sprache, zu der das Wort
@@ -321,13 +338,31 @@ python3 tools/build_emoji.py --emoji-json unicode-emoji-json/data-by-group.json 
 
 Das Logo, das App-Symbol und die Symbole der Plugin-Apps (Farben von World of Bytes) erzeugt `python3 tools/build_logo.py`, die Play-Store-Grafiken `node tools/render_store_graphics.js`.
 
-Weitere Sprachen für die Wörterbücher: `--extra fr:fr_full.txt` (siehe `tools/build_dictionaries.py --help`).
+Weitere Sprachen für die Wörterbücher: `--extra fr:fr_full.txt` (siehe `tools/build_dictionaries.py --help`); ohne
+`--freq-de`/`--freq-en` entstehen nur diese. Chinesisch samt Pinyin-Tabelle:
+
+```bash
+git clone --depth 1 https://github.com/mozillazg/pinyin-data
+git clone --depth 1 https://github.com/mozillazg/phrase-pinyin-data
+python3 tools/build_dictionaries.py --freq-zh FrequencyWords/content/2018/zh_cn/zh_cn_full.txt \
+  --pinyin-data pinyin-data --phrase-pinyin-data phrase-pinyin-data
+```
+
+Für das chinesische Sprachmodell müssen die Sätze vorher in Wörter zerlegt sein (ein Leerzeichen zwischen den Wörtern,
+z. B. mit [jieba](https://github.com/fxsjy/jieba)); die Datei geht dann mit `--source` an `tools/NgramBuilder`.
+Für `keywords.zh.txt` ergänzt `tools/build_emoji.py --pinyin-data pinyin-data` die Pinyin-Schreibweise der Stichwörter.
+
+Eine neue Sprache braucht: Layout, Name, Schrift und Gebietsschema in `Keyboard/Layouts.cs`, Wortliste und Sprachmodell
+in `Assets/dict/`, `Assets/emoji/keywords.<Sprache>.txt`. `LanguagesTests` prüft dann unter anderem, dass sich die
+3000 häufigsten Wörter mit dem Layout tippen lassen.
 
 ## Nächste Schritte
 
 - Test auf echten Geräten: Tippgefühl, Wischerkennung mit echten Spuren, Ladezeit und Speicher der Wörterbücher
   und Sprachmodelle, Spracheingabe auf Geräten mit und ohne Offline-Erkennung
 - Schwellen der Autokorrektur an echtem Tippen prüfen (bisher nur an simuliertem abgestimmt)
-- Testsätze für Französisch, Spanisch und Italienisch; mehr Alltagstext für die Sprachmodelle
+- Testsätze für alle Sprachen außer Deutsch und Englisch; mehr Alltagstext für die Sprachmodelle (für Griechisch,
+  Vietnamesisch und Rumänisch gibt es bisher nur wenige tausend Sätze)
+- Die 13 neuen Sprachen auf echten Geräten prüfen, besonders Arabisch (Schreibrichtung) und Chinesisch
 - F-Droid-Metadaten
 - Weitere Sprachen für die Oberfläche (Französisch, Spanisch, Italienisch)

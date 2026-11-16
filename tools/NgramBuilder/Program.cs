@@ -25,7 +25,7 @@ for (int i = 0; i < args.Length; i++)
                 string name = Path.GetFileName(file);
                 if (name.StartsWith("singleword", StringComparison.Ordinal)) continue;
                 sources.Add((file, name.StartsWith("wiki", StringComparison.Ordinal) ? 0.15
-                    : name.StartsWith("europarl", StringComparison.Ordinal) ? 1.0 : 10.0));
+                    : name.Contains("europarl", StringComparison.Ordinal) ? 1.0 : 10.0));
             }
 
             break;
@@ -69,7 +69,8 @@ if (words == null || output == null || sources.Count == 0)
 WordDictionary dictionary;
 using (var stream = File.OpenRead(words))
 {
-    dictionary = WordDictionary.Load(stream);
+    // Die Sprache steht im Dateinamen (tr.txt): Türkisch schreibt i/İ und ı/I anders groß und klein.
+    dictionary = WordDictionary.Load(stream, language: Path.GetFileNameWithoutExtension(words));
 }
 
 var builder = new NgramModel.Builder();

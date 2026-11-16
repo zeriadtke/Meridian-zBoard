@@ -181,10 +181,8 @@ public sealed class SettingsActivity : Activity
     string LanguageSummary()
     {
         return string.Join(", ", _settings.Languages.Select(code =>
-            $"{Layouts.LanguageNames.GetValueOrDefault(code, code)} ({LayoutName(code)})"));
+            $"{Layouts.LanguageNames.GetValueOrDefault(code, code)} ({Layouts.LayoutName(code)})"));
     }
-
-    static string LayoutName(string code) => code switch { "de" => "QWERTZ", "fr" => "AZERTY", _ => "QWERTY" };
 
     void BuildSetupCard()
     {
@@ -226,7 +224,7 @@ public sealed class SettingsActivity : Activity
         Section(L.T("Aktive Sprachen", "Active languages"));
         foreach (var (code, name) in Layouts.LanguageNames)
         {
-            Toggle(name, LayoutName(code), _settings.Languages.Contains(code), (view, isChecked) =>
+            Toggle(name, Layouts.LayoutName(code), _settings.Languages.Contains(code), (view, isChecked) =>
             {
                 var list = _settings.Languages.ToList();
                 if (isChecked && !list.Contains(code)) list.Add(code);
@@ -244,8 +242,10 @@ public sealed class SettingsActivity : Activity
         }
 
         Toggle(L.T("Mehrsprachige Eingabe", "Multilingual typing"),
-            L.T("Vorschläge und Autokorrektur in allen aktiven Sprachen gleichzeitig (bis zu drei), auf der Leertaste z. B. „DE · EN“",
-                "Suggestions and autocorrect in all active languages at once (up to three), e.g. “DE · EN” on the space bar"),
+            L.T("Vorschläge und Autokorrektur in allen aktiven Sprachen derselben Schrift gleichzeitig (bis zu drei), "
+                + "auf der Leertaste z. B. „DE · EN“ oder „RU · UK“",
+                "Suggestions and autocorrect in all active languages of the same script at once (up to three), "
+                + "e.g. “DE · EN” or “RU · UK” on the space bar"),
             _settings.MultilingualTyping, (_, v) => _settings.MultilingualTyping = v);
 
         Note(L.T("Zum Wechseln lange auf die Leertaste drücken und die Sprache wählen. Bei mehrsprachiger Eingabe wechselt das nur "
@@ -257,6 +257,14 @@ public sealed class SettingsActivity : Activity
         Toggle(L.T("Eigene Tasten für ü, ö, ä", "Separate keys for ü, ö, ä"),
             L.T("Sonst per langem Druck auf u, o, a (ß auf s)", "Otherwise by long-pressing u, o, a (ß on s)"),
             _settings.UmlautKeys, (_, v) => _settings.UmlautKeys = v);
+
+        Section("Tiếng Việt");
+        Toggle("Telex",
+            L.T("Zeichen und Töne durch Buchstaben: aa → â, aw → ă, dd → đ, s f r x j für die Töne, z entfernt den Ton. "
+                + "Dieselbe Taste noch einmal nimmt es zurück.",
+                "Marks and tones by letters: aa → â, aw → ă, dd → đ, s f r x j for the tones, z removes the tone. "
+                + "The same key again takes it back."),
+            _settings.VietnameseTelex, (_, v) => _settings.VietnameseTelex = v);
     }
 
     void BuildPreferences()
@@ -677,6 +685,10 @@ public sealed class SettingsActivity : Activity
             string languages = string.Join(", ", data.Learned.Keys.Order(StringComparer.Ordinal)
                 .Select(code => Layouts.LanguageNames.GetValueOrDefault(code, code)));
             lines.Add(L.T($"{words} gelernte Wörter", $"{words} learned words") + (languages.Length > 0 ? $" ({languages})" : string.Empty));
+            if (data.Pinyin is { Count: > 0 } pinyin)
+            {
+                lines.Add(L.T($"{pinyin.Count} gewählte Schriftzeichen (Pinyin)", $"{pinyin.Count} chosen characters (Pinyin)"));
+            }
         }
 
         if (data.Emails != null) lines.Add(L.T($"{data.Emails.Count} E-Mail-Adresse(n)", $"{data.Emails.Count} email address(es)"));
@@ -829,6 +841,8 @@ public sealed class SettingsActivity : Activity
              + L.T("Wortlisten (CC BY-SA 4.0): FrequencyWords von Hermit Dave auf Basis von OpenSubtitles 2018; "
                    + "Großschreibung deutscher Substantive nach german-nouns von Gregor Weichbrodt auf Basis von Wiktionary. "
                    + "Lizenz: creativecommons.org/licenses/by-sa/4.0\n\n"
+                   + "Chinesisch: Lesungen der Schriftzeichen (Pinyin) nach pinyin-data und phrase-pinyin-data "
+                   + "von mozillazg (MIT).\n\n"
                    + "Sprachmodelle für die Vorhersage: Wortfolgen aus der Satzsammlung von Mozilla Common Voice "
                    + "(gemeinfrei, CC0), in der Schreibweise der Wortlisten.\n\n"
                    + "Emoji-Daten: unicode-emoji-json von Mu-An Chiou (MIT); Namen und Suchbegriffe: Unicode CLDR "
@@ -837,6 +851,8 @@ public sealed class SettingsActivity : Activity
                  "Word lists (CC BY-SA 4.0): FrequencyWords by Hermit Dave based on OpenSubtitles 2018; "
                    + "capitalization of German nouns from german-nouns by Gregor Weichbrodt based on Wiktionary. "
                    + "License: creativecommons.org/licenses/by-sa/4.0\n\n"
+                   + "Chinese: character readings (pinyin) from pinyin-data and phrase-pinyin-data "
+                   + "by mozillazg (MIT).\n\n"
                    + "Language models for prediction: word sequences from the Mozilla Common Voice sentence "
                    + "collection (public domain, CC0), spelled as in the word lists.\n\n"
                    + "Emoji data: unicode-emoji-json by Mu-An Chiou (MIT); names and keywords: Unicode CLDR "

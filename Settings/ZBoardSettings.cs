@@ -149,6 +149,13 @@ public sealed class ZBoardSettings
         set => PutBool("umlautKeys", value);
     }
 
+    /// <summary>Vietnamesisch: Telex (aa → â, s/f/r/x/j setzen den Ton) wie bei Gboard; sonst nur per langem Druck.</summary>
+    public bool VietnameseTelex
+    {
+        get => _prefs.GetBoolean("vietnameseTelex", true);
+        set => PutBool("vietnameseTelex", value);
+    }
+
     /// <summary>Ziffernreihe über den Buchstaben.</summary>
     public bool NumberRow
     {

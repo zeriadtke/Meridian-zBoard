@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Erzeugt die zBoard-Wörterbücher Assets/dict/de.txt und Assets/dict/en.txt.
+Erzeugt die zBoard-Wörterbücher in Assets/dict/: de.txt und en.txt, mit --extra weitere Sprachen, mit --freq-zh
+Chinesisch (zh.txt und die Pinyin-Tabelle zh.pinyin.txt).
 
 Quellen (per git holen, siehe README "Wörterbücher neu erzeugen"):
   --freq-de / --freq-en  FrequencyWords (OpenSubtitles 2018), CC BY-SA 4.0
@@ -25,6 +26,7 @@ Format der Ausgabe: eine Schreibweise pro Zeile, "wort<TAB>häufigkeit".
 import argparse
 import csv
 import re
+import unicodedata
 
 WORD = re.compile(r"^[^\W\d_][\w'\-]*$", re.UNICODE)
 
@@ -307,16 +309,181 @@ def drop_transposition_typos(lines, skip_capitalized):
     return [(w, f) for w, f in lines if w.lower() not in typos]
 
 
-def build_other(path, limit, min_freq):
-    """Weitere Sprachen (Französisch, Spanisch, Italienisch …): Häufigkeitsliste, Einbuchstabenwörter nur mit Akzent/Apostroph."""
-    lines = []
+# Wörter aus einem Buchstaben je Sprache; alle anderen Einbuchstaben-Einträge der Quelle sind Bruchstücke.
+SINGLE_LETTER_WORDS = {
+    "fr": "ayoeàèé", "es": "ayoeàèé", "it": "ayoeàèé",
+    "nl": "u", "pl": "aiouwz", "cs": "aikosuvz", "hu": "aőseó", "ro": "aeo", "tr": "o",
+    "ru": "авикосуя", "uk": "авзійоуяє", "bg": "ависеяоу", "el": "ηοαήω", "ar": "و",
+}
+
+# Sprachen mit eigener Schrift: Nur Wörter aus diesen Buchstaben (die Untertitel enthalten viel Englisch).
+ALPHABETS = {
+    "ru": "абвгдеёжзийклмнопрстуфхцчшщъыьэюя",
+    "uk": "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя'",
+    "bg": "абвгдежзийклмнопрстуфхцчшщъьюяѝ",
+    "el": "αβγδεζηθικλμνξοπρσςτυφχψωάέήίόύώϊϋΐΰ",
+    "ar": "ءآأؤإئابةتثجحخدذرزسشصضطظعغفقكلمنهوىي",
+}
+# Arabische Vokalzeichen und Dehnungsstrich: gehören nicht zur Schreibweise eines Worts im Wörterbuch
+ROMANIAN_COMMA = str.maketrans("şţ", "șț")
+ARABIC_MARKS = dict.fromkeys(list(range(0x064B, 0x0653)) + [0x0640, 0x0670])
+
+
+# Viele Untertitel sind ohne Akzente getippt ("dziekuje", "multumesc"); solche Einträge hielte zBoard für richtige
+# Wörter und korrigierte sie nicht. Ein Eintrag ohne Zusatzzeichen entfällt deshalb, wenn dieselbe Buchstabenfolge
+# mit Zusatzzeichen um diesen Faktor häufiger ist: (Faktor, Mindestlänge). Kurze Wörter bleiben, dort gibt es echte
+# Paare ("sa"/"să"). Rumänische Untertitel lassen die Zeichen besonders oft weg, deshalb der kleine Faktor.
+LAZY_SPELLING = {
+    "pl": (20, 4), "cs": (20, 4), "hu": (20, 4), "tr": (20, 4), "vi": (20, 2), "el": (20, 4), "nl": (20, 4),
+    "ro": (3, 5),
+}
+FOLD_EXTRA = str.maketrans("łđı", "ldi")
+
+
+def fold(word):
+    """Das Wort ohne Akzente, Häkchen und Tonzeichen ("dziękuję" -> "dziekuje")."""
+    plain = "".join(c for c in unicodedata.normalize("NFD", word) if unicodedata.category(c) != "Mn")
+    return plain.translate(FOLD_EXTRA)
+
+
+def drop_lazy_spellings(lang, merged):
+    if lang not in LAZY_SPELLING:
+        return merged
+    ratio, min_length = LAZY_SPELLING[lang]
+    marked = {}
+    for word, freq in merged.items():
+        key = fold(word)
+        if key != word:
+            marked[key] = max(marked.get(key, 0), freq)
+    lazy = {w for w, f in merged.items() if len(w) >= min_length and marked.get(w, 0) >= ratio * f}
+    print(f"  {len(lazy)} Einträge ohne Zusatzzeichen entfernt")
+    return {w: f for w, f in merged.items() if w not in lazy}
+
+
+def is_latin(word):
+    return all(not c.isalpha() or unicodedata.name(c, "").startswith("LATIN") for c in word)
+
+
+def build_other(lang, path, limit, min_freq):
+    """
+    Weitere Sprachen: Häufigkeitsliste; Einbuchstabenwörter nur, wenn es sie in der Sprache gibt, und nur Wörter
+    in der Schrift der Sprache. Im Vietnamesischen ist fast jede Silbe ein Wort, auch ein einzelner Vokal mit Ton.
+    """
+    singles = SINGLE_LETTER_WORDS.get(lang, "")
+    alphabet = ALPHABETS.get(lang)
+    merged = {}
     for word, freq in load_frequencies(path, min_freq):
-        if len(word) < 2 and word not in ("a", "y", "o", "e", "à", "è", "é"):
+        word = unicodedata.normalize("NFC", word)
+        if lang == "ar":
+            word = word.translate(ARABIC_MARKS)
+        elif lang == "ro":
+            word = word.translate(ROMANIAN_COMMA)  # die Untertitel schreiben ş/ţ mit Cedille statt ș/ț mit Komma
+        if not word:
             continue
-        lines.append((word, freq))
-        if len(lines) >= limit:
-            break
-    return lines
+        if alphabet is not None:
+            if any(c not in alphabet and c != "-" for c in word) or word[0] in "-'":
+                continue
+        elif not is_latin(word):
+            continue
+        if len(word) < 2 and word not in singles and not (lang == "vi" and ord(word) > 127):
+            continue
+        merged[word] = merged.get(word, 0) + freq
+    merged = drop_lazy_spellings(lang, merged)
+    lines = sorted(merged.items(), key=lambda e: e[1], reverse=True)
+    return lines[:limit]
+
+
+# ---------- Chinesisch (Pinyin) ----------
+
+PINYIN_TONES = {
+    "ā": "a", "á": "a", "ǎ": "a", "à": "a", "ē": "e", "é": "e", "ě": "e", "è": "e", "ế": "e", "ề": "e", "ê": "e",
+    "ī": "i", "í": "i", "ǐ": "i", "ì": "i", "ō": "o", "ó": "o", "ǒ": "o", "ò": "o",
+    "ū": "u", "ú": "u", "ǔ": "u", "ù": "u", "ü": "v", "ǖ": "v", "ǘ": "v", "ǚ": "v", "ǜ": "v",
+    "ń": "n", "ň": "n", "ǹ": "n", "ḿ": "m",
+}
+
+
+def plain_pinyin(syllable):
+    """Pinyin ohne Tonzeichen, ü als v (so wird es auf QWERTY getippt): "lǜ" → "lv"."""
+    plain = "".join(PINYIN_TONES.get(c, c) for c in unicodedata.normalize("NFC", syllable.strip().lower()))
+    return plain if plain.isascii() and plain.isalpha() else None
+
+
+def load_char_pinyin(pinyin_data):
+    """Zeichen -> Lesungen (häufigste zuerst) für die 8105 Zeichen der Liste allgemein gebräuchlicher Schriftzeichen."""
+    def read(name):
+        table = {}
+        with open(f"{pinyin_data}/{name}", encoding="utf-8") as src:
+            for line in src:
+                line = line.split("#")[0].strip()
+                if not line.startswith("U+"):
+                    continue
+                code, readings = line.split(":", 1)
+                plain = [p for p in (plain_pinyin(r) for r in readings.split(",")) if p]
+                if plain:
+                    table[chr(int(code[2:], 16))] = list(dict.fromkeys(plain))
+        return table
+
+    common = read("kMandarin_8105.txt")
+    every = read("kXHC1983.txt")  # Lesungen des Wörterbuchs der modernen chinesischen Sprache
+    return {c: list(dict.fromkeys(first + every.get(c, []))) for c, first in common.items()}
+
+
+def load_phrase_pinyin(phrase_data):
+    phrases = {}
+    for name in ("large_pinyin.txt", "pinyin.txt", "overwrite.txt"):  # spätere Dateien haben Vorrang
+        with open(f"{phrase_data}/{name}", encoding="utf-8") as src:
+            for line in src:
+                line = line.split("#")[0].strip()
+                if ":" not in line:
+                    continue
+                phrase, readings = line.split(":", 1)
+                plain = [plain_pinyin(r) for r in readings.split()]
+                if len(plain) == len(phrase.strip()) and all(plain):
+                    phrases[phrase.strip()] = plain
+    return phrases
+
+
+def build_chinese(args):
+    """
+    zh.txt: Wörter in vereinfachten Schriftzeichen mit Häufigkeit (für die Vorhersage).
+    zh.pinyin.txt: "pinyin<TAB>wort<TAB>häufigkeit" (für die Eingabe); einzelne Zeichen mit allen Lesungen.
+    """
+    chars = load_char_pinyin(args.pinyin_data)
+    phrases = load_phrase_pinyin(args.phrase_pinyin_data)
+    words, pinyin = [], []
+    seen = set()
+    with open(args.freq_zh, encoding="utf-8") as src:
+        for line in src:
+            parts = line.split()
+            if len(parts) != 2 or not parts[1].isdigit():
+                continue
+            word, freq = parts[0], int(parts[1])
+            if freq < args.min_freq or len(word) > 8 or word in seen or any(c not in chars for c in word):
+                continue  # auch: traditionelle Zeichen, Latein, Ziffern
+            seen.add(word)
+            words.append((word, freq))
+            if len(word) == 1:
+                for i, reading in enumerate(chars[word]):
+                    pinyin.append((reading, word, max(1, freq // (1 if i == 0 else 20 * i))))
+            else:
+                reading = phrases.get(word) or [chars[c][0] for c in word]
+                pinyin.append(("".join(reading), word, freq))
+            if len(words) >= args.limit_zh:
+                break
+    for char, readings in chars.items():  # seltene Zeichen, die in den Untertiteln fehlen
+        if char not in seen:
+            words.append((char, 1))
+            pinyin.extend((reading, char, 1) for reading in readings)
+
+    note = ("Quellen: FrequencyWords (OpenSubtitles 2018, CC BY-SA 4.0); Zeichen der Liste allgemein gebräuchlicher "
+            "Schriftzeichen und Lesungen nach pinyin-data und phrase-pinyin-data (MIT)")
+    write(f"{args.out_dir}/zh.txt", words, note)
+    with open(f"{args.out_dir}/zh.pinyin.txt", "w", encoding="utf-8") as dst:
+        dst.write(f"# {note}\n")
+        for reading, word, freq in sorted(pinyin, key=lambda e: (e[0], -e[2], e[1])):
+            dst.write(f"{reading}\t{word}\t{freq}\n")
+    print(f"{args.out_dir}/zh.pinyin.txt: {len(pinyin)} Zeilen")
 
 
 def write(path, lines, source_note):
@@ -329,10 +496,14 @@ def write(path, lines, source_note):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--freq-de", required=True)
-    p.add_argument("--freq-en", required=True)
-    p.add_argument("--nouns", required=True)
-    p.add_argument("--hunspell-de", required=True)
+    p.add_argument("--freq-de")
+    p.add_argument("--freq-en")
+    p.add_argument("--nouns")
+    p.add_argument("--hunspell-de")
+    p.add_argument("--freq-zh", help="Chinesisch: zh_cn_full.txt; braucht --pinyin-data und --phrase-pinyin-data")
+    p.add_argument("--pinyin-data", help="https://github.com/mozillazg/pinyin-data (MIT)")
+    p.add_argument("--phrase-pinyin-data", help="https://github.com/mozillazg/phrase-pinyin-data (MIT)")
+    p.add_argument("--limit-zh", type=int, default=60_000)
     p.add_argument("--out-dir", default="Assets/dict")
     p.add_argument("--limit-de", type=int, default=120_000)
     p.add_argument("--limit-en", type=int, default=100_000)
@@ -342,14 +513,23 @@ def main():
     p.add_argument("--limit-extra", type=int, default=80_000)
     args = p.parse_args()
 
-    write(f"{args.out_dir}/de.txt", drop_transposition_typos(build_german(args), skip_capitalized=True),
-          "Quellen: FrequencyWords (OpenSubtitles 2018, CC BY-SA 4.0), Großschreibung nach german-nouns/Wiktionary (CC BY-SA 4.0)")
-    write(f"{args.out_dir}/en.txt", drop_transposition_typos(build_english(args), skip_capitalized=False),
-          "Quelle: FrequencyWords (OpenSubtitles 2018, CC BY-SA 4.0)")
+    # Deutsch und Englisch nur, wenn ihre Quellen angegeben sind (weitere Sprachen lassen sich einzeln erzeugen)
+    if args.freq_de:
+        if not (args.nouns and args.hunspell_de):
+            p.error("--freq-de braucht --nouns und --hunspell-de")
+        write(f"{args.out_dir}/de.txt", drop_transposition_typos(build_german(args), skip_capitalized=True),
+              "Quellen: FrequencyWords (OpenSubtitles 2018, CC BY-SA 4.0), Großschreibung nach german-nouns/Wiktionary (CC BY-SA 4.0)")
+    if args.freq_en:
+        write(f"{args.out_dir}/en.txt", drop_transposition_typos(build_english(args), skip_capitalized=False),
+              "Quelle: FrequencyWords (OpenSubtitles 2018, CC BY-SA 4.0)")
+    if args.freq_zh:
+        if not (args.pinyin_data and args.phrase_pinyin_data):
+            p.error("--freq-zh braucht --pinyin-data und --phrase-pinyin-data")
+        build_chinese(args)
     for spec in args.extra:
         lang, freq_path = spec.split(":")[:2]
         write(f"{args.out_dir}/{lang}.txt",
-              drop_transposition_typos(build_other(freq_path, args.limit_extra, args.min_freq), skip_capitalized=False),
+              drop_transposition_typos(build_other(lang, freq_path, args.limit_extra, args.min_freq), skip_capitalized=False),
               "Quelle: FrequencyWords (OpenSubtitles 2018, CC BY-SA 4.0)")
 
 

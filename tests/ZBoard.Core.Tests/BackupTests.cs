@@ -201,4 +201,109 @@ public class BackupTests
         zip.Position = 0;
         return zip;
     }
+
+    // ---------- Bei Pinyin gewählte Schriftzeichen ----------
+
+    static PinyinLearned Chosen(params (string Pinyin, string Word, int Times)[] choices)
+    {
+        var learned = new PinyinLearned();
+        foreach (var (pinyin, word, times) in choices)
+        {
+            for (int i = 0; i < times; i++) learned.Learn(pinyin, word);
+        }
+
+        return learned;
+    }
+
+    [Fact]
+    public void PinyinChoices_AreSavedWithTheLearnedPart()
+    {
+        var restored = RoundTrip(new BackupData
+        {
+            Learned = new Dictionary<string, UserHistory> { ["zh"] = Learned("你好") },
+            Pinyin = Chosen(("ni", "尼", 3), ("nihaohao", "你好好", 1)),
+        });
+
+        Assert.Equal(2, restored.Pinyin!.Count);
+        Assert.Equal(3, restored.Pinyin.CountOf("ni", "尼"));
+        Assert.Equal(1, restored.Pinyin.CountOf("nihaohao", "你好好"));
+        Assert.Equal(new[] { "zh" }, restored.Learned!.Keys); // die Datei zählt nicht als Sprache "zh.pinyin"
+    }
+
+    [Fact]
+    public void PinyinChoices_AreNotWrittenWithoutTheLearnedPart()
+    {
+        var restored = RoundTrip(new BackupData { PinnedClips = "x", Pinyin = Chosen(("ni", "尼", 1)) });
+        Assert.Null(restored.Learned);
+        Assert.Null(restored.Pinyin);
+    }
+
+    /// <summary>Sicherung ohne solche Datei (ältere Version, oder nie Chinesisch getippt): leer, nicht null – Wiederherstellen ersetzt.</summary>
+    [Fact]
+    public void BackupWithLearnedPartButNoPinyinChoices_ReadsAsEmpty()
+    {
+        var restored = RoundTrip(new BackupData { Learned = new Dictionary<string, UserHistory>(), Pinyin = new PinyinLearned() });
+        Assert.NotNull(restored.Pinyin);
+        Assert.Equal(0, restored.Pinyin.Count);
+    }
+
+    [Fact]
+    public void PinyinChoices_Merge_TakesTheHigherCount_AndIsIdempotent()
+    {
+        var mine = Chosen(("ni", "你", 1), ("ni", "尼", 4));
+        var theirs = Chosen(("ni", "你", 3), ("ma", "妈", 2));
+
+        Assert.True(mine.MergeFrom(theirs));
+        Assert.Equal(3, mine.CountOf("ni", "你"));
+        Assert.Equal(4, mine.CountOf("ni", "尼"));
+        Assert.Equal(2, mine.CountOf("ma", "妈"));
+        Assert.True(mine.IsDirty);
+        Assert.Equal(new[] { "尼", "你" }, mine.For("ni").Select(e => e.Word));
+
+        Assert.False(mine.MergeFrom(theirs)); // zweimal abgleichen zählt nichts doppelt
+        Assert.False(mine.MergeFrom(mine));
+    }
+
+    [Fact]
+    public void PinyinChoices_ReplaceWith_DropsWhatWasThere()
+    {
+        var mine = Chosen(("ni", "尼", 4));
+        mine.ReplaceWith(Chosen(("ma", "妈", 2)));
+        Assert.Equal(0, mine.CountOf("ni", "尼"));
+        Assert.Equal(2, mine.CountOf("ma", "妈"));
+        Assert.False(mine.IsDirty);
+
+        mine.ReplaceWith(new PinyinLearned());
+        Assert.Equal(0, mine.Count);
+    }
+
+    /// <summary>Was aus der Sicherung kommt, wirkt in der Eingabe: das Gewählte steht wieder vorn.</summary>
+    [Fact]
+    public void RestoredPinyinChoices_RankCandidatesAgain()
+    {
+        var restored = RoundTrip(new BackupData
+        {
+            Learned = new Dictionary<string, UserHistory>(),
+            Pinyin = Chosen(("ni", "尼", 2)),
+        });
+
+        var engine = PinyinEngine.FromEntries([("ni", "你", 100), ("ni", "尼", 10)]);
+        Assert.Equal("你", engine.Candidates("ni")[0].Text);
+        engine.Learned.ReplaceWith(restored.Pinyin!);
+        Assert.Equal("尼", engine.Candidates("ni")[0].Text);
+    }
+
+    [Fact]
+    public void PinyinChoices_SaveCopy_KeepsDirty_AndLoadSkipsBrokenLines()
+    {
+        var learned = Chosen(("ni", "尼", 2));
+        using var copy = new MemoryStream();
+        learned.SaveCopy(copy);
+        Assert.True(learned.IsDirty);
+        Assert.Equal("ni\t尼\t2\n", System.Text.Encoding.UTF8.GetString(copy.ToArray()));
+
+        var loaded = PinyinLearned.Load(new MemoryStream(System.Text.Encoding.UTF8.GetBytes("ni\t尼\t2\n../x\t尼\t2\nni\t\t1\nni\t你\t-3\n")));
+        Assert.Equal(1, loaded.Count);
+        Assert.False(loaded.IsDirty);
+    }
 }

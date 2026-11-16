@@ -27,7 +27,7 @@ Alles, was du tippst, bleibt auf deinem Gerät. zBoard hat keine Internet-Berech
 sammelt keine Daten.
 
 TIPPEN WIE GEWOHNT
-• Wortvorschläge und Autokorrektur für Deutsch, Englisch, Französisch, Spanisch und Italienisch
+• Wortvorschläge und Autokorrektur in 18 Sprachen: Deutsch, Englisch, Französisch, Spanisch, Italienisch, Niederländisch, Polnisch, Tschechisch, Ungarisch, Rumänisch, Türkisch, Vietnamesisch, Griechisch, Russisch, Ukrainisch, Bulgarisch, Arabisch und Chinesisch (Pinyin)
 • Vorschläge für das nächste Wort, bevor du zu tippen beginnst
 • Deutsche Substantive werden automatisch großgeschrieben
 • Lernt deine Wörter – nur auf dem Gerät, abschaltbar und jederzeit löschbar
@@ -71,7 +71,7 @@ zBoard is a fast, modern keyboard for Android – free, open source and offline.
 Everything you type stays on your device. zBoard has no internet permission, shows no ads and collects no data.
 
 TYPE THE WAY YOU'RE USED TO
-• Word suggestions and auto-correction for English, German, French, Spanish and Italian
+• Word suggestions and auto-correction in 18 languages: English, German, French, Spanish, Italian, Dutch, Polish, Czech, Hungarian, Romanian, Turkish, Vietnamese, Greek, Russian, Ukrainian, Bulgarian, Arabic and Chinese (Pinyin)
 • Next-word suggestions before you start typing
 • Learns your words – on the device only, can be turned off and deleted at any time
 • Backup & restore: take your settings and dictionary along as a file – no account needed

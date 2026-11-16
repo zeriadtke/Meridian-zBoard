@@ -33,10 +33,50 @@ Sätze aus Wikipedia und, für Deutsch, aus den Protokollen des Europäischen Pa
 gemeinfrei unter [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) weiter. Die Modelle enthalten keine
 Sätze, nur gezählte Wortfolgen.
 
-## Assets/dict/fr.txt, es.txt, it.txt
+## Assets/dict/fr.txt, es.txt, it.txt und die Wortlisten der weiteren Sprachen
 
-Französisch, Spanisch und Italienisch aus derselben Quelle wie oben: Wortlisten aus FrequencyWords (CC BY-SA 4.0).
-Änderung: auf 80 000 Wörter gekürzt, Tippfehler gefiltert.
+Französisch, Spanisch, Italienisch, Niederländisch, Polnisch, Tschechisch, Ungarisch, Rumänisch, Türkisch,
+Vietnamesisch, Griechisch, Russisch, Ukrainisch, Bulgarisch und Arabisch aus derselben Quelle wie oben: Wortlisten
+aus FrequencyWords (CC BY-SA 4.0). Änderung: auf 80 000 Wörter gekürzt, Tippfehler gefiltert. Bei den Sprachen ab
+Niederländisch außerdem: nur Wörter in der Schrift der Sprache; Einträge ohne Akzente entfernt, wenn dieselbe
+Buchstabenfolge mit Akzenten deutlich häufiger ist; Rumänisch mit ș/ț statt ş/ţ; Arabisch ohne Vokalzeichen.
+
+## Assets/dict/zh.txt, zh.pinyin.txt
+
+Chinesisch: Wörter und Häufigkeiten aus FrequencyWords (`zh_cn`, CC BY-SA 4.0), beschränkt auf die 8105 Zeichen der
+Liste allgemein gebräuchlicher Schriftzeichen (vereinfacht). Die Pinyin-Lesungen stammen aus
+[pinyin-data](https://github.com/mozillazg/pinyin-data) und
+[phrase-pinyin-data](https://github.com/mozillazg/phrase-pinyin-data) von mozillazg (beide MIT, © 2016/2017 mozillazg);
+Änderung: Tonzeichen entfernt, ü als v. Beide Dateien stehen wie die übrigen Wortlisten unter CC BY-SA 4.0.
+
+Das chinesische Sprachmodell (`zh.ngrams.bin`) entstand aus den Common-Voice-Sätzen, vorher mit
+[jieba](https://github.com/fxsjy/jieba) (MIT) in Wörter zerlegt; jieba selbst ist nicht enthalten.
+
+Lizenztext von pinyin-data (Copyright (c) 2016 mozillazg) und phrase-pinyin-data (Copyright (c) 2017 mozillazg):
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2016 mozillazg
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
 
 ## Assets/emoji/
 
