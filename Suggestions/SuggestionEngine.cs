@@ -129,6 +129,9 @@ public sealed class SuggestionEngine
 
     public UserHistory History => _history;
 
+    /// <summary>Sprache des Wörterbuchs, soweit sie die Groß- und Kleinschreibung bestimmt (siehe <see cref="WordDictionary.Language"/>).</summary>
+    public string? Language => _dictionary.Language;
+
     /// <summary>Der Nutzer hat dieses Wort bewusst so gewollt (Autokorrektur rückgängig gemacht).</summary>
     public void SuppressCorrection(string word) => _noCorrection.Add(word);
 
@@ -150,7 +153,7 @@ public sealed class SuggestionEngine
         {
             if ((!analysis.TypedIsWord || analysis.CorrectionOverrides) && analysis.Correction is { } correction && typed.Length >= 2)
             {
-                autoCorrection = MatchCase(correction.Word, typed);
+                autoCorrection = MatchCase(correction.Word, typed, _dictionary.Language);
             }
             else if (analysis.NounForm is { } noun)
             {
@@ -177,7 +180,7 @@ public sealed class SuggestionEngine
         if (string.IsNullOrWhiteSpace(typed)) return SuggestionAnalysis.Empty;
         proximity ??= _proximity;
 
-        var lower = typed.ToLowerInvariant();
+        var lower = _dictionary.Lower(typed);
         bool learned = _history.IsKnown(lower);
         int typedFrequency = _dictionary.Lookup(lower)?.Freq ?? ApostropheFormFrequency(lower);
 
@@ -310,7 +313,7 @@ public sealed class SuggestionEngine
         // Alle Schreibweisen der besten Wörter anbieten ("frage" und "Frage"); OrderByDescending ist stabil.
         var candidates = scores
             .OrderByDescending(s => s.Value)
-            .SelectMany(s => FormsOf(s.Key).Select(form => (Word: MatchCase(form, typed), Score: s.Value)))
+            .SelectMany(s => FormsOf(s.Key).Select(form => (Word: MatchCase(form, typed, _dictionary.Language), Score: s.Value)))
             .DistinctBy(c => c.Word, StringComparer.Ordinal)
             .Take(max)
             .ToList();
@@ -627,7 +630,7 @@ public sealed class SuggestionEngine
     public (string Word, double Score)? JoinAcrossSpace(
         string previousTyped, string typed, WordContext context, KeyProximity? proximity = null)
     {
-        string first = previousTyped.ToLowerInvariant(), second = typed.ToLowerInvariant();
+        string first = _dictionary.Lower(previousTyped), second = _dictionary.Lower(typed);
         if (first.Length == 0 || second.Length == 0 || first.Length + second.Length < MinJoinedLength) return null;
         if (!first.All(char.IsLetter) || !second.All(char.IsLetter) || _dictionary.TotalFrequency == 0) return null;
 
@@ -657,7 +660,7 @@ public sealed class SuggestionEngine
             : Analyze(typed, new WordContext(previousTyped, context.Previous), proximity).Correction?.Score ?? 0;
         if (!firstIsWord && !secondIsWord) aloneScore /= DistancePenaltyBase;
 
-        return best.Value.Score > aloneScore ? (MatchCase(best.Value.Word, previousTyped), best.Value.Score) : null;
+        return best.Value.Score > aloneScore ? (MatchCase(best.Value.Word, previousTyped, _dictionary.Language), best.Value.Score) : null;
     }
 
     /// <summary>Schreibweisen aus dem Wörterbuch, sonst das (gelernte) Wort selbst.</summary>
@@ -700,12 +703,13 @@ public sealed class SuggestionEngine
     static bool IsLowerCase(string text) => text.Length > 0 && !text.Any(char.IsUpper);
 
     /// <summary>Übernimmt die Großschreibung der Eingabe: "Hal" → "Hallo", "HAL" → "HALLO", "haus" → "Haus" (Wörterbuchform).</summary>
-    public static string MatchCase(string word, string typed)
+    /// <param name="language">Sprache für die Großschreibung (Türkisch: "istanbul" → "İstanbul").</param>
+    public static string MatchCase(string word, string typed, string? language = null)
     {
         if (typed.Length == 0) return word;
         bool allUpper = typed.Length > 1 && typed.Where(char.IsLetter).All(char.IsUpper);
-        if (allUpper) return word.ToUpperInvariant();
-        if (char.IsUpper(typed[0])) return char.ToUpperInvariant(word[0]) + word[1..];
+        if (allUpper) return TextCase.Upper(word, language);
+        if (char.IsUpper(typed[0])) return TextCase.Capitalize(word, language);
         return word;
     }
 }

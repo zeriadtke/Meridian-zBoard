@@ -20,6 +20,10 @@
     <Compile Include="../../Suggestions/UserHistory.cs" Link="Core/UserHistory.cs" />
     <Compile Include="../../Suggestions/GlideDecoder.cs" Link="Core/GlideDecoder.cs" />
     <Compile Include="../../Suggestions/MultilingualEngine.cs" Link="Core/MultilingualEngine.cs" />
+    <Compile Include="../../Suggestions/PinyinEngine.cs" Link="Core/PinyinEngine.cs" />
+    <Compile Include="../../Suggestions/PinyinLearned.cs" Link="Core/PinyinLearned.cs" />
+    <Compile Include="../../Suggestions/Telex.cs" Link="Core/Telex.cs" />
+    <Compile Include="../../Suggestions/CandidateStrip.cs" Link="Core/CandidateStrip.cs" />
     <Compile Include="../../Ime/TextBoundaries.cs" Link="Core/TextBoundaries.cs" />
     <Compile Include="../../Emoji/EmojiCatalog.cs" Link="Core/EmojiCatalog.cs" />
     <Compile Include="../../Clipboard/ClipboardHistory.cs" Link="Core/ClipboardHistory.cs" />

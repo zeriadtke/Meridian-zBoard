@@ -36,7 +36,7 @@ public static class TextBoundaries
 
         int i = trimmed.Length - 1;
         while (i > 0 && trimmed[i] is '"' or '\'' or '“' or '”' or '‘' or '’' or '»' or '«' or ')' or ']') i--;
-        return trimmed[i] is '.' or '!' or '?' or '…';
+        return trimmed[i] is '.' or '!' or '?' or '…' or '。' or '！' or '？' or '؟';
     }
 
     static bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c is '\'' or '-';

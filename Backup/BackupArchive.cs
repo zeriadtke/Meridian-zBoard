@@ -27,6 +27,13 @@ public sealed class BackupData
     /// <summary>Gelernte Wörter und Wortfolgen pro Sprache ("de", "en" …).</summary>
     public IReadOnlyDictionary<string, UserHistory>? Learned { get; init; }
 
+    /// <summary>
+    /// Bei der Pinyin-Eingabe gewählte Schriftzeichen. Gehört zum Teil "Gelernt": wird nur zusammen mit
+    /// <see cref="Learned"/> geschrieben; beim Lesen einer Sicherung mit diesem Teil nie <c>null</c> (leer, wenn die
+    /// Sicherung keine enthält, etwa aus einer älteren Version).
+    /// </summary>
+    public PinyinLearned? Pinyin { get; init; }
+
     /// <summary>Gemerkte E-Mail-Adressen.</summary>
     public EmailMemory? Emails { get; init; }
 
@@ -58,6 +65,7 @@ public sealed class BackupException(BackupError error, string message, Exception
 /// settings.json          Einstellungen nach Typ getrennt
 /// clipboard/pinned.txt   angeheftete Zwischenablage
 /// learning/&lt;sprache&gt;.tsv gelernte Wörter (Format von UserHistory)
+/// learning/zh.pinyin.tsv bei Pinyin gewählte Schriftzeichen (Format von PinyinLearned)
 /// learning/emails.tsv    E-Mail-Adressen (Format von EmailMemory)
 /// </code>
 /// Plattformunabhängig; das Lesen prüft alles, bevor etwas übernommen wird.
@@ -79,6 +87,9 @@ public static partial class BackupArchive
     const string PinnedEntry = "clipboard/pinned.txt";
     const string LearningPrefix = "learning/";
     const string EmailsEntry = "learning/emails.tsv";
+
+    /// <summary>Der Punkt im Namen ist kein gültiger Sprachcode: Ältere Versionen übergehen den Eintrag einfach.</summary>
+    const string PinyinEntry = "learning/zh.pinyin.tsv";
 
     const string PartSettings = "settings";
     const string PartClipboard = "clipboard";
@@ -128,6 +139,8 @@ public static partial class BackupArchive
                     if (!IsLanguageCode(language)) throw new ArgumentException($"Ungültiger Sprachcode: {language}", nameof(data));
                     WriteEntry(zip, $"{LearningPrefix}{language}.tsv", stream => history.SaveCopy(stream));
                 }
+
+                if (data.Pinyin is { Count: > 0 } pinyin) WriteEntry(zip, PinyinEntry, stream => pinyin.SaveCopy(stream));
             }
 
             if (data.Emails != null)
@@ -272,8 +285,12 @@ public static partial class BackupArchive
         }
 
         Dictionary<string, UserHistory>? learned = null;
+        PinyinLearned? pinyin = null;
         if (parts.Contains(PartLearned))
         {
+            pinyin = zip.GetEntry(PinyinEntry) is { } pinyinEntry
+                ? PinyinLearned.Load(new MemoryStream(ReadBytes(pinyinEntry)))
+                : new PinyinLearned();
             learned = new Dictionary<string, UserHistory>(StringComparer.Ordinal);
             foreach (var entry in zip.Entries)
             {
@@ -299,6 +316,7 @@ public static partial class BackupArchive
             SettingsModified = settingsModified,
             PinnedClips = pinned,
             Learned = learned,
+            Pinyin = pinyin,
             Emails = emails,
         };
     }

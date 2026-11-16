@@ -35,11 +35,16 @@ public sealed class SuggestionBarView : View
     public const string ChoicePrefix = "choice:";
     public const string ChoiceCloseId = "choice-close";
 
+    /// <summary>Präfix der Einträge der durchgehenden Vorschlagszeile ("cand:0", "cand:1" …).</summary>
+    const string CandidatePrefix = "cand:";
+
     /// <summary>Pfeil links neben den Vorschlägen: Werkzeugleiste öffnen; dort der Pfeil zurück zu den Vorschlägen.</summary>
     public const string ToolbarOpenId = "toolbar-open";
     public const string ToolbarCloseId = "toolbar-close";
 
     const float ToggleWidthDp = 40;
+    const float CandidateTextDp = 20;
+    const float DragSlopDp = 8;     // ab dieser Strecke gilt eine Berührung der Vorschlagszeile als Schieben
 
     enum Mode
     {
@@ -53,6 +58,9 @@ public sealed class SuggestionBarView : View
 
         /// <summary>Einträge zur Auswahl (Plugin-Aktionen, Rückgängig) und ein Kreuz zum Schließen.</summary>
         Choices,
+
+        /// <summary>Durchgehende Zeile beliebig vieler Vorschläge, seitlich verschiebbar (Schriftzeichen bei Pinyin).</summary>
+        Candidates,
     }
 
     readonly float _dp;
@@ -76,6 +84,12 @@ public sealed class SuggestionBarView : View
     string _removeLabel = string.Empty;
     IReadOnlyList<string> _choices = [];
     int _statusIcon = Resource.Drawable.ms_mic;
+    IReadOnlyList<string> _candidates = [];
+    CandidateStrip? _strip;     // Anordnung der Vorschlagszeile; null, bis gezeichnet wurde
+    float _scroll;              // so weit ist die Vorschlagszeile nach links geschoben
+    float _downX;
+    float _downScroll;
+    bool _dragging;
 
     public SuggestionBarView(Context context) : base(context)
     {
@@ -96,6 +110,9 @@ public sealed class SuggestionBarView : View
 
     /// <summary>Emoji aus der Suchzeile angetippt.</summary>
     public event Action<string>? EmojiPicked;
+
+    /// <summary>Eintrag der durchgehenden Vorschlagszeile angetippt (Index in der Liste aus <see cref="SetCandidates"/>).</summary>
+    public event Action<int>? CandidatePicked;
 
     public KeyboardTheme Theme
     {
@@ -120,6 +137,24 @@ public sealed class SuggestionBarView : View
         Reset();
 #if DEBUG || ZBOARD_TESTHOOKS
         Android.Util.Log.Info("zBoardTest", "SUGGESTIONS " + string.Join("|", _slots.Select(s => s?.Word ?? "")));
+#endif
+    }
+
+    /// <summary>
+    /// Durchgehende Vorschlagszeile wie bei Gboards Pinyin-Tastatur: alle Einträge nebeneinander, der erste fett
+    /// (ihn nimmt die Leertaste); mit dem Finger seitlich schieben zeigt die weiteren.
+    /// </summary>
+    public void SetCandidates(IReadOnlyList<string> candidates)
+    {
+        bool same = _mode == Mode.Candidates && candidates.SequenceEqual(_candidates);
+        _candidates = candidates;
+        _strip = null;
+        if (!same) _scroll = 0;
+        _dragging = false;
+        _mode = Mode.Candidates;
+        Reset();
+#if DEBUG || ZBOARD_TESTHOOKS
+        Android.Util.Log.Info("zBoardTest", "CANDIDATES " + string.Join("|", candidates.Take(8)));
 #endif
     }
 
@@ -197,6 +232,9 @@ public sealed class SuggestionBarView : View
                 break;
             case Mode.Choices:
                 LayoutChoices();
+                break;
+            case Mode.Candidates:
+                LayoutCandidates();
                 break;
             case Mode.Remove:
                 _targets.Add((new RectF(0, 0, Width * 0.7f, Height), RemoveId, "🗑 " + _removeLabel, 0));
@@ -288,6 +326,26 @@ public sealed class SuggestionBarView : View
         _targets.Add((new RectF(Width - close, 0, Width, Height), ChoiceCloseId, "✕", 0));
     }
 
+    void LayoutCandidates()
+    {
+        if (_strip == null)
+        {
+            _text.SetTypeface(Typeface.DefaultBold); // der breiteste Fall: der erste Eintrag steht fett
+            _text.TextSize = CandidateTextDp * _dp;
+            var widths = new float[_candidates.Count];
+            for (int i = 0; i < widths.Length; i++) widths[i] = _text.MeasureText(_candidates[i]);
+            _strip = new CandidateStrip(widths, 14 * _dp, 48 * _dp);
+        }
+
+        _scroll = _strip.Clamp(_scroll, Width);
+        var (first, end) = _strip.Visible(_scroll, Width);
+        for (int i = first; i < end; i++)
+        {
+            var (left, right) = _strip.Bounds(i);
+            _targets.Add((new RectF(left - _scroll, 0, right - _scroll, Height), CandidatePrefix + i, _candidates[i], 0));
+        }
+    }
+
     void LayoutEmojiSearch()
     {
         float pillWidth = Width * 0.35f;
@@ -334,16 +392,19 @@ public sealed class SuggestionBarView : View
             canvas.DrawRect(bounds, _fill);
         }
 
-        if (_mode == Mode.Suggestions && index > 0 && _targets[index - 1].Id != ToolbarOpenId)
+        if ((_mode == Mode.Suggestions && index > 0 && _targets[index - 1].Id != ToolbarOpenId)
+            || (_mode == Mode.Candidates && index > 0))
         {
             _line.Color = Theme.HintText;
             canvas.DrawLine(bounds.Left, Height * 0.3f, bounds.Left, Height * 0.7f, _line);
         }
 
-        bool emphasized = id.StartsWith("slot") && _slots[id[^1] - '0']?.Emphasized == true;
+        bool emphasized = _mode == Mode.Candidates
+            ? id == CandidatePrefix + "0"
+            : id.StartsWith("slot") && _slots[id[^1] - '0']?.Emphasized == true;
         _text.SetTypeface(emphasized ? Typeface.DefaultBold : Typeface.Default);
         _text.Color = _mode == Mode.Status ? Theme.Accent : Theme.Text;
-        _text.TextSize = (id.StartsWith("emoji:") || _mode == Mode.Toolbar && !pill ? 20 : 17) * _dp;
+        _text.TextSize = (_mode == Mode.Candidates ? CandidateTextDp : id.StartsWith("emoji:") || _mode == Mode.Toolbar && !pill ? 20 : 17) * _dp;
 
         float iconSize = icon != 0 ? 20 * _dp : 0;
         float iconGap = icon != 0 ? 6 * _dp : 0;
@@ -383,12 +444,25 @@ public sealed class SuggestionBarView : View
                 _pressed = index;
                 _downTime = e.EventTime;
                 _longPressFired = false;
+                _downX = e.GetX();
+                _downScroll = _scroll;
+                _dragging = false;
                 int generation = ++_pressGeneration;
                 if (index >= 0 && _mode == Mode.Suggestions) PostDelayed(() => OnLongPress(generation, index), ViewConfiguration.LongPressTimeout);
                 Invalidate();
                 break;
 
             case MotionEventActions.Move:
+                if (_mode == Mode.Candidates && _strip != null && (_dragging || Math.Abs(e.GetX() - _downX) > DragSlopDp * _dp))
+                {
+                    // Schieben statt Antippen: Die Zeile folgt dem Finger.
+                    _dragging = true;
+                    _pressed = -1;
+                    _scroll = _strip.Clamp(_downScroll - (e.GetX() - _downX), Width);
+                    Invalidate();
+                    break;
+                }
+
                 if (_pressed >= 0 && index != _pressed)
                 {
                     _pressed = -1;
@@ -436,6 +510,10 @@ public sealed class SuggestionBarView : View
         else if (id.StartsWith("emoji:"))
         {
             EmojiPicked?.Invoke(id["emoji:".Length..]);
+        }
+        else if (id.StartsWith(CandidatePrefix, StringComparison.Ordinal))
+        {
+            CandidatePicked?.Invoke(int.Parse(id[CandidatePrefix.Length..]));
         }
         else
         {

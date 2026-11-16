@@ -104,6 +104,8 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             if (task.IsCompletedSuccessfully) task.Result.History.Clear();
         }
 
+        ClearPinyinLearning();
+
         var dir = Path.Combine(context.FilesDir!.AbsolutePath, "learning");
         if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
     }
@@ -118,6 +120,8 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             using var stream = File.Create(path);
             task.Result.History.Save(stream);
         }
+
+        SavePinyinLearning();
     }
 
     public override View? OnCreateInputView() => BuildInputView();
@@ -274,11 +278,22 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         {
             _autoSpaceInserted = false;
             TrackTouches(text, _keyboardView?.TapPoint);
-            _composing.Append(text);
+            if (text.Length == 1 && _language == "vi" && _settings.VietnameseTelex)
+            {
+                // Telex: Der Buchstabe kann das Wort verändern statt angehängt zu werden ("tieng" + "s" → "tiếng").
+                string word = Telex.Apply(_composing.ToString(), text[0]);
+                _composing.Clear().Append(word);
+            }
+            else
+            {
+                _composing.Append(text);
+            }
+
             ic.SetComposingText(J(_composing.ToString()), 1);
             UpdateSuggestions();
         }
-        else if (!wordChar && text.Length == 1 && AutoPunctuation.Contains(text[0]))
+        else if (!wordChar && text.Length == 1
+                 && (AutoPunctuation.Contains(text[0]) || (IsChinese && ChinesePunctuation.Contains(text[0]))))
         {
             CommitSeparator(text);
         }
@@ -508,6 +523,12 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             return;
         }
 
+        if (IsChinese && !_glideActive)
+        {
+            CommitChinese(convert: autocorrect, separator);
+            return;
+        }
+
         string typed = _composing.ToString();
         string final = typed;
         bool restored = typed == _restoredWord; // wiederhergestelltes Original: nicht korrigieren, sondern lernen
@@ -576,6 +597,12 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         if (slot.IsReplacement)
         {
             PickReplacement(slot);
+            return;
+        }
+
+        if (PickChinese(slot))
+        {
+            MeridianSuggestionPicked(); // Meridian: nur das Ereignis (Vorhersage im chinesischen Layout)
             return;
         }
 
@@ -735,8 +762,8 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
     string ApplyShiftCase(string word) => _shift switch
     {
-        ShiftState.Locked => word.ToUpperInvariant(),
-        ShiftState.OneShot => char.ToUpperInvariant(word[0]) + word[1..],
+        ShiftState.Locked => TextCase.Upper(word, _language),
+        ShiftState.OneShot => TextCase.Capitalize(word, _language),
         _ => word,
     };
 
@@ -797,6 +824,12 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
         if (!_glideActive && TryShowEmailSuggestions()) return;
         if (_reselect != null && _composing.Length == 0 && ShowReselect()) return;
+        if (IsChinese && _composing.Length > 0 && !_glideActive && _profile.AllowSuggestions)
+        {
+            ShowPinyinCandidates();
+            return;
+        }
+
         var engine = Engine;
         if (engine == null || !_profile.AllowSuggestions)
         {
@@ -865,7 +898,9 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     /// <summary>Nächstes-Wort-Vorhersage nach einem Leerzeichen.</summary>
     void ShowPredictions(MultilingualEngine engine)
     {
-        WordContext context = _settings.NextWordPrediction ? SentenceContext() : WordContext.None;
+        WordContext context = !_settings.NextWordPrediction ? WordContext.None
+            : IsChinese ? ChineseContext() // ohne Leerzeichen gibt es kein "Wort vor dem Cursor": das zuletzt eingesetzte
+            : SentenceContext();
 
         // Im leeren Feld bleibt die Werkzeugleiste (wie bei Gboard); Satzanfänge sagt zBoard erst im Text vorher.
         if (context.IsSentenceStart && TextBeforeCursor(1).Length == 0) context = WordContext.None;
@@ -874,7 +909,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         if (context.IsSentenceStart && _shift != ShiftState.Off)
         {
             // Die Umschalttaste ist aktiv: Vorhersagen so zeigen, wie sie eingefügt werden.
-            predictions = [.. predictions.Select(p => char.ToUpperInvariant(p[0]) + p[1..])];
+            predictions = [.. predictions.Select(p => TextCase.Capitalize(p, _language))];
         }
 
         if (predictions.Count == 0)
@@ -922,6 +957,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     {
         _language = language;
         _settings.CurrentLanguage = language;
+        EnsurePinyin();
         var languages = InputLanguages();
         var tasks = languages.Select(l => Engines.GetOrAdd(l, lang => Task.Run(() => LoadEngine(lang)))).ToArray();
         _engineTask = CombineEngines(languages, tasks);
@@ -964,7 +1000,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         using (var stream = Assets!.Open($"dict/{language}.txt"))
         {
             // Gemeinsamer Maßstab, damit sich die Sprachen bei mehrsprachiger Eingabe vergleichen lassen
-            dictionary = WordDictionary.Load(stream, WordDictionary.ReferenceTotal);
+            dictionary = WordDictionary.Load(stream, WordDictionary.ReferenceTotal, language);
         }
 
         var model = NgramModel.Empty;

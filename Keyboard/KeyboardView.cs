@@ -473,7 +473,9 @@ public sealed class KeyboardView : View
     };
 
     string Shifted(string text) =>
-        Shift != ShiftState.Off && _layout?.IsAlphabetic == true ? text.ToUpperInvariant() : text;
+        Shift != ShiftState.Off && _layout is { IsAlphabetic: true } layout
+            ? Suggestions.TextCase.Upper(text, layout.Id) // Layoutname = Sprache: Türkisch schreibt i groß als İ
+            : text;
 
     void DrawPreview(Canvas canvas, PlacedKey pk, float radius)
     {

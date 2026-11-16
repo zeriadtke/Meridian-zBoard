@@ -20,6 +20,15 @@ public sealed class WordDictionary
     public int Count => _keys.Length;
 
     /// <summary>
+    /// Sprache der Wortliste, soweit sie die Groß- und Kleinschreibung bestimmt: Im Türkischen gehören i/İ und ı/I
+    /// zusammen. null: Regeln wie in den meisten Sprachen.
+    /// </summary>
+    public string? Language { get; init; }
+
+    /// <summary>Kleinschreibung nach den Regeln der Sprache dieses Wörterbuchs (Schlüssel der Einträge).</summary>
+    public string Lower(string text) => TextCase.Lower(text, Language);
+
+    /// <summary>
     /// Gemeinsamer Maßstab für die Häufigkeiten aller Sprachen (etwa die Summe der deutschen Liste). Die Wortlisten
     /// stammen aus unterschiedlich großen Korpora (die englische zählt rund viermal so viel wie die deutsche); erst auf
     /// denselben Maßstab gebracht, lassen sich Wörter verschiedener Sprachen bei der mehrsprachigen Eingabe vergleichen.
@@ -34,9 +43,10 @@ public sealed class WordDictionary
     /// Dieselbe Kleinschreibung darf mehrfach vorkommen ("frage" und "Frage").
     /// </summary>
     /// <param name="normalizeTo">Häufigkeiten so skalieren, dass ihre Summe diesem Wert entspricht (siehe <see cref="ReferenceTotal"/>).</param>
-    public static WordDictionary Load(Stream stream, long? normalizeTo = null)
+    /// <param name="language">Sprache der Liste (siehe <see cref="Language"/>).</param>
+    public static WordDictionary Load(Stream stream, long? normalizeTo = null, string? language = null)
     {
-        var dict = new WordDictionary();
+        var dict = new WordDictionary { Language = language };
         using var reader = new StreamReader(stream);
         string? line;
         while ((line = reader.ReadLine()) != null)
@@ -59,7 +69,7 @@ public sealed class WordDictionary
     {
         if (_builder == null) throw new InvalidOperationException("Wörterbuch ist bereits fertig aufgebaut.");
 
-        var key = word.ToLowerInvariant();
+        var key = Lower(word);
         if (!_builder.TryGetValue(key, out var forms))
         {
             forms = new List<(string, int)>(1);
@@ -122,23 +132,23 @@ public sealed class WordDictionary
     /// <summary>Häufigste Schreibweise und Häufigkeit eines Wortes (Groß-/Kleinschreibung egal).</summary>
     public (string Word, int Freq)? Lookup(string word)
     {
-        int i = IndexOf(word.ToLowerInvariant());
+        int i = IndexOf(Lower(word));
         return i < 0 ? null : (_forms[i][0], _freq[i]);
     }
 
-    public bool Contains(string word) => IndexOf(word.ToLowerInvariant()) >= 0;
+    public bool Contains(string word) => IndexOf(Lower(word)) >= 0;
 
     /// <summary>Alle Schreibweisen eines Wortes, häufigste zuerst; leer, wenn unbekannt.</summary>
     public IReadOnlyList<string> Forms(string word)
     {
-        int i = IndexOf(word.ToLowerInvariant());
+        int i = IndexOf(Lower(word));
         return i < 0 ? [] : _forms[i];
     }
 
     /// <summary>Alle Einträge mit diesem Präfix: Schlüssel (klein), häufigste Schreibweise, Häufigkeit.</summary>
     public IEnumerable<(string Key, string Form, int Freq)> WithPrefix(string prefix)
     {
-        var lower = prefix.ToLowerInvariant();
+        var lower = Lower(prefix);
         int lo = LowerBound(lower);
         int hi = LowerBound(lower + char.MaxValue);
         for (int i = lo; i < hi; i++) yield return (_keys[i], _forms[i][0], _freq[i]);
@@ -147,7 +157,7 @@ public sealed class WordDictionary
     /// <summary>Häufigste Wörter, die mit <paramref name="prefix"/> beginnen (inkl. des Präfix selbst).</summary>
     public IReadOnlyList<(string Word, int Freq)> Complete(string prefix)
     {
-        var lower = prefix.ToLowerInvariant();
+        var lower = Lower(prefix);
         if (lower.Length <= CachedPrefixLength && _prefixTop.TryGetValue(lower, out var cached)) return cached;
         return ScanTop(lower);
     }
@@ -191,7 +201,7 @@ public sealed class WordDictionary
     public List<(string Word, int Freq, float Distance)> FindSimilar(
         string input, float maxDistance, Func<int, char, char, float> substitutionCost, float transpositionCost = 0.6f)
     {
-        var target = input.ToLowerInvariant();
+        var target = Lower(input);
         int n = target.Length;
         // Länger als die Eingabe darf ein Wort um die erlaubten Einfügungen sein – und um einen Apostroph, wenn der
         // Rest der Distanz dafür reicht ("im" → "I'm" bei maxDistance 0,3).
@@ -302,4 +312,21 @@ public sealed class WordDictionary
         while (k < max && a[k] == b[k]) k++;
         return k;
     }
+}
+
+/// <summary>
+/// Groß- und Kleinschreibung nach den Regeln einer Sprache. Fast überall genügt die sprachunabhängige Umwandlung;
+/// Türkisch unterscheidet i mit Punkt (i/İ) und ohne (ı/I).
+/// </summary>
+public static class TextCase
+{
+    public static string Upper(string text, string? language) =>
+        language == "tr" ? text.Replace('i', 'İ').Replace('ı', 'I').ToUpperInvariant() : text.ToUpperInvariant();
+
+    public static string Lower(string text, string? language) =>
+        language == "tr" ? text.Replace('I', 'ı').Replace('İ', 'i').ToLowerInvariant() : text.ToLowerInvariant();
+
+    /// <summary>Erster Buchstabe groß, der Rest unverändert.</summary>
+    public static string Capitalize(string text, string? language) =>
+        text.Length == 0 ? text : Upper(text[..1], language) + text[1..];
 }
