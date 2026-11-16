@@ -17,7 +17,9 @@ Unlike Gboard, zBoard works completely offline and has no internet permission; w
 stays on your device. Features that need the internet (such as translating with DeepL) come as separate
 plugin apps – only people who install them give them internet access. zBoard is written in C# with .NET 10 for Android.
 
-Status: **all five milestones done** – testing on real devices, not yet published.
+Status: **version 0.13.0**, all five milestones done – testing on real devices. The 13 languages added in 0.13.0 are
+covered by unit tests but have not been tried on a real device yet.
+Finished versions: [Releases](https://github.com/World-of-Bytes/zBoard/releases).
 
 ## zBoard compared with Gboard
 
@@ -28,8 +30,8 @@ Status: **all five milestones done** – testing on real devices, not yet publis
 | Learning from your typing | yes, models are improved with Google's servers via federated learning | yes, only on the device, can be turned off and deleted; what you stop using loses weight over time |
 | Languages | a great many languages and layouts | 18 languages: German, Czech, Hungarian (QWERTZ); English, Spanish, Italian, Dutch, Polish, Romanian, Turkish, Vietnamese (QWERTY); French (AZERTY); Greek; Russian, Ukrainian, Bulgarian (Cyrillic); Arabic; Chinese (Pinyin, simplified characters) |
 | Typing, shift, symbols, long press for accented characters | ✓ | ✓ in Gboard's order, most frequent character preselected |
-| Word suggestions and autocorrect | ✓ | ✓ 120,000 German, 100,000 English words; uses where the finger hit each key; swapped letters, left-out umlauts and apostrophes |
-| Language model | neural network, sees the whole sentence | count table of frequent word sequences, sees the two words before; every value traceable, about 2.4 MB per language |
+| Word suggestions and autocorrect | ✓ | ✓ 120,000 German, 100,000 English words, up to 80,000 for each further language; uses where the finger hit each key; swapped letters, left-out umlauts and apostrophes |
+| Language model | neural network, sees the whole sentence | count table of frequent word sequences, sees the two words before; every value traceable, up to about 2.5 MB per language |
 | Correction that follows the sentence | ✓ | ✓ "ich hae" → "habe"; correctly spelled words only when the finger was almost on the key border ("heute drei" → "frei") |
 | Missing and accidental spaces | ✓ | ✓ "ihave" → "I have", "da ke" → "danke" |
 | German compound nouns | ✓ | ✓ recognised from known nouns, capitalised and completed ("Haustürschlüssel") |
@@ -41,6 +43,8 @@ Status: **all five milestones done** – testing on real devices, not yet publis
 | Suggestions for a word you tap in the text | ✓ | ✓ tapping replaces the whole word |
 | Suggesting email addresses | ✓ | ✓ remembered addresses and common providers after "@" |
 | Glide typing | ✓ | ✓ |
+| Chinese with Pinyin | ✓ | ✓ simplified characters, scrolling candidate row, learns the characters you choose |
+| Vietnamese with Telex | ✓ | ✓ can be turned off |
 | Cursor control via space bar, deleting words by swiping | ✓ | ✓ |
 | Key preview, vibration, sound | ✓ | ✓ |
 | Themes | ✓ | light, dark, Material You (colours from the wallpaper) |
@@ -86,7 +90,7 @@ The user interface is bilingual: German if the system language is German, Englis
 
 The logic that does not depend on Android (dictionary, autocorrect, language model, finger positions, compound
 words, spaces, prediction, phrases, learning, email addresses, glide typing, emoji, clipboard, layouts,
-accented-character popup, backups) has its own unit tests:
+accented-character popup, backups, all 18 languages, Pinyin, Telex) has its own unit tests:
 
 ```bash
 dotnet test tests/ZBoard.Core.Tests
@@ -112,7 +116,7 @@ dotnet run -c Release --project tools/SuggestionEval -- --lang de
 | `Keyboard/` | layout model, all layouts, `KeyboardView` (drawing and touch), `PopupGrid` (popup layout), colours |
 | `Emoji/` | `EmojiCatalog` (data, search, skin tones), `EmojiPanelView` |
 | `Clipboard/` | `ClipboardHistory`, `ClipboardPanelView` |
-| `Suggestions/` | `WordDictionary` (sorted array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (language model), `TouchTrace` (finger positions), `UserHistory`, `EmailMemory`, `KeyProximity`, `SuggestionBarView` |
+| `Suggestions/` | `WordDictionary` (sorted array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (language model), `TouchTrace` (finger positions), `UserHistory`, `EmailMemory`, `KeyProximity`, `TextCase` (upper and lower case per language), `PinyinEngine` and `PinyinLearned` (Chinese), `Telex` (Vietnamese), `CandidateStrip` (layout of the candidate row), `SuggestionBarView` |
 | `Settings/` | `SettingsActivity` (start screen), `ZBoardSettings` |
 | `Backup/` | `BackupArchive` (backup file: writing, reading, validation) |
 | `Assets/dict/` | word lists and language models per language |
@@ -132,11 +136,20 @@ The script filters out typical typos from the subtitles ("nciht", "waht").
 The source splits English contractions ("don't", "I'm") into two entries; the script puts them back together
 (frequencies partly estimated, see `EN_SUFFIX_SHARES`).
 
+The other languages come from the same source, up to 80,000 words each: French, Spanish, Italian, Dutch, Polish,
+Czech, Hungarian, Romanian, Turkish, Greek, Russian, Ukrainian, Bulgarian and Arabic; Vietnamese has 37,000 (almost
+every syllable is a word there). The script keeps only words in the language's script and drops entries without
+accents when the same letters with accents are clearly more frequent – many subtitles are typed without them
+("dziekuje"). Chinese: 65,000 words in simplified characters (`zh.txt`) and the Pinyin table `zh.pinyin.txt` with
+the spelling of every word and all readings of the 8,105 commonly used characters.
+
 For prediction: one language model per language (`de.ngrams.bin` …) with the 200,000 most frequent two-word and
 150,000 most frequent three-word sequences, counted in the public-domain sentence collection of Mozilla Common Voice.
 It drives next-word prediction, the order of suggestions, the choice of correction and the capitalisation of
 ambiguous German words ("eine frage" → "Frage"). zBoard learns the rest from your typing
-(`files/learning/<language>.tsv` in the app's private storage).
+(`files/learning/<language>.tsv` in the app's private storage). The models are only as good as their source is large:
+about 2.4 MB for most languages, but only 1.3 MB for Arabic, 0.7 MB for Romanian and under 0.4 MB for Greek and
+Vietnamese – there are only a few thousand sentences for those so far, and prediction is correspondingly thin.
 
 Capitalisation in German:
 
@@ -177,7 +190,8 @@ dotnet run -c Release --project tools/NgramBuilder -- \
   --words Assets/dict/de.txt --out Assets/dict/de.ngrams.bin --common-voice common-voice/server/data/de
 ```
 
-Likewise for the other languages (`en`, `fr`, `es`, `it`). Submitted everyday sentences count ten times, Wikipedia
+Likewise for the other languages (`en`, `fr`, `es`, `it`, `nl`, `pl`, `cs`, `hu`, `ro`, `tr`, `vi`, `el`, `ru`, `uk`,
+`bg`, `ar`; for Chinese see below). Submitted everyday sentences count ten times, Wikipedia
 sentences only 15 %, because they read differently from messages; add your own texts with `--source`.
 Regenerate the models after changing the word lists so the spellings match.
 
@@ -234,8 +248,8 @@ with simulated typos:
 | Space bar instead of a letter: word restored | – | 57.4 % | – | 68.3 % |
 
 These numbers come from the simulation, not from real fingers. That applies most to the gain from finger positions:
-the correction assumes the same kind of scatter the measurement types with. French, Spanish and Italian have
-language models from the same process but no test sentences yet. In places the language models sound like Wikipedia
+the correction assumes the same kind of scatter the measurement types with. All other languages have
+language models from the same process but no test sentences yet – there is no measurement for them. In places the language models sound like Wikipedia
 and parliament, because the source contains little everyday text.
 
 ## Glide typing

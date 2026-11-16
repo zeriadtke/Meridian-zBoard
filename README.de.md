@@ -17,7 +17,9 @@ Anders als Gboard arbeitet zBoard vollständig offline und ohne Internetberechti
 lernt, bleibt auf dem Gerät. Funktionen, die Internet brauchen (etwa Übersetzen mit DeepL), kommen als eigene
 Plugin-Apps dazu – nur wer sie installiert, gibt ihnen Internetzugriff. Geschrieben ist zBoard in C# mit .NET 10 for Android.
 
-Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, noch nicht veröffentlicht.
+Stand: **Version 0.13.0**, alle fünf Meilensteine umgesetzt – Testphase auf echten Geräten. Die 13 Sprachen, die mit
+0.13.0 dazugekommen sind, sind durch Unit-Tests geprüft, aber noch auf keinem echten Gerät ausprobiert.
+Fertige Versionen: [Releases](https://github.com/World-of-Bytes/zBoard/releases).
 
 ## zBoard im Vergleich zu Gboard
 
@@ -28,8 +30,8 @@ Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, 
 | Lernen aus Eingaben | ja, Modelle werden per Federated Learning mit Google-Servern verbessert | ja, ausschließlich auf dem Gerät, abschaltbar und löschbar; lange nicht Benutztes verliert an Gewicht |
 | Sprachen | sehr viele Sprachen und Layouts | 18 Sprachen: Deutsch, Tschechisch, Ungarisch (QWERTZ); Englisch, Spanisch, Italienisch, Niederländisch, Polnisch, Rumänisch, Türkisch, Vietnamesisch (QWERTY); Französisch (AZERTY); Griechisch; Russisch, Ukrainisch, Bulgarisch (kyrillisch); Arabisch; Chinesisch (Pinyin, vereinfachte Schriftzeichen) |
 | Tippen, Umschalt, Symbole, langer Druck für Sonderzeichen | ✓ | ✓ in Gboard-Reihenfolge, häufigstes Zeichen vorausgewählt |
-| Wortvorschläge und Autokorrektur | ✓ | ✓ 120 000 deutsche, 100 000 englische Wörter; rechnet mit der Stelle, an der der Finger die Taste traf; Vertauschungen, weggelassene Umlaute und Apostrophe |
-| Sprachmodell | neuronales Netz, sieht den ganzen Satz | Zähltabelle häufiger Wortfolgen, sieht die zwei Wörter davor; jeder Wert nachvollziehbar, rund 2,4 MB je Sprache |
+| Wortvorschläge und Autokorrektur | ✓ | ✓ 120 000 deutsche, 100 000 englische Wörter, bis zu 80 000 je weiterer Sprache; rechnet mit der Stelle, an der der Finger die Taste traf; Vertauschungen, weggelassene Umlaute und Apostrophe |
+| Sprachmodell | neuronales Netz, sieht den ganzen Satz | Zähltabelle häufiger Wortfolgen, sieht die zwei Wörter davor; jeder Wert nachvollziehbar, bis rund 2,5 MB je Sprache |
 | Korrektur nach dem Satz | ✓ | ✓ „ich hae“ → „habe“; richtig geschriebene Wörter nur, wenn der Finger fast auf der Tastengrenze lag („heute drei“ → „frei“) |
 | Fehlende und versehentliche Leerzeichen | ✓ | ✓ „ichhabe“ → „ich habe“, „da ke“ → „danke“ |
 | Zusammengesetzte deutsche Substantive | ✓ | ✓ aus bekannten Substantiven erkannt, großgeschrieben und vervollständigt („Haustürschlüssel“) |
@@ -41,6 +43,8 @@ Stand: **alle fünf Meilensteine umgesetzt** – Testphase auf echten Geräten, 
 | Vorschläge für ein angetipptes Wort im Text | ✓ | ✓ Antippen ersetzt das ganze Wort |
 | E-Mail-Adressen vorschlagen | ✓ | ✓ gemerkte Adressen und bekannte Anbieter nach „@“ |
 | Wischeingabe (Glide Typing) | ✓ | ✓ |
+| Chinesisch mit Pinyin | ✓ | ✓ vereinfachte Schriftzeichen, durchgehende Vorschlagszeile, lernt die gewählten Zeichen |
+| Vietnamesisch mit Telex | ✓ | ✓ abschaltbar |
 | Cursor per Leertaste, Wort-Löschen per Wischen | ✓ | ✓ |
 | Tastenvorschau, Vibration, Ton | ✓ | ✓ |
 | Designs | ✓ | hell, dunkel, Material You (Farben aus dem Hintergrundbild) |
@@ -86,7 +90,7 @@ Die Oberfläche ist zweisprachig: Deutsch, wenn das System auf Deutsch steht, so
 
 Die Logik ohne Android (Wörterbuch, Autokorrektur, Sprachmodell, Fingerpositionen, zusammengesetzte Wörter,
 Leerzeichen, Vorhersage, Wortfolgen, Lernen, E-Mail-Adressen, Wischeingabe, Emoji, Zwischenablage, Layouts,
-Sonderzeichen-Popup, Sicherungen) hat eigene Unit-Tests:
+Sonderzeichen-Popup, Sicherungen, alle 18 Sprachen, Pinyin, Telex) hat eigene Unit-Tests:
 
 ```bash
 dotnet test tests/ZBoard.Core.Tests
@@ -112,7 +116,7 @@ dotnet run -c Release --project tools/SuggestionEval -- --lang de
 | `Keyboard/` | Layout-Modell, alle Layouts, `KeyboardView` (Zeichnen und Touch), `PopupGrid` (Anordnung im Popup), Farben |
 | `Emoji/` | `EmojiCatalog` (Daten, Suche, Hauttöne), `EmojiPanelView` |
 | `Clipboard/` | `ClipboardHistory`, `ClipboardPanelView` |
-| `Suggestions/` | `WordDictionary` (sortiertes Array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (Sprachmodell), `TouchTrace` (Fingerpositionen), `UserHistory`, `EmailMemory`, `KeyProximity`, `SuggestionBarView` |
+| `Suggestions/` | `WordDictionary` (sortiertes Array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (Sprachmodell), `TouchTrace` (Fingerpositionen), `UserHistory`, `EmailMemory`, `KeyProximity`, `TextCase` (Groß-/Kleinschreibung je Sprache), `PinyinEngine` und `PinyinLearned` (Chinesisch), `Telex` (Vietnamesisch), `CandidateStrip` (Anordnung der Vorschlagszeile), `SuggestionBarView` |
 | `Settings/` | `SettingsActivity` (Startbildschirm), `ZBoardSettings` |
 | `Backup/` | `BackupArchive` (Sicherungsdatei: Schreiben, Lesen, Prüfen) |
 | `Assets/dict/` | Wortlisten und Sprachmodelle pro Sprache |
@@ -132,11 +136,21 @@ Typische Tippfehler aus den Untertiteln („nciht“, „waht“) filtert das Sk
 Englische Kurzformen („don't“, „I'm“) zerlegt die Quelle in zwei Einträge; das Skript setzt sie wieder zusammen
 (Häufigkeiten teils geschätzt, siehe `EN_SUFFIX_SHARES`).
 
+Die weiteren Sprachen kommen aus derselben Quelle, je bis zu 80 000 Wörter: Französisch, Spanisch, Italienisch,
+Niederländisch, Polnisch, Tschechisch, Ungarisch, Rumänisch, Türkisch, Griechisch, Russisch, Ukrainisch, Bulgarisch
+und Arabisch; Vietnamesisch hat 37 000 (fast jede Silbe ist dort ein Wort). Das Skript behält nur Wörter in der
+Schrift der Sprache und entfernt Einträge ohne Akzente, wenn dieselbe Buchstabenfolge mit Akzenten deutlich häufiger
+ist – viele Untertitel sind ohne getippt („dziekuje“). Chinesisch: 65 000 Wörter in vereinfachten Schriftzeichen
+(`zh.txt`) und die Pinyin-Tabelle `zh.pinyin.txt` mit der Schreibweise jedes Worts und allen Lesungen der 8105
+allgemein gebräuchlichen Zeichen.
+
 Für die Vorhersage: ein Sprachmodell je Sprache (`de.ngrams.bin` …) mit den 200 000 häufigsten Zweier- und 150 000
 häufigsten Dreierfolgen von Wörtern, gezählt in der gemeinfreien Satzsammlung von Mozilla Common Voice. Es bestimmt
 die Vorhersage des nächsten Worts, die Reihenfolge der Vorschläge, die Wahl der Korrektur und die Großschreibung
 mehrdeutiger Wörter („eine frage“ → „Frage“). Den Rest lernt zBoard aus deinen Eingaben
-(`files/learning/<sprache>.tsv` im app-privaten Speicher).
+(`files/learning/<sprache>.tsv` im app-privaten Speicher). Die Modelle sind so gut wie ihre Quelle groß ist: rund
+2,4 MB bei den meisten Sprachen, aber nur 1,3 MB für Arabisch, 0,7 MB für Rumänisch und unter 0,4 MB für Griechisch
+und Vietnamesisch – dort gibt es erst wenige tausend Sätze, die Vorhersage ist entsprechend dünn.
 
 Großschreibung im Deutschen:
 
@@ -177,7 +191,8 @@ dotnet run -c Release --project tools/NgramBuilder -- \
   --words Assets/dict/de.txt --out Assets/dict/de.ngrams.bin --common-voice common-voice/server/data/de
 ```
 
-Für die anderen Sprachen entsprechend (`en`, `fr`, `es`, `it`). Eingesandte Alltagssätze zählen zehnfach, Sätze aus
+Für die anderen Sprachen entsprechend (`en`, `fr`, `es`, `it`, `nl`, `pl`, `cs`, `hu`, `ro`, `tr`, `vi`, `el`, `ru`,
+`uk`, `bg`, `ar`; Chinesisch siehe unten). Eingesandte Alltagssätze zählen zehnfach, Sätze aus
 Wikipedia nur zu 15 %, weil sie anders klingen als Nachrichten; eigene Texte lassen sich mit `--source` dazunehmen.
 Nach einer Änderung an den Wortlisten die Modelle neu erzeugen, damit die Schreibweisen übereinstimmen.
 
@@ -233,8 +248,8 @@ Tippfehlern:
 | Leertaste statt Buchstabe: Wort wiederhergestellt | – | 57,4 % | – | 68,3 % |
 
 Die Zahlen stammen aus der Simulation, nicht von echten Fingern. Das gilt besonders für den Gewinn durch die
-Fingerposition: Die Korrektur nimmt dieselbe Art von Streuung an, mit der die Messung tippt. Französisch, Spanisch
-und Italienisch haben Sprachmodelle aus demselben Verfahren, aber noch keine Testsätze. Die Sprachmodelle klingen
+Fingerposition: Die Korrektur nimmt dieselbe Art von Streuung an, mit der die Messung tippt. Alle anderen
+Sprachen haben Sprachmodelle aus demselben Verfahren, aber noch keine Testsätze – für sie gibt es keine Messung. Die Sprachmodelle klingen
 stellenweise nach Wikipedia und Parlament, weil die Quelle wenig Alltagstext enthält.
 
 ## Wischeingabe
