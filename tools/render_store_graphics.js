@@ -1,6 +1,7 @@
 // Rendert die Grafiken für den Play-Store-Eintrag (Playwright mit Chromium):
 //   node tools/render_store_graphics.js
-// Ausgabe: docs/store/icon-512.png, docs/store/feature-graphic.png
+// Ausgabe: docs/store/icon-512.png, docs/store/feature-graphic.png und zu jedem docs/logo/*.svg ein gleichnamiges
+// PNG (512 × 512, Ecken durchsichtig) – für Stellen, die kein SVG annehmen (z. B. OAuth-Zustimmungsbildschirme).
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
@@ -40,6 +41,19 @@ const feature = `<!doctype html><html><head><style>
   await page.setViewportSize({ width: 1024, height: 500 });
   await page.setContent(feature);
   await page.screenshot({ path: path.join(store, 'feature-graphic.png') });
+
+  // Logos als PNG: durchsichtiger Hintergrund bleibt erhalten
+  const logos = path.join(root, 'docs', 'logo');
+  const names = fs.readdirSync(logos).filter(f => f.endsWith('.svg')).sort();
+  await page.setViewportSize({ width: 512, height: 512 });
+  for (const name of names) {
+    const svg = fs.readFileSync(path.join(logos, name), 'utf8');
+    await page.setContent(`<html><body style="margin:0;background:transparent">${svg}</body></html>`);
+    await page.screenshot({
+      path: path.join(logos, name.replace(/\.svg$/, '.png')),
+      clip: { x: 0, y: 0, width: 512, height: 512 }, omitBackground: true,
+    });
+  }
   await browser.close();
-  console.log('docs/store/icon-512.png, docs/store/feature-graphic.png');
+  console.log('docs/store/icon-512.png, docs/store/feature-graphic.png, ' + names.map(n => 'docs/logo/' + n.replace(/\.svg$/, '.png')).join(', '));
 })();
