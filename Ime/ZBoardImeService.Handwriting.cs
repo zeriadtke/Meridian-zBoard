@@ -164,6 +164,7 @@ public sealed partial class ZBoardImeService : IHandwritingListener
     void OnInkCandidatePicked(int index)
     {
         if (index < 0 || index >= _inkCandidates.Count) return;
+        MeridianSuggestionPicked(); // Meridian: nur das Ereignis (anderes Wort der Handschrift gewählt)
         _inkGeneration++;
         SetInkText(_inkCandidates[index]);
         CommitInk(IsChinese ? string.Empty : " ");

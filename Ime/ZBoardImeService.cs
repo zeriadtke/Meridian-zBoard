@@ -595,6 +595,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             {
                 final = own;
                 _lastCorrection = new Correction(typed, own, separator);
+                MeridianAutoCorrected(); // Meridian: nur das Ereignis
             }
         }
         else if (mayCorrect && !_personal.IsShortcut(typed)) // ein Kürzel bleibt stehen, bis sein Text angetippt wird
@@ -644,6 +645,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
         if (slot.IsShortcut)
         {
+            MeridianSuggestionPicked(); // Meridian: nur das Ereignis (Text eines Kürzels)
             PickShortcut(slot);
             return;
         }
