@@ -17,7 +17,7 @@ Unlike Gboard, zBoard works completely offline and has no internet permission; w
 stays on your device. Features that need the internet (such as translating with DeepL) come as separate
 plugin apps – only people who install them give them internet access. zBoard is written in C# with .NET 10 for Android.
 
-Status: **version 0.13.0**, all five milestones done – testing on real devices. The 13 languages added in 0.13.0 are
+Status: **version 1.0.0**, all five milestones done – testing on real devices. The 13 languages added in 0.13.0 are
 covered by unit tests but have not been tried on a real device yet.
 Finished versions: [Releases](https://github.com/World-of-Bytes/zBoard/releases).
 
@@ -42,12 +42,14 @@ Finished versions: [Releases](https://github.com/World-of-Bytes/zBoard/releases)
 | Suggesting whole phrases ("freundlichen Grüßen") | ✓ | ✓ from what it has learned |
 | Suggestions for a word you tap in the text | ✓ | ✓ tapping replaces the whole word |
 | Suggesting email addresses | ✓ | ✓ remembered addresses and common providers after "@" |
+| Personal dictionary with shortcuts ("brb" → "be right back") | ✓ | ✓ own words and shortcuts for all languages, included in backup and sync |
 | Glide typing | ✓ | ✓ |
 | Chinese with Pinyin | ✓ | ✓ simplified characters, scrolling candidate row, learns the characters you choose |
 | Vietnamese with Telex | ✓ | ✓ can be turned off |
 | Cursor control via space bar, deleting words by swiping | ✓ | ✓ |
+| Text editing (arrow keys, select, copy, cut, paste) | ✓ | ✓ from the toolbar |
 | Key preview, vibration, sound | ✓ | ✓ |
-| Themes | ✓ | light, dark, Material You (colours from the wallpaper) |
+| Themes | ✓ | light, dark, Material You (colours from the wallpaper), your own image (can be darkened), key borders on/off |
 | Emoji keyboard | ✓ | ✓ with categories, skin tones, "recently used" and search in all 18 languages |
 | Clipboard history | ✓ | ✓ one hour, pinning, sensitive content excluded |
 | Backup & restore (settings, learned words, email addresses, pinned clips) | partly: learned words only via sync with the Google account, personal dictionary export; no settings backup | ✓ as a ZIP file you store wherever you like, no account needed |
@@ -55,7 +57,10 @@ Finished versions: [Releases](https://github.com/World-of-Bytes/zBoard/releases)
 | Voice typing | ✓ | ✓ via the system's speech recognition, offline only by default |
 | Toolbar (clipboard, microphone, settings) | ✓ | ✓ via the arrow at the left of the suggestion bar |
 | One-handed mode, height, number row | ✓ | ✓ |
+| Floating keyboard | ✓ | ✓ from the toolbar, movable by its handle |
+| Split keyboard (tablets, foldables) | ✓ | ✓ on screens from 600 dp wide, in landscape by default |
 | Translation | ✓ | ✓ via the plugin app "zBoard DeepL" (your own DeepL API key) |
+| Handwriting | ✓ | ✓ via the plugin app "zBoard Pen" (Google ML Kit, recognition on the device) |
 | Sync between devices | learned words via the Google account | ✓ via the plugin app "zBoard Sync": settings, learned words, email addresses via Google Drive, OneDrive, Dropbox or WebDAV (HiDrive, Nextcloud …) |
 | Google services | ✓ | not planned |
 
@@ -89,7 +94,7 @@ The user interface is bilingual: German if the system language is German, Englis
 ## Tests
 
 The logic that does not depend on Android (dictionary, autocorrect, language model, finger positions, compound
-words, spaces, prediction, phrases, learning, email addresses, glide typing, emoji, clipboard, layouts,
+words, spaces, prediction, phrases, learning, email addresses, personal dictionary, glide typing, emoji, clipboard, layouts,
 accented-character popup, backups, all 18 languages, Pinyin, Telex) has its own unit tests:
 
 ```bash
@@ -125,16 +130,17 @@ prepared form in the app's cache after loading it for the first time (`cache/dic
 | Folder | Contents |
 | --- | --- |
 | `Ime/` | `ZBoardImeService` (the heart of it), `EditorProfile` (properties of the input field), `TextBoundaries` |
-| `Keyboard/` | layout model, all layouts, `KeyboardView` (drawing and touch), `PopupGrid` (popup layout), colours |
+| `Keyboard/` | `HandwritingPanelView` (writing area), `TextEditPanelView` (text editing), layout model, all layouts, `KeyboardView` (drawing and touch), `PopupGrid` (popup layout), colours |
 | `Emoji/` | `EmojiCatalog` (data, search, skin tones), `EmojiPanelView` |
 | `Clipboard/` | `ClipboardHistory`, `ClipboardPanelView` |
-| `Suggestions/` | `WordDictionary` (sorted array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (language model), `TouchTrace` (finger positions), `UserHistory`, `EmailMemory`, `KeyProximity`, `TextCase` (upper and lower case per language), `PinyinEngine` and `PinyinLearned` (Chinese), `Telex` (Vietnamese), `CandidateStrip` (layout of the candidate row), `SuggestionBarView` |
+| `Suggestions/` | `WordDictionary` (sorted array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (language model), `TouchTrace` (finger positions), `UserHistory`, `EmailMemory`, `PersonalDictionary` (own words and shortcuts), `KeyProximity`, `TextCase` (upper and lower case per language), `PinyinEngine` and `PinyinLearned` (Chinese), `Telex` (Vietnamese), `CandidateStrip` (layout of the candidate row), `SuggestionBarView` |
 | `Settings/` | `SettingsActivity` (start screen), `ZBoardSettings` |
 | `Backup/` | `BackupArchive` (backup file: writing, reading, validation) |
 | `Assets/dict/` | word lists and language models per language |
 | `Assets/emoji/` | emoji by category, names and search terms per language |
 | `Plugins/` | `PluginContract` (interface), `PluginRegistry` (installed plugins), `PluginClient` (messenger) |
 | `plugin-apps/DeepL/` | plugin app "zBoard DeepL" (a separate app with internet permission) |
+| `plugin-apps/Pen/` | plugin app "zBoard Pen" (handwriting with Google ML Kit) |
 | `Sync/` | `SyncManager` (sync through a plugin), `SyncFileProvider` (hands the file to the plugin) |
 | `plugin-apps/Sync/` | plugin app "zBoard Sync" (Google Drive, OneDrive, Dropbox, WebDAV); provider setup in its README |
 | `tools/` | `build_dictionaries.py` (word lists), `NgramBuilder` (language models), `SuggestionEval` (suggestion measurement), `LoadBench` (loading times, time per keystroke), `build_emoji.py` (emoji data), `emulator_test.py` |
@@ -293,12 +299,26 @@ used. zBoard has no internet permission (release build).
 - **Emoji:** the ☺ key left of the comma. Categories at the bottom, 🕘 recently used, 🔍 search. While searching, the
   keyboard types into the search field in the bar ("thumbs", "good", "laugh"); matches appear next to it. Long-pressing
   people emoji shows the skin tones. Emoji the device's font does not know are hidden.
-- **Toolbar:** 📋 clipboard, 🎤 voice typing, ✋ one-handed mode (right → left → off), ⚙ settings. It appears in an
+- **Toolbar:** 📋 clipboard, text editing, 🎤 voice typing, ✋ one-handed mode (right → left → off), ⚙ settings. It appears in an
   empty field and when there is nothing to suggest; otherwise the arrow at the left of the suggestion bar opens it,
   and the arrow there, or simply typing on, brings the suggestions back. Text you have just copied appears there as
   a suggestion for 90 seconds.
+- **Themes:** besides light, dark and Material You there is "My image": the chosen picture sits behind the bar and the
+  keys, a slider darkens it, and the labels turn light or dark to match. "Key borders" off draws only the labels (as
+  in Gboard). The image stays on the device and is not part of backup and sync.
+- **Floating keyboard:** the four-way arrow in the toolbar makes the keyboard narrower and freely movable (handle
+  below the keys); the app underneath is not resized. Tap it again to dock the keyboard at the bottom.
+- **Split keyboard:** on screens at least 600 dp wide (tablets, unfolded foldables) the two halves of the keys move to
+  the edges, with a space bar on each side. Settings → Preferences → Layout: off, in landscape (default) or always.
+- **Text editing:** the cursor icon in the toolbar replaces the keys with arrow keys (including start and end of
+  line). "Select" makes the arrows select text; next to them are Select all, Copy, Cut and Paste. Arrows and delete
+  repeat while held, "ABC" returns to the keys.
 - **Accented characters:** long-press a letter. As in Gboard, the characters appear in a grid above your finger,
   with the most frequent one (ö on o, ä on a, é on e in French …) preselected.
+- **Handwriting:** with the plugin app **zBoard Pen** a pen appears in the toolbar. It opens a writing area; the
+  recognized word appears underlined in the field, alternatives in the bar. After a short pause the next word begins,
+  delete discards the word you just wrote, "ABC" returns to the keyboard. Recognition runs on the device with Google
+  ML Kit; zBoard Pen only needs the internet for the handwriting models (about 20 MB per language).
 - **Plugins:** online features as separate apps, e.g. **zBoard DeepL** for translating (`plugin-apps/DeepL`).
   zBoard itself stays offline; turn plugins on under Settings → Plugins and use them via the puzzle icon in the bar.
   Interface for your own plugins: [docs/PLUGINS.md](docs/PLUGINS.md).
@@ -313,6 +333,11 @@ used. zBoard has no internet permission (release build).
   “Email address” label above it): in single-line form fields zBoard therefore also suggests remembered addresses as soon
   as the field holds a single word of at least three letters that starts one of them, and remembers an address when the
   field ends up containing exactly one valid address.
+- **Personal dictionary:** under Settings → Dictionary → Personal dictionary you add your own words and shortcuts.
+  The bar suggests your own words (names, technical terms, “zBoard”) as you type; autocorrect leaves them alone and
+  applies the stored spelling (“zboard” → “zBoard”). When you type a shortcut (“brb”), the bar shows its text (“be
+  right back”); as in Gboard it is only inserted when you tap it. Entries apply to all languages and are part of the
+  settings – backup and sync include them.
 - **Clipboard:** history of the last hour, pinning (📌) keeps items permanently. Only pinned items are saved;
   content marked as sensitive (e.g. from password managers) and copies from password fields are never taken.
 - **Backup & restore:** Settings → Backup & restore saves your settings, learned words and phrases, remembered email

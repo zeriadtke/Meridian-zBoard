@@ -9,6 +9,12 @@ public sealed record PluginAction(PluginInfo Plugin, string Id, string Label);
 /// <summary>Antwort eines Plugins: neuer Text oder Fehlermeldung.</summary>
 public sealed record PluginResult(string? Text, string? Error);
 
+/// <summary>Antwort eines Handschrift-Plugins: erkannte Texte, oder Fehlermeldung (Loading: Modell wird noch geladen).</summary>
+public sealed record InkResult(IReadOnlyList<string> Candidates, string? Error, bool Loading);
+
+/// <summary>Strich auf der Schreibfläche: Punkte (x, y in Pixeln) mit Zeitpunkt in Millisekunden.</summary>
+public sealed record InkStroke(IReadOnlyList<(float X, float Y, long Time)> Points);
+
 /// <summary>Zustand eines Synchronisations-Plugins: eingerichtet?, Anzeige des Speichers, Fehlermeldung.</summary>
 public sealed record SyncStatus(bool Ready, string? Target, string? Error);
 
@@ -51,6 +57,43 @@ public sealed class PluginClient(Context context)
         var reply = await RequestAsync(action.Plugin, PluginContract.MsgRun, data, RunTimeout, cancel);
         if (reply == null) return new PluginResult(null, null);
         return new PluginResult(reply.GetString(PluginContract.KeyText), reply.GetString(PluginContract.KeyError));
+    }
+
+    // ---------- Handschrift ----------
+
+    public static readonly TimeSpan InkTimeout = TimeSpan.FromSeconds(10);
+
+    /// <summary>Striche an ein Handschrift-Plugin; keine Texte und kein Fehler, wenn es nicht antwortet.</summary>
+    public async Task<InkResult> RecognizeInkAsync(PluginInfo plugin, IReadOnlyList<InkStroke> strokes, float width, float height,
+        string language, string preContext, CancellationToken cancel = default)
+    {
+        var counts = new List<int>();
+        var points = new List<float>();
+        var times = new List<long>();
+        foreach (var stroke in strokes)
+        {
+            if (times.Count + stroke.Points.Count > PluginContract.MaxInkPoints) break;
+            counts.Add(stroke.Points.Count);
+            foreach (var (x, y, t) in stroke.Points)
+            {
+                points.Add(x);
+                points.Add(y);
+                times.Add(t);
+            }
+        }
+
+        var data = new Bundle();
+        data.PutIntArray(PluginContract.KeyInkStrokes, [.. counts]);
+        data.PutFloatArray(PluginContract.KeyInkPoints, [.. points]);
+        data.PutLongArray(PluginContract.KeyInkTimes, [.. times]);
+        data.PutFloat(PluginContract.KeyInkWidth, width);
+        data.PutFloat(PluginContract.KeyInkHeight, height);
+        data.PutString(PluginContract.KeyLanguage, language);
+        data.PutString(PluginContract.KeyPreContext, preContext);
+        var reply = await RequestAsync(plugin, PluginContract.MsgInkRecognize, data, InkTimeout, cancel);
+        if (reply == null) return new InkResult([], null, false);
+        return new InkResult(reply.GetStringArray(PluginContract.KeyCandidates) ?? [], reply.GetString(PluginContract.KeyError),
+            reply.GetBoolean(PluginContract.KeyInkLoading, false));
     }
 
     // ---------- Synchronisation ----------

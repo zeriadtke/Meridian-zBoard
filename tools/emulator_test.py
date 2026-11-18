@@ -2,7 +2,7 @@
 """
 Emulator-Test für zBoard (läuft in GitHub Actions, geht aber auch lokal mit laufendem Emulator).
 
-    python3 tools/emulator_test.py <pfad-zur-debug.apk> <ausgabeordner>
+    python3 tools/emulator_test.py <pfad-zur-debug.apk> <ausgabeordner> [<pfad-zur-pen.apk>]
 
 Installiert die Debug-APK, macht zBoard zur aktiven Tastatur, öffnet das Testfeld (TypingTestActivity) und
 tippt echte Fingertipps und eine Wischgeste. Geprüft wird der Text im Eingabefeld. Die Tastenpositionen schreibt
@@ -249,6 +249,28 @@ def bar_ink(path, keys):
     return ink(path, top - 44 * density, top - 10 * density)
 
 
+def bar_targets():
+    """Einträge der Leiste über der Tastatur (Vorschläge, Werkzeuge) mit Bildschirmposition, aus dem Log der Testversion."""
+    lines = re.findall(r"BAR (.*)$", adb("logcat", "-d", "-s", "zBoardTest:I", check=False), re.M)
+    targets = {}
+    for item in (lines[-1].split() if lines else []):
+        name, _, pos = item.rpartition("@")
+        x, y = pos.split(",")
+        targets[name] = (int(x), int(y))
+    return targets
+
+
+def edit_buttons():
+    """Schaltflächen der Textbearbeitung mit Bildschirmposition, aus dem Log der Testversion."""
+    lines = re.findall(r"EDIT (.*)$", adb("logcat", "-d", "-s", "zBoardTest:I", check=False), re.M)
+    buttons = {}
+    for item in (lines[-1].split() if lines else []):
+        name, _, pos = item.rpartition("@")
+        x, y = pos.split(",")
+        buttons[name] = (int(x), int(y))
+    return buttons
+
+
 def crashes():
     log = adb("logcat", "-d", "-b", "crash", check=False)
     return [line for line in log.splitlines() if PACKAGE in line or "FATAL" in line]
@@ -256,6 +278,7 @@ def crashes():
 
 def main():
     apk, out_dir = sys.argv[1], sys.argv[2]
+    pen_apk = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else None  # Plugin zBoard Pen (optional)
     os.makedirs(out_dir, exist_ok=True)
     results = []
 
@@ -437,6 +460,167 @@ def main():
         ink = bar_ink(screenshot(out_dir, "5-suchleiste"), keys)
         check("Vorschlagsleiste sichtbar (Screenshot)", ink > 0.002, f"({ink:.2%} Schrift im Leistenbereich)")
 
+        # Persönliches Wörterbuch: Kürzel zeigt seinen Text in der Leiste, Antippen setzt ihn ein; ein eigenes Wort
+        # bekommt beim Leerzeichen die gespeicherte Schreibweise
+        shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY} --es personal 'mfg=Mit freundlichen Worten;=zBoard'")
+        time.sleep(3)
+        type_text(keys, "mfg")
+        time.sleep(1)
+        log = adb("logcat", "-d", "-s", "zBoardTest:I", check=False)
+        shown = re.findall(r"SUGGESTIONS (.*)$", log, re.M)
+        last = shown[-1].strip() if shown else ""
+        check("Persönliches Wörterbuch: Kürzel zeigt den Text", "Mit freundlichen Worten" in last, f"→ Leiste „{last}“")
+        slot = bar_targets().get("slot1")
+        if slot:
+            tap(slot)
+            time.sleep(0.8)
+        text = field_text()
+        check("Persönliches Wörterbuch: Antippen setzt den Text ein", text == "Mit freundlichen Worten ", f"→ „{text}“")
+        screenshot(out_dir, "5a-kuerzel")
+        type_text(keys, "zboard ")
+        text = field_text()
+        check("Persönliches Wörterbuch: eigene Schreibweise (zboard → zBoard)", text.endswith("Worten zBoard "), f"→ „{text}“")
+        shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY} --es personal ';'")  # wieder leeren
+        time.sleep(2)
+
+        # Textbearbeitung: über die Werkzeugleiste öffnen, alles auswählen, ausschneiden, einfügen, Cursor an den Anfang
+        type_text(keys, "hallo ")
+        time.sleep(0.5)
+        for target in ("toolbar-open", "textedit"):
+            pos = bar_targets().get(target)
+            if pos:
+                tap(pos)
+                time.sleep(0.8)
+        edit = edit_buttons()
+        check("Textbearbeitung öffnet sich", "SelectAll" in edit, f"({len(edit)} Schaltflächen)")
+        if edit:
+            screenshot(out_dir, "5a2-textbearbeitung")
+            tap(edit["SelectAll"])
+            tap(edit["Cut"])
+            time.sleep(0.8)
+            text = field_text()
+            # Leeres Feld: uiautomator meldet dann den Hinweistext
+            check("Textbearbeitung: alles auswählen und ausschneiden", text in ("", "Testfeld"), f"→ „{text}“")
+            tap(edit["Paste"])
+            time.sleep(0.8)
+            text = field_text()
+            check("Textbearbeitung: einfügen", text == "Hallo ", f"→ „{text}“")
+            tap(edit["Home"])
+            tap(edit["Right"])
+            tap(edit["Close"])
+            time.sleep(0.8)
+            tap(kb.wait_for("de")["x"])
+            time.sleep(0.5)
+            text = field_text()
+            check("Textbearbeitung: Pfeiltasten bewegen den Cursor", text == "Hxallo ", f"→ „{text}“")
+
+        # Eigenes Bild als Hintergrund, ohne Tastenrahmen; Tippen muss weiter funktionieren
+        shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY} --es theme image --es borders false")
+        time.sleep(3)
+        type_text(keys, "bild ")
+        time.sleep(0.8)
+        log = adb("logcat", "-d", "-s", "zBoardTest:I", check=False)
+        theme = re.findall(r"THEME (.*)$", log, re.M)
+        theme = theme[-1].strip() if theme else ""
+        check("Design: eigenes Bild, ohne Tastenrahmen", "image=True" in theme and "borders=False" in theme, f"→ {theme}")
+        path = screenshot(out_dir, "5a3-design-bild")
+        width, _, bpp, rows = read_png(path)
+        top, density = keyboard_top(kb.wait_for("de"))
+        # Farbverlauf sichtbar: oben in der Tastatur blauer, unten violetter
+        upper = rows[int(top + 10 * density)][4 * bpp:4 * bpp + 3]
+        lower = rows[int(top + 200 * density)][4 * bpp:4 * bpp + 3]
+        check("Design: Bild liegt unter den Tasten (Farbverlauf)", upper[2] > upper[0] and lower[0] > upper[0],
+              f"(oben {tuple(upper)}, unten {tuple(lower)})")
+        text = field_text()
+        check("Design: Tippen mit eigenem Bild", text == "Bild ", f"→ „{text}“")
+        shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY} --es theme plain --es borders true")
+        time.sleep(2)
+
+        # Schwebende Tastatur: über die Werkzeugleiste ein, schmaler, am Griff verschieben, Tippen geht weiter
+        before = kb.wait_for("de")
+        width_before = before["p"][0] - before["q"][0]
+        type_text(keys, "frei ")
+        for target in ("toolbar-open", "floating"):
+            pos = bar_targets().get(target)
+            if pos:
+                tap(pos)
+                time.sleep(1)
+        time.sleep(1)
+        floating = kb.wait_for("de", timeout=20)
+        width_after = floating["p"][0] - floating["q"][0]
+        check("Schwebende Tastatur: schmaler", width_after < width_before * 0.9, f"(q–p {width_before} → {width_after} px)")
+        handles = re.findall(r"FLOATING handle@(\d+),(\d+)", adb("logcat", "-d", "-s", "zBoardTest:I", check=False))
+        if handles:
+            hx, hy = map(int, handles[-1])
+            shell(f"input swipe {hx} {hy} {hx} {hy - 500} 600")
+            time.sleep(1.5)
+            moved = kb.wait_for("de", timeout=20)
+            dy = floating["q"][1] - moved["q"][1]
+            check("Schwebende Tastatur: am Griff verschieben", dy > 300, f"(um {dy} px nach oben)")
+            screenshot(out_dir, "5a4-schwebend")
+            for ch in "gut":
+                tap(moved[ch])
+            tap(moved["Space"])
+            time.sleep(0.8)
+            text = field_text()
+            check("Schwebende Tastatur: Tippen", text.endswith("gut "), f"→ „{text}“")
+        else:
+            check("Schwebende Tastatur: Griff", False, "(keine Lage im Log)")
+        for target in ("toolbar-open", "floating"):
+            pos = bar_targets().get(target)
+            if pos:
+                tap(pos)
+                time.sleep(1)
+        docked = kb.wait_for("de", timeout=20)
+        check("Schwebende Tastatur: wieder unten", docked["p"][0] - docked["q"][0] >= width_before * 0.95)
+
+        # Handschrift mit zBoard Pen: Plugin installieren und freischalten, über den Stift in der Werkzeugleiste
+        # schreiben. Beim ersten Mal lädt das Plugin das Schriftmodell (rund 20 MB), zBoard fragt von selbst wieder.
+        if pen_apk:
+            try:
+                print(adb("install", "-r", pen_apk, timeout=300).strip())
+                shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY} --es plugins de.World_of_Bytes.zBoard.Pen")
+                time.sleep(3)
+                kb.wait_for("de")
+                for target in ("toolbar-open", "handwriting"):
+                    pos = bar_targets().get(target)
+                    if pos:
+                        tap(pos)
+                        time.sleep(1)
+                areas = re.findall(r"PEN area@(\d+),(\d+),(\d+),(\d+)", adb("logcat", "-d", "-s", "zBoardTest:I", check=False))
+                check("Handschrift: Schreibfläche öffnet sich", bool(areas))
+                if areas:
+                    x1, y1, x2, y2 = map(int, areas[-1])
+                    cx, cy, r = (x1 + x2) // 2, (y1 + y2) // 2, (y2 - y1) // 4
+                    import math
+                    # ein „o“: Kreis gegen den Uhrzeigersinn, oben beginnend
+                    points = [(int(cx + r * math.sin(-a / 24 * 2 * math.pi)), int(cy - r * math.cos(a / 24 * 2 * math.pi))) for a in range(25)]
+                    commands = [f"input motionevent DOWN {points[0][0]} {points[0][1]}"]
+                    commands += [f"input motionevent MOVE {x} {y}" for x, y in points[1:]]
+                    commands.append(f"input motionevent UP {points[-1][0]} {points[-1][1]}")
+                    adb("logcat", "-c", check=False)
+                    shell("; ".join(commands))
+                    candidates = []
+                    end = time.time() + 180
+                    while time.time() < end and not candidates:
+                        time.sleep(3)
+                        found = re.findall(r"CANDIDATES (.*)$", adb("logcat", "-d", "-s", "zBoardTest:I", check=False), re.M)
+                        candidates = [c for c in found[-1].split("|") if c] if found else []
+                    screenshot(out_dir, "5e-handschrift")
+                    check("Handschrift: zBoard Pen erkennt ein „o“", any(c.lower() in ("o", "0", "ο", "о") for c in candidates),
+                          f"→ {candidates[:6]}")
+                    pen = {k: tuple(map(int, v.split(","))) for k, v in re.findall(r"(\w+)@(\d+,\d+)", (re.findall(r"PEN (.*)$", adb("logcat", "-d", "-s", "zBoardTest:I", check=False), re.M) or [""])[-1])}
+                    if "Close" in pen:
+                        tap(pen["Close"])
+                        time.sleep(1)
+                    text = field_text()
+                    check("Handschrift: Wort steht im Feld", candidates and text.strip() != "" and text != "Testfeld", f"→ „{text}“")
+            except Exception as e:  # noqa: BLE001
+                check("Handschrift mit zBoard Pen", False, str(e))
+            finally:
+                shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY} --es plugins ,")
+                time.sleep(2)
+
         # Passwortfeld: Buchstaben und Ziffern müssen ankommen (Android zeigt sie maskiert)
         shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY} --es password text")
         time.sleep(3)
@@ -468,6 +652,26 @@ def main():
         plain = plain[-1].strip() if plain else ""
         check("PIN-Feld: Ziffernfeld", "a" not in pad and plain == "12", f"→ „{plain}“")
         screenshot(out_dir, "5c-pin")
+
+        # Geteilte Tastatur: im Querformat (Emulator 914 dp breit) mit Lücke zwischen den Hälften
+        try:
+            shell("settings put system accelerometer_rotation 0")
+            shell("settings put system user_rotation 1")
+            shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY}")
+            time.sleep(4)
+            KEYBOARD.layouts.clear()
+            adb("logcat", "-c", check=False)
+            shell(f"am start -W --activity-clear-task -n {TEST_ACTIVITY}")
+            split = KEYBOARD.wait_for("de", timeout=40)
+            gap = split["z"][0] - split["t"][0]
+            step = split["t"][0] - split["r"][0]
+            screenshot(out_dir, "5d-geteilt")
+            check("Geteilte Tastatur im Querformat", gap > 3 * step, f"(t→z {gap} px, eine Taste {step} px)")
+        except Exception as e:  # noqa: BLE001
+            check("Geteilte Tastatur im Querformat", False, str(e))
+        finally:
+            shell("settings put system user_rotation 0", check=False)
+            time.sleep(2)
 
         # Einstellungen öffnen (Startseite und eine Unterseite)
         shell("input keyevent KEYCODE_BACK", check=False)

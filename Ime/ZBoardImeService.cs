@@ -164,6 +164,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _symbolsPage = _profile.IsNumeric ? NumpadPage : 0;
 
         ReloadRestoredData();
+        StartPersonal();
         StartPanels();
         RefreshSystemBarPadding();
         UpdatePopupSpace(); // Platz für Popups über der Tastatur (falls Android das Fenster neu aufgebaut hat)
@@ -587,7 +588,17 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             return;
         }
 
-        if (mayCorrect)
+        if (mayCorrect && _personal.Word(typed) is { } own)
+        {
+            // Eigenes Wort: nie korrigieren, nur die gespeicherte Schreibweise einsetzen ("zboard" → "zBoard")
+            if (own != typed)
+            {
+                final = own;
+                _lastCorrection = new Correction(typed, own, separator);
+                MeridianAutoCorrected(); // Meridian: nur das Ereignis
+            }
+        }
+        else if (mayCorrect && !_personal.IsShortcut(typed)) // ein Kürzel bleibt stehen, bis sein Text angetippt wird
         {
             var result = Engine?.Suggest(typed, context, touches: Touches());
             if (result?.AutoCorrection is { } corrected && corrected != typed)
@@ -629,6 +640,13 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         if (PickChinese(slot))
         {
             MeridianSuggestionPicked(); // Meridian: nur das Ereignis (Vorhersage im chinesischen Layout)
+            return;
+        }
+
+        if (slot.IsShortcut)
+        {
+            MeridianSuggestionPicked(); // Meridian: nur das Ereignis (Text eines Kürzels)
+            PickShortcut(slot);
             return;
         }
 
@@ -842,7 +860,13 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     void UpdateSuggestions()
     {
         if (_suggestionBar == null || _emojiSearchActive || _voiceActive) return;
-        if (_toolbarOpen)
+        if (HandwritingOpen)
+        {
+            ShowHandwritingBar();
+            return;
+        }
+
+        if (_toolbarOpen || TextEditOpen) // Textbearbeitung: Die Leiste bleibt ruhig, während der Cursor wandert
         {
             ShowToolbar();
             return;
@@ -855,6 +879,9 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             ShowPinyinCandidates();
             return;
         }
+
+        // Persönliches Wörterbuch: eigene Wörter und Kürzel, auch solange die Wortlisten noch laden
+        if (_composing.Length > 0 && !_glideActive && _profile.AllowSuggestions && ShowPersonalSuggestions(_composing.ToString())) return;
 
         var engine = Engine;
         if (engine == null || !_profile.AllowSuggestions)
@@ -1252,20 +1279,41 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _keyboardView.Shift = _symbolsPage == 0 ? _shift : ShiftState.Off;
     }
 
+    ImageBackgroundDrawable? _imageBackground;
+
     void ApplyTheme()
     {
         bool systemDark = (Resources!.Configuration!.UiMode & UiMode.NightMask) == UiMode.NightYes;
-        var theme = _settings.Theme switch
-        {
-            ThemeMode.Light => KeyboardTheme.Light,
-            ThemeMode.Dark => KeyboardTheme.Dark,
-            // Wie Gboard: ab Android 12 standardmäßig Material-You-Farben passend zum Hintergrundbild
-            _ when OperatingSystem.IsAndroidVersionAtLeast(31) => KeyboardTheme.FromSystem(this, systemDark),
-            _ => systemDark ? KeyboardTheme.Dark : KeyboardTheme.Light,
-        };
+        var system = OperatingSystem.IsAndroidVersionAtLeast(31)
+            ? KeyboardTheme.FromSystem(this, systemDark) // wie Gboard: ab Android 12 Material You passend zum Hintergrundbild
+            : systemDark ? KeyboardTheme.Dark : KeyboardTheme.Light;
+        var image = _settings.Theme == ThemeMode.Image ? ThemeImage.Load(this) : null;
+        float dim = _settings.ThemeImageDim / 100f;
+        var theme = image != null
+            ? KeyboardTheme.FromImage(ThemeImage.Dimmed(image.Average, dim), system.Accent)
+            : _settings.Theme switch
+            {
+                ThemeMode.Light => KeyboardTheme.Light,
+                ThemeMode.Dark => KeyboardTheme.Dark,
+                _ => system,
+            };
+
         _keyboardView?.Theme = theme;
+        _keyboardView?.KeyBorders = _settings.KeyBorders;
         _suggestionBar?.Theme = theme;
         ApplyPanelTheme(theme);
+
+        // Das Bild liegt unter Leiste und Tasten (auch hinter der Navigationsleiste)
+        if (image == null) _imageBackground = null;
+        else if (_imageBackground == null || _imageBackground.Bitmap != image.Bitmap || _imageBackground.Dim != dim)
+        {
+            _imageBackground = new ImageBackgroundDrawable(image.Bitmap, dim);
+        }
+
+        if (_imageBackground != null) _inputRoot?.Background = _imageBackground;
+#if DEBUG || ZBOARD_TESTHOOKS
+        Android.Util.Log.Info("zBoardTest", $"THEME image={image != null} dark={ThemeImage.IsDark(theme.BarColor)} borders={_settings.KeyBorders}");
+#endif
     }
 
     // ---------- Hilfen ----------

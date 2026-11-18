@@ -21,6 +21,59 @@ public sealed class KeyboardTheme
     public Color EnterKey { get; init; }
     public Color EnterText { get; init; }
 
+    /// <summary>
+    /// Deckende Farbe, die für die Fläche steht, wenn <see cref="Background"/> durchsichtig ist (Design mit eigenem Bild):
+    /// für die Navigationsleiste und um zu entscheiden, ob deren Symbole hell oder dunkel sein müssen.
+    /// </summary>
+    public Color? Solid { get; init; }
+
+    public Color BarColor => Solid ?? Background;
+
+    /// <summary>Schatten unter der Schrift, damit sie auf einem Bild lesbar bleibt.</summary>
+    public bool TextShadow { get; init; }
+
+    /// <summary>
+    /// Design mit eigenem Hintergrundbild: Hintergrund durchsichtig (das Bild liegt darunter), Tasten halb
+    /// durchsichtig. Schrift hell oder dunkel je nachdem, wie hell das Bild nach dem Abdunkeln ist.
+    /// </summary>
+    /// <param name="average">Mittlere Farbe des Bilds nach dem Abdunkeln.</param>
+    public static KeyboardTheme FromImage(Color average, Color accent)
+    {
+        bool dark = ThemeImage.IsDark(average);
+        return dark
+            ? new KeyboardTheme
+            {
+                Background = Color.Transparent,
+                Solid = average,
+                Key = Color.Argb(64, 255, 255, 255),
+                SpecialKey = Color.Argb(36, 255, 255, 255),
+                KeyPressed = Color.Argb(120, 255, 255, 255),
+                Accent = accent,
+                AccentText = Color.ParseColor("#0E1218"),
+                Text = Color.White,
+                HintText = Color.Argb(210, 255, 255, 255),
+                Popup = Color.ParseColor("#3A3F46"),
+                EnterKey = accent,
+                EnterText = Color.ParseColor("#0E1218"),
+                TextShadow = true,
+            }
+            : new KeyboardTheme
+            {
+                Background = Color.Transparent,
+                Solid = average,
+                Key = Color.Argb(170, 255, 255, 255),
+                SpecialKey = Color.Argb(100, 255, 255, 255),
+                KeyPressed = Color.Argb(230, 255, 255, 255),
+                Accent = accent,
+                AccentText = Color.White,
+                Text = Color.ParseColor("#1F2328"),
+                HintText = Color.ParseColor("#3F4650"),
+                Popup = Color.White,
+                EnterKey = accent,
+                EnterText = Color.White,
+            };
+    }
+
     public static readonly KeyboardTheme Light = new()
     {
         Background = Color.ParseColor("#E9ECEF"),

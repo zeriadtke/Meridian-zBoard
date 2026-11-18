@@ -28,6 +28,7 @@
     <Compile Include="../../Emoji/EmojiCatalog.cs" Link="Core/EmojiCatalog.cs" />
     <Compile Include="../../Clipboard/ClipboardHistory.cs" Link="Core/ClipboardHistory.cs" />
     <Compile Include="../../Suggestions/EmailMemory.cs" Link="Core/EmailMemory.cs" />
+    <Compile Include="../../Suggestions/PersonalDictionary.cs" Link="Core/PersonalDictionary.cs" />
     <Compile Include="../../Backup/BackupArchive.cs" Link="Core/BackupArchive.cs" />
     <Compile Include="../../Backup/BackupMerge.cs" Link="Core/BackupMerge.cs" />
   </ItemGroup>

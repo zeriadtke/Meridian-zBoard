@@ -5,7 +5,8 @@ using ZBoard.Settings;
 namespace ZBoard.Plugins;
 
 /// <summary>Installiertes Plugin: App und Dienst, Name, ob es Internet nutzen darf, ob es synchronisieren kann.</summary>
-public sealed record PluginInfo(string Package, string Service, string Label, bool HasInternet, bool SameSigner, bool CanSync = false);
+public sealed record PluginInfo(
+    string Package, string Service, string Label, bool HasInternet, bool SameSigner, bool CanSync = false, bool CanInk = false);
 
 /// <summary>
 /// Findet installierte Plugins (Dienste mit <see cref="PluginContract.ServiceAction"/>). Freigeschaltet ist ein Plugin
@@ -30,8 +31,9 @@ public static class PluginRegistry
 
             string label = info.LoadLabel(pm)?.ToString() ?? service.PackageName;
             bool canSync = service.MetaData?.GetBoolean(PluginContract.MetaSync, false) == true;
+            bool canInk = service.MetaData?.GetBoolean(PluginContract.MetaInk, false) == true;
             result.Add(new PluginInfo(service.PackageName, service.Name, label,
-                HasInternet(pm, service.PackageName), SameSigner(pm, context.PackageName!, service.PackageName), canSync));
+                HasInternet(pm, service.PackageName), SameSigner(pm, context.PackageName!, service.PackageName), canSync, canInk));
         }
 
         return [.. result.OrderBy(p => p.Label, StringComparer.CurrentCultureIgnoreCase)];

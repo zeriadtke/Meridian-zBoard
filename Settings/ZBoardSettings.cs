@@ -11,6 +11,21 @@ public enum ThemeMode
 
     /// <summary>Material You: Farben aus dem Hintergrundbild (ab Android 12).</summary>
     Dynamic = 3,
+
+    /// <summary>Eigenes Bild als Hintergrund der Tastatur (Keyboard.ThemeImage); ohne Bild wie das System.</summary>
+    Image = 4,
+}
+
+/// <summary>Geteilte Tastatur für breite Bildschirme (Tablets, aufgeklappte Foldables).</summary>
+public enum SplitMode
+{
+    Off = 0,
+
+    /// <summary>Im Querformat, wenn der Bildschirm mindestens 600 dp breit ist.</summary>
+    Auto = 1,
+
+    /// <summary>Immer, wenn der Bildschirm mindestens 600 dp breit ist.</summary>
+    On = 2,
 }
 
 public enum OneHandedMode
@@ -109,6 +124,16 @@ public sealed class ZBoardSettings
         set => PutBool("rememberEmails", value);
     }
 
+    /// <summary>
+    /// Persönliches Wörterbuch (eigene Wörter und Kürzel), Format siehe <c>Suggestions.PersonalDictionary</c>. Gehört zu
+    /// den Einstellungen und ist damit in Sicherung und Synchronisation enthalten.
+    /// </summary>
+    public string PersonalDictionary
+    {
+        get => _prefs.GetString("personalDictionary", string.Empty) ?? string.Empty;
+        set => PutString("personalDictionary", value);
+    }
+
     /// <summary>Vom Nutzer freigeschaltete Plugins (Paketnamen). Nur diese bekommen auf Wunsch Text zu sehen.</summary>
     public IReadOnlySet<string> EnabledPlugins
     {
@@ -168,6 +193,32 @@ public sealed class ZBoardSettings
     {
         get => Math.Clamp(_prefs.GetInt("heightPercent", 100), 80, 130);
         set => PutInt("heightPercent", Math.Clamp(value, 80, 130));
+    }
+
+    public SplitMode Split
+    {
+        get => (SplitMode)_prefs.GetInt("splitLayout", (int)SplitMode.Auto);
+        set => PutInt("splitLayout", (int)value);
+    }
+
+    /// <summary>Schwebende Tastatur (frei verschiebbar, kleiner). Gerätebezogen, wie die Lage.</summary>
+    public bool Floating
+    {
+        get => _prefs.GetBoolean("floating", false);
+        set => PutBool("floating", value);
+    }
+
+    /// <summary>Lage der schwebenden Tastatur: linke Kante und Unterkante als Anteil des freien Platzes (0–1).</summary>
+    public float FloatingX
+    {
+        get => Math.Clamp(_prefs.GetFloat("floatingX", 0.5f), 0f, 1f);
+        set => Apply("floatingX", e => e.PutFloat("floatingX", Math.Clamp(value, 0f, 1f)));
+    }
+
+    public float FloatingY
+    {
+        get => Math.Clamp(_prefs.GetFloat("floatingY", 0.85f), 0f, 1f);
+        set => Apply("floatingY", e => e.PutFloat("floatingY", Math.Clamp(value, 0f, 1f)));
     }
 
     public OneHandedMode OneHanded
@@ -241,6 +292,20 @@ public sealed class ZBoardSettings
 
     /// <summary>Letzte Änderung an Einstellungen, die synchronisiert werden (Unix-ms).</summary>
     public long SettingsModifiedMs => _prefs.GetLong(BackupMerge.SettingsModifiedKey, 0);
+
+    /// <summary>Tasten als Flächen zeichnen (Gboard: „Tastenrahmen“); aus: nur die Beschriftung.</summary>
+    public bool KeyBorders
+    {
+        get => _prefs.GetBoolean("keyBorders", true);
+        set => PutBool("keyBorders", value);
+    }
+
+    /// <summary>Wie stark das eigene Hintergrundbild abgedunkelt wird, in Prozent (0–80).</summary>
+    public int ThemeImageDim
+    {
+        get => Math.Clamp(_prefs.GetInt("themeImageDim", 25), 0, 80);
+        set => PutInt("themeImageDim", Math.Clamp(value, 0, 80));
+    }
 
     public ThemeMode Theme
     {

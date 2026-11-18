@@ -7,6 +7,7 @@ online dictionaries …) come as **separate plugin apps**, e.g. from the Play St
 internet access – without a plugin, you have a keyboard without internet.
 
 Plugins: **zBoard DeepL** (`plugin-apps/DeepL`) – translates the selected text or the content of the field;
+**zBoard Pen** (`plugin-apps/Pen`) – handwriting, recognized on the device with Google ML Kit;
 **zBoard Sync** (`plugin-apps/Sync`) – syncs settings and learned data between devices via Google Drive, OneDrive,
 Dropbox or WebDAV (HiDrive, Nextcloud …).
 
@@ -59,6 +60,19 @@ plugin access only for the duration of one request (`grantUriPermission`). zBoar
 | `12` Upload | `uri` (read access) | empty **or** `error` |
 
 Time limit 90 s per transfer, at most 64 MB. Example: `plugin-apps/Sync` (its README explains the provider setup).
+
+### Handwriting plugins
+
+A plugin with the additional meta-data entry `de.World_of_Bytes.zBoard.plugin.INK` = `true` recognizes handwriting.
+zBoard then shows a pen in the toolbar that opens the writing area. zBoard collects the strokes and asks the plugin
+after each stroke (with a short delay); the best result appears as the word being composed in the field, the others
+in the bar.
+
+| `what` | Request (`data`) | Reply |
+| --- | --- | --- |
+| `20` Recognize | `inkStrokes` (int[]: points per stroke), `inkPoints` (float[]: x, y alternating, pixels of the writing area), `inkTimes` (long[]: ms per point), `inkWidth`, `inkHeight` (float), `language`, `preContext` (up to 20 characters before the cursor) | `candidates` (string[], best first) **or** `error`; plus `inkLoading` = true while the plugin is still downloading what it needs – zBoard then asks again every 2 s |
+
+Time limit 10 s, at most 20,000 points per request. Example: `plugin-apps/Pen`.
 
 ### Security
 

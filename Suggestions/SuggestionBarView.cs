@@ -12,9 +12,10 @@ namespace ZBoard.Suggestions;
 /// <param name="IsEmail">E-Mail-Adresse: ersetzt das angefangene Adress-Stück, ohne Leerzeichen dahinter.</param>
 /// <param name="IsPhrase">Mehrere Wörter aus einer gelernten Wortfolge (Wort plus die nächsten).</param>
 /// <param name="IsReplacement">Ersetzt ein angetipptes Wort im Text statt das Wort in Bearbeitung.</param>
+/// <param name="IsShortcut">Text aus dem persönlichen Wörterbuch (zu einem Kürzel): wird eingesetzt, aber nicht gelernt.</param>
 public sealed record SuggestionSlot(
     string Display, string Word, bool Emphasized, bool IsLiteral, bool IsEmail = false, bool IsPhrase = false,
-    bool IsReplacement = false);
+    bool IsReplacement = false, bool IsShortcut = false);
 
 /// <summary>Eintrag der Werkzeugleiste (Material-Symbol). <paramref name="Trailing"/>: rechts im Kreis (Mikrofon).</summary>
 public sealed record ToolbarItem(string Id, int Icon, bool Trailing = false);
@@ -243,7 +244,36 @@ public sealed class SuggestionBarView : View
         }
 
         for (int i = 0; i < _targets.Count; i++) DrawTarget(canvas, i);
+#if DEBUG || ZBOARD_TESTHOOKS
+        LogTargets();
+#endif
     }
+
+#if DEBUG || ZBOARD_TESTHOOKS
+    string _loggedTargets = string.Empty;
+
+    /// <summary>
+    /// Nur Testversionen: Bildschirmposition jedes Eintrags der Leiste ins Log (Tag "zBoardTest"), damit der
+    /// Emulator-Test Vorschläge und Werkzeuge gezielt antippen kann. Format: "BAR slot1@540,1500 toolbar-open@40,1500 …".
+    /// </summary>
+    void LogTargets()
+    {
+        var origin = new int[2];
+        GetLocationOnScreen(origin);
+        var line = new System.Text.StringBuilder("BAR ");
+        foreach (var (bounds, id, _, _) in _targets)
+        {
+            line.Append(id.Replace(' ', '_')).Append('@')
+                .Append((int)(origin[0] + bounds.CenterX())).Append(',')
+                .Append((int)(origin[1] + bounds.CenterY())).Append(' ');
+        }
+
+        string text = line.ToString();
+        if (text == _loggedTargets) return;
+        _loggedTargets = text;
+        Android.Util.Log.Info("zBoardTest", text);
+    }
+#endif
 
     void LayoutSuggestions()
     {
@@ -265,8 +295,10 @@ public sealed class SuggestionBarView : View
         float toggle = ToggleWidthDp * _dp;
         _targets.Add((new RectF(0, 0, toggle, Height), ToolbarOpenId, string.Empty, Resource.Drawable.ms_arrow_forward));
 
-        // Eine Wortfolge rechts bekommt mehr Platz, damit sie lesbar bleibt
-        float[] share = _slots[2]?.IsPhrase == true ? [0.27f, 0.31f, 0.42f] : [1 / 3f, 1 / 3f, 1 / 3f];
+        // Eine Wortfolge rechts bekommt mehr Platz, damit sie lesbar bleibt; ebenso der Text zu einem Kürzel
+        float[] share = [1 / 3f, 1 / 3f, 1 / 3f];
+        if (_slots[1]?.IsShortcut == true) share = _slots[2] == null ? [0.24f, 0.76f, 0f] : [0.24f, 0.46f, 0.30f];
+        else if (_slots[2] is { IsPhrase: true } or { IsShortcut: true }) share = [0.27f, 0.31f, 0.42f];
         float x = toggle;
         for (int i = 0; i < 3; i++)
         {
@@ -294,14 +326,19 @@ public sealed class SuggestionBarView : View
             _targets.Add((new RectF(0, 0, x, Height), ToolbarCloseId, string.Empty, Resource.Drawable.ms_arrow_back));
         }
 
+        var leading = ToolbarItems.Where(t => !t.Trailing).ToList();
         if (_clipChip != null)
         {
-            float chipWidth = Width * 0.45f;
-            _targets.Add((new RectF(x, 0, x + chipWidth, Height), ClipChipId, Shorten(_clipChip), Resource.Drawable.ms_content_paste));
-            x += chipWidth;
+            // Der kopierte Text weicht den Werkzeugen, wenn die Leiste schmal ist (schwebende Tastatur, viele Werkzeuge):
+            // Jedes Symbol behält mindestens 44 dp, der Vorschlag mindestens 96 dp – sonst entfällt er.
+            float chipWidth = Math.Min(Width * 0.45f, right - x - leading.Count * 44 * _dp);
+            if (chipWidth >= 96 * _dp)
+            {
+                _targets.Add((new RectF(x, 0, x + chipWidth, Height), ClipChipId, Shorten(_clipChip), Resource.Drawable.ms_content_paste));
+                x += chipWidth;
+            }
         }
 
-        var leading = ToolbarItems.Where(t => !t.Trailing).ToList();
         if (leading.Count == 0) return;
         float w = Math.Min(slot, (right - x) / leading.Count);
         foreach (var item in leading)

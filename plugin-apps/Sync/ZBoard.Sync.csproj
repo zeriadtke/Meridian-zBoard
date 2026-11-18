@@ -12,8 +12,8 @@
 
     <ApplicationId>de.World_of_Bytes.zBoard.Sync</ApplicationId>
     <ApplicationTitle>zBoard Sync</ApplicationTitle>
-    <ApplicationVersion>2</ApplicationVersion>
-    <ApplicationDisplayVersion>1.1</ApplicationDisplayVersion>
+    <ApplicationVersion>3</ApplicationVersion>
+    <ApplicationDisplayVersion>1.2</ApplicationDisplayVersion>
   </PropertyGroup>
 
   <!-- Gemeinsamer Vertrag mit zBoard -->

@@ -7,6 +7,7 @@ Online-Wörterbücher …), kommen als **eigene Plugin-Apps**, z. B. aus dem Pla
 fragt nach Internet – wer kein Plugin installiert, hat eine Tastatur ohne Internet.
 
 Plugins: **zBoard DeepL** (`plugin-apps/DeepL`) – übersetzt den markierten Text oder den Inhalt des Felds;
+**zBoard Pen** (`plugin-apps/Pen`) – Handschrift, erkannt mit Google ML Kit auf dem Gerät;
 **zBoard Sync** (`plugin-apps/Sync`) – gleicht Einstellungen und Gelerntes über Google Drive, OneDrive, Dropbox oder
 WebDAV (HiDrive, Nextcloud …) zwischen Geräten ab.
 
@@ -61,6 +62,19 @@ zBoard stellt die Datei (ZIP, Format der Sicherung) über seinen nicht exportier
 
 Zeitlimit 90 s je Übertragung, höchstens 64 MB. Beispiel: `plugin-apps/Sync` (README dort mit der Einrichtung der
 Anbieter).
+
+### Handschrift-Plugins
+
+Ein Plugin mit zusätzlicher Meta-Angabe `de.World_of_Bytes.zBoard.plugin.INK` = `true` erkennt Handschrift. zBoard
+zeigt dann in der Werkzeugleiste einen Stift; er öffnet die Schreibfläche. zBoard sammelt die Striche und fragt das
+Plugin nach jedem Strich (kurz verzögert); das beste Ergebnis steht als Wort in Bearbeitung im Feld, die übrigen in
+der Leiste.
+
+| `what` | Anfrage (`data`) | Antwort |
+| --- | --- | --- |
+| `20` Erkennen | `inkStrokes` (int[]: Punkte je Strich), `inkPoints` (float[]: x, y abwechselnd, Pixel der Schreibfläche), `inkTimes` (long[]: ms je Punkt), `inkWidth`, `inkHeight` (float), `language`, `preContext` (bis 20 Zeichen vor dem Cursor) | `candidates` (string[], bester zuerst) **oder** `error`; dazu `inkLoading` = true, solange das Plugin noch lädt, was es braucht – zBoard fragt dann alle 2 s erneut |
+
+Zeitlimit 10 s, höchstens 20 000 Punkte je Anfrage. Beispiel: `plugin-apps/Pen`.
 
 ### Sicherheit
 

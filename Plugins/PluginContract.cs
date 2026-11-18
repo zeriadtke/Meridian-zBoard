@@ -88,4 +88,45 @@ public static class PluginContract
 
     /// <summary>Größte Datei, die Plugin und zBoard austauschen.</summary>
     public const long MaxSyncBytes = 64L * 1024 * 1024;
+
+    // ---------- Handschrift (Plugins mit Meta-Daten MetaInk = true) ----------
+    // zBoard zeigt die Schreibfläche und sammelt die Striche; das Plugin erkennt daraus Text (z. B. zBoard Pen mit
+    // ML Kit). Handschrift-Plugins erscheinen in der Werkzeugleiste als Stift, nicht unter dem Puzzle-Symbol.
+
+    /// <summary>Meta-Daten am Dienst (boolean, true): das Plugin erkennt Handschrift.</summary>
+    public const string MetaInk = "de.World_of_Bytes.zBoard.plugin.INK";
+
+    /// <summary>
+    /// Handschrift erkennen. Anfrage: <see cref="KeyInkStrokes"/>, <see cref="KeyInkPoints"/>, <see cref="KeyInkTimes"/>,
+    /// <see cref="KeyInkWidth"/>, <see cref="KeyInkHeight"/>, <see cref="KeyLanguage"/>, <see cref="KeyPreContext"/>.
+    /// Antwort: <see cref="KeyCandidates"/>, oder <see cref="KeyError"/> (mit <see cref="KeyInkLoading"/> = true, solange
+    /// das Plugin noch sein Schriftmodell lädt: zBoard fragt dann von selbst wieder).
+    /// </summary>
+    public const int MsgInkRecognize = 20;
+
+    /// <summary>int[]: Anzahl der Punkte je Strich.</summary>
+    public const string KeyInkStrokes = "inkStrokes";
+
+    /// <summary>float[]: alle Punkte hintereinander, je x und y in Pixeln der Schreibfläche (oben links = 0, 0).</summary>
+    public const string KeyInkPoints = "inkPoints";
+
+    /// <summary>long[]: Zeitpunkt je Punkt in Millisekunden.</summary>
+    public const string KeyInkTimes = "inkTimes";
+
+    /// <summary>float: Breite und Höhe der Schreibfläche in Pixeln.</summary>
+    public const string KeyInkWidth = "inkWidth";
+
+    public const string KeyInkHeight = "inkHeight";
+
+    /// <summary>string: bis zu 20 Zeichen vor dem Cursor (verbessert die Erkennung, z. B. Groß-/Kleinschreibung).</summary>
+    public const string KeyPreContext = "preContext";
+
+    /// <summary>string[]: erkannte Texte, wahrscheinlichster zuerst.</summary>
+    public const string KeyCandidates = "candidates";
+
+    /// <summary>bool: Das Plugin lädt noch, was es zum Erkennen braucht.</summary>
+    public const string KeyInkLoading = "inkLoading";
+
+    /// <summary>Höchstens so viele Punkte schickt zBoard in einer Anfrage.</summary>
+    public const int MaxInkPoints = 20_000;
 }

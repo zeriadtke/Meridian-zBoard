@@ -17,7 +17,7 @@ Anders als Gboard arbeitet zBoard vollständig offline und ohne Internetberechti
 lernt, bleibt auf dem Gerät. Funktionen, die Internet brauchen (etwa Übersetzen mit DeepL), kommen als eigene
 Plugin-Apps dazu – nur wer sie installiert, gibt ihnen Internetzugriff. Geschrieben ist zBoard in C# mit .NET 10 for Android.
 
-Stand: **Version 0.13.0**, alle fünf Meilensteine umgesetzt – Testphase auf echten Geräten. Die 13 Sprachen, die mit
+Stand: **Version 1.0.0**, alle fünf Meilensteine umgesetzt – Testphase auf echten Geräten. Die 13 Sprachen, die mit
 0.13.0 dazugekommen sind, sind durch Unit-Tests geprüft, aber noch auf keinem echten Gerät ausprobiert.
 Fertige Versionen: [Releases](https://github.com/World-of-Bytes/zBoard/releases).
 
@@ -42,12 +42,14 @@ Fertige Versionen: [Releases](https://github.com/World-of-Bytes/zBoard/releases)
 | Ganze Wortfolgen vorschlagen („freundlichen Grüßen“) | ✓ | ✓ aus Gelerntem |
 | Vorschläge für ein angetipptes Wort im Text | ✓ | ✓ Antippen ersetzt das ganze Wort |
 | E-Mail-Adressen vorschlagen | ✓ | ✓ gemerkte Adressen und bekannte Anbieter nach „@“ |
+| Persönliches Wörterbuch mit Kürzeln („mfg“ → „Mit freundlichen Grüßen“) | ✓ | ✓ eigene Wörter und Kürzel für alle Sprachen, in Sicherung und Synchronisation enthalten |
 | Wischeingabe (Glide Typing) | ✓ | ✓ |
 | Chinesisch mit Pinyin | ✓ | ✓ vereinfachte Schriftzeichen, durchgehende Vorschlagszeile, lernt die gewählten Zeichen |
 | Vietnamesisch mit Telex | ✓ | ✓ abschaltbar |
 | Cursor per Leertaste, Wort-Löschen per Wischen | ✓ | ✓ |
+| Textbearbeitung (Pfeiltasten, Markieren, Kopieren, Ausschneiden, Einfügen) | ✓ | ✓ über die Werkzeugleiste |
 | Tastenvorschau, Vibration, Ton | ✓ | ✓ |
-| Designs | ✓ | hell, dunkel, Material You (Farben aus dem Hintergrundbild) |
+| Designs | ✓ | hell, dunkel, Material You (Farben aus dem Hintergrundbild), eigenes Bild (abdunkelbar), Tastenrahmen an/aus |
 | Emoji-Tastatur | ✓ | ✓ mit Kategorien, Hauttönen, „Zuletzt verwendet“ und Suche in allen 18 Sprachen |
 | Zwischenablage-Verlauf | ✓ | ✓ eine Stunde, Anheften, vertrauliche Inhalte ausgenommen |
 | Sichern & wiederherstellen (Einstellungen, gelernte Wörter, E-Mail-Adressen, angeheftete Zwischenablage) | teilweise: gelernte Wörter nur per Synchronisation mit dem Google-Konto, Export des persönlichen Wörterbuchs; keine Sicherung der Einstellungen | ✓ als ZIP-Datei, die du ablegst, wo du willst – ohne Konto |
@@ -55,7 +57,10 @@ Fertige Versionen: [Releases](https://github.com/World-of-Bytes/zBoard/releases)
 | Spracheingabe | ✓ | ✓ über die Spracherkennung des Systems, standardmäßig nur offline |
 | Werkzeugleiste (Zwischenablage, Mikrofon, Einstellungen) | ✓ | ✓ über den Pfeil links in der Vorschlagsleiste |
 | Einhandmodus, Höhe, Zahlenreihe | ✓ | ✓ |
+| Schwebende Tastatur | ✓ | ✓ über die Werkzeugleiste, am Griff verschiebbar |
+| Geteilte Tastatur (Tablets, Foldables) | ✓ | ✓ ab 600 dp Bildschirmbreite, standardmäßig im Querformat |
 | Übersetzen | ✓ | ✓ über die Plugin-App „zBoard DeepL“ (eigener DeepL-API-Schlüssel) |
+| Handschrift | ✓ | ✓ über die Plugin-App „zBoard Pen“ (Google ML Kit, Erkennung auf dem Gerät) |
 | Synchronisation zwischen Geräten | gelernte Wörter über das Google-Konto | ✓ über die Plugin-App „zBoard Sync“: Einstellungen, gelernte Wörter, E-Mail-Adressen via Google Drive, OneDrive, Dropbox oder WebDAV (HiDrive, Nextcloud …) |
 | Google-Dienste | ✓ | nicht geplant |
 
@@ -89,7 +94,7 @@ Die Oberfläche ist zweisprachig: Deutsch, wenn das System auf Deutsch steht, so
 ## Tests
 
 Die Logik ohne Android (Wörterbuch, Autokorrektur, Sprachmodell, Fingerpositionen, zusammengesetzte Wörter,
-Leerzeichen, Vorhersage, Wortfolgen, Lernen, E-Mail-Adressen, Wischeingabe, Emoji, Zwischenablage, Layouts,
+Leerzeichen, Vorhersage, Wortfolgen, Lernen, E-Mail-Adressen, persönliches Wörterbuch, Wischeingabe, Emoji, Zwischenablage, Layouts,
 Sonderzeichen-Popup, Sicherungen, alle 18 Sprachen, Pinyin, Telex) hat eigene Unit-Tests:
 
 ```bash
@@ -125,16 +130,17 @@ ersten Laden fertig vorbereitet im Zwischenspeicher der App ab (`cache/dict/`; n
 | Ordner | Inhalt |
 | --- | --- |
 | `Ime/` | `ZBoardImeService` (Herzstück), `EditorProfile` (Eigenschaften des Eingabefelds), `TextBoundaries` |
-| `Keyboard/` | Layout-Modell, alle Layouts, `KeyboardView` (Zeichnen und Touch), `PopupGrid` (Anordnung im Popup), Farben |
+| `Keyboard/` | `HandwritingPanelView` (Schreibfläche), `TextEditPanelView` (Textbearbeitung), Layout-Modell, alle Layouts, `KeyboardView` (Zeichnen und Touch), `PopupGrid` (Anordnung im Popup), Farben |
 | `Emoji/` | `EmojiCatalog` (Daten, Suche, Hauttöne), `EmojiPanelView` |
 | `Clipboard/` | `ClipboardHistory`, `ClipboardPanelView` |
-| `Suggestions/` | `WordDictionary` (sortiertes Array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (Sprachmodell), `TouchTrace` (Fingerpositionen), `UserHistory`, `EmailMemory`, `KeyProximity`, `TextCase` (Groß-/Kleinschreibung je Sprache), `PinyinEngine` und `PinyinLearned` (Chinesisch), `Telex` (Vietnamesisch), `CandidateStrip` (Anordnung der Vorschlagszeile), `SuggestionBarView` |
+| `Suggestions/` | `WordDictionary` (sortiertes Array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (Sprachmodell), `TouchTrace` (Fingerpositionen), `UserHistory`, `EmailMemory`, `PersonalDictionary` (eigene Wörter und Kürzel), `KeyProximity`, `TextCase` (Groß-/Kleinschreibung je Sprache), `PinyinEngine` und `PinyinLearned` (Chinesisch), `Telex` (Vietnamesisch), `CandidateStrip` (Anordnung der Vorschlagszeile), `SuggestionBarView` |
 | `Settings/` | `SettingsActivity` (Startbildschirm), `ZBoardSettings` |
 | `Backup/` | `BackupArchive` (Sicherungsdatei: Schreiben, Lesen, Prüfen) |
 | `Assets/dict/` | Wortlisten und Sprachmodelle pro Sprache |
 | `Assets/emoji/` | Emoji nach Kategorien, Namen und Suchbegriffe pro Sprache |
 | `Plugins/` | `PluginContract` (Schnittstelle), `PluginRegistry` (installierte Plugins), `PluginClient` (Messenger) |
 | `plugin-apps/DeepL/` | Plugin-App „zBoard DeepL“ (eigene App mit Internet-Berechtigung) |
+| `plugin-apps/Pen/` | Plugin-App „zBoard Pen“ (Handschrift mit Google ML Kit) |
 | `Sync/` | `SyncManager` (Abgleich über ein Plugin), `SyncFileProvider` (Datei-Übergabe an das Plugin) |
 | `plugin-apps/Sync/` | Plugin-App „zBoard Sync“ (Google Drive, OneDrive, Dropbox, WebDAV); Einrichtung der Anbieter in der README dort |
 | `tools/` | `build_dictionaries.py` (Wortlisten), `NgramBuilder` (Sprachmodelle), `SuggestionEval` (Vorschlagsmessung), `LoadBench` (Ladezeiten, Zeit je Tastendruck), `build_emoji.py` (Emoji-Daten), `emulator_test.py` |
@@ -293,12 +299,27 @@ von Google werden nicht übernommen. zBoard hat keine Internet-Berechtigung (Rel
 - **Emoji:** Taste ☺ links neben dem Komma. Unten Kategorien, 🕘 zuletzt verwendet, 🔍 Suche. Bei der Suche schreibt
   die Tastatur in das Suchfeld der Leiste („Daumen“, „gut“, „lachen“); Treffer erscheinen daneben. Langer Druck auf
   Personen-Emoji zeigt die Hauttöne. Emoji, die die Schrift des Geräts nicht kennt, werden ausgeblendet.
-- **Werkzeugleiste:** 📋 Zwischenablage, 🎤 Spracheingabe, ✋ Einhandmodus (rechts → links → aus), ⚙ Einstellungen.
+- **Werkzeugleiste:** 📋 Zwischenablage, Textbearbeitung, 🎤 Spracheingabe, ✋ Einhandmodus (rechts → links → aus), ⚙ Einstellungen.
   Sie erscheint im leeren Feld und wenn es nichts vorzuschlagen gibt; sonst öffnet sie der Pfeil links in der
   Vorschlagsleiste, und der Pfeil dort oder das Weitertippen führt zurück zu den Vorschlägen. Eben kopierter Text
   erscheint dort 90 Sekunden lang als Vorschlag.
+- **Designs:** Neben hell, dunkel und Material You gibt es „Eigenes Bild“: Das gewählte Bild liegt hinter Leiste und
+  Tasten, ein Regler dunkelt es ab, die Schrift wird passend hell oder dunkel. „Tastenrahmen“ aus zeichnet nur die
+  Beschriftungen (wie bei Gboard). Das Bild bleibt auf dem Gerät und gehört nicht zu Sicherung und Synchronisation.
+- **Schwebende Tastatur:** Das Pfeilkreuz in der Werkzeugleiste macht die Tastatur schmaler und frei verschiebbar
+  (Griff unter den Tasten); die App darunter wird nicht verkleinert. Noch einmal antippen legt sie wieder unten an.
+- **Geteilte Tastatur:** Auf Bildschirmen ab 600 dp Breite (Tablets, aufgeklappte Foldables) rücken die
+  Tastenhälften an die Ränder, die Leertaste gibt es auf beiden Seiten. Einstellungen → Einstellungen → Layout:
+  aus, im Querformat (Standard) oder immer.
+- **Textbearbeitung:** Das Cursor-Symbol in der Werkzeugleiste ersetzt die Tasten durch Pfeiltasten (auch Zeilenanfang
+  und -ende). „Auswählen“ lässt die Pfeile Text markieren; daneben Alles auswählen, Kopieren, Ausschneiden und
+  Einfügen. Pfeile und Löschen wiederholen sich beim Halten, „ABC“ führt zurück zu den Tasten.
 - **Sonderzeichen:** langer Druck auf einen Buchstaben. Wie bei Gboard erscheinen die Zeichen im Raster über dem Finger,
   das häufigste (ö auf o, ä auf a, é auf e im Französischen …) ist vorausgewählt.
+- **Handschrift:** Mit der Plugin-App **zBoard Pen** erscheint in der Werkzeugleiste ein Stift. Er öffnet eine
+  Schreibfläche; das erkannte Wort steht unterstrichen im Feld, Alternativen in der Leiste. Nach einer kurzen Pause
+  beginnt das nächste Wort, Löschen verwirft das gerade geschriebene, „ABC“ führt zurück zur Tastatur. Erkannt wird
+  mit Google ML Kit auf dem Gerät; Internet braucht zBoard Pen nur für die Schriftmodelle (je Sprache etwa 20 MB).
 - **Plugins:** Funktionen mit Internet als eigene Apps, z. B. **zBoard DeepL** zum Übersetzen
   (`plugin-apps/DeepL`). zBoard selbst bleibt ohne Internet; einschalten unter Einstellungen → Plugins, benutzen über
   das Puzzle-Symbol in der Leiste. Schnittstelle für eigene Plugins: [docs/PLUGINS.de.md](docs/PLUGINS.de.md).
@@ -313,6 +334,11 @@ von Google werden nicht übernommen. zBoard hat keine Internet-Berechtigung (Rel
   (nur eine Beschriftung „E-Mail-Adresse“ darüber): In einzeiligen Formularfeldern schlägt zBoard deshalb gemerkte
   Adressen auch vor, sobald das Feld nur ein Wort von mindestens drei Buchstaben enthält, mit dem eine gemerkte Adresse
   beginnt, und merkt sich Adressen, wenn am Ende genau eine gültige Adresse im Feld steht.
+- **Persönliches Wörterbuch:** Unter Einstellungen → Wörterbuch → Persönliches Wörterbuch legst du eigene Wörter und
+  Kürzel an. Eigene Wörter (Namen, Fachbegriffe, „zBoard“) schlägt die Leiste beim Tippen vor; die Autokorrektur lässt
+  sie stehen und setzt die gespeicherte Schreibweise ein („zboard“ → „zBoard“). Tippst du ein Kürzel („mfg“), zeigt die
+  Leiste seinen Text („Mit freundlichen Grüßen“); wie bei Gboard setzt ihn erst das Antippen ein. Die Einträge gelten in
+  allen Sprachen und gehören zu den Einstellungen – Sicherung und Synchronisation nehmen sie mit.
 - **Zwischenablage:** Verlauf der letzten Stunde, Anheften (📌) hält Einträge dauerhaft. Nur Angeheftetes wird
   gespeichert; als vertraulich markierte Inhalte (z. B. aus Passwort-Managern) und Kopien aus Passwortfeldern
   werden nie übernommen.

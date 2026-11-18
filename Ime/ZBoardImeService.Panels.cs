@@ -14,7 +14,7 @@ using ZBoard.Localization;
 
 namespace ZBoard.Ime;
 
-/// <summary>Werkzeugleiste, Emoji-Tastatur mit Suche, Zwischenablage-Verlauf und Einhandmodus.</summary>
+/// <summary>Werkzeugleiste, Emoji-Tastatur mit Suche, Zwischenablage-Verlauf, Textbearbeitung und Einhandmodus.</summary>
 public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPanelListener
 {
     const long ClipChipMaxAgeMs = 90_000;
@@ -24,7 +24,9 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
     static readonly IReadOnlyList<ToolbarItem> Toolbar =
     [
         new("clipboard", Resource.Drawable.ms_content_paste),
+        new("textedit", Resource.Drawable.ms_text_select_move_forward_character),
         new("onehanded", Resource.Drawable.ms_back_hand),
+        new("floating", Resource.Drawable.ms_open_with),
         new("settings", Resource.Drawable.ms_settings),
         new("voice", Resource.Drawable.ms_mic, Trailing: true),
     ];
@@ -54,7 +56,7 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _inputRoot = root;
 
         // Ab Android 15 reicht das Tastaturfenster bis unter die Navigationsleiste: Platz dafür freihalten.
-        root.SetOnApplyWindowInsetsListener(new SystemBarInsets());
+        root.SetOnApplyWindowInsetsListener(new SystemBarInsets(this));
         // Ein neu angehängter View bekommt die Insets nicht immer von selbst (z. B. wenn Android die Tastatur
         // neu aufbaut): beim Anhängen ausdrücklich anfordern.
         root.AddOnAttachStateChangeListener(new RequestInsetsOnAttach());
@@ -65,11 +67,13 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _suggestionBar.ToolbarPicked += OnToolbarPicked;
         _suggestionBar.SuggestionLongPressed += OnSuggestionLongPressed;
         _suggestionBar.EmojiPicked += InsertEmoji;
-        _suggestionBar.CandidatePicked += OnPinyinCandidatePicked;
+        _suggestionBar.CandidatePicked += OnCandidatePicked;
 
         _keyboardView = new KeyboardView(this) { Listener = this };
         _emojiPanel = new EmojiPanelView(this) { Listener = this, Visibility = ViewStates.Gone };
         _clipboardPanel = new ClipboardPanelView(this) { Listener = this, Visibility = ViewStates.Gone };
+        _textEditPanel = new TextEditPanelView(this) { Listener = this, Visibility = ViewStates.Gone };
+        _handwritingPanel = new HandwritingPanelView(this) { Listener = this, Visibility = ViewStates.Gone };
 
         _emojiCatalogLanguage = null; // neues Panel braucht den Katalog erneut
 
@@ -81,10 +85,15 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _panelHost.AddView(_keyboardView);
         _panelHost.AddView(_emojiPanel);
         _panelHost.AddView(_clipboardPanel);
+        _panelHost.AddView(_textEditPanel);
+        _panelHost.AddView(_handwritingPanel);
         ApplyOneHanded();
 
         root.AddView(_suggestionBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, (int)(48 * dp)));
         root.AddView(_panelHost, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent));
+        // Griff der schwebenden Tastatur (sonst ausgeblendet)
+        _floatingHandle = new FloatingHandle(this) { Visibility = ViewStates.Gone };
+        root.AddView(_floatingHandle, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, (int)(22 * dp)));
 
         // Durchsichtiger Platz über der Tastatur für Popups, Tastatur unten (siehe ZBoardImeService.Window.cs)
         var frame = new PopupSpaceFrame(this);
@@ -105,7 +114,7 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _emojiSearchActive = false;
         _emojiQuery.Clear();
         _keyboardView?.HeightScale = _settings.HeightPercent / 100f;
-        ApplyOneHanded();
+        ApplyFloating(); // ruft auch ApplyOneHanded und ApplySplit
         ShowKeyboardPanel();
     }
 
@@ -124,6 +133,9 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _panelHost?.SetBackgroundColor(theme.Background);
         _emojiPanel?.Theme = theme;
         _clipboardPanel?.ApplyTheme(theme);
+        _textEditPanel?.Theme = theme;
+        _handwritingPanel?.Theme = theme;
+        _floatingHandle?.Color = theme.HintText;
         ApplyNavigationBarStyle();
     }
 
@@ -132,6 +144,9 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _keyboardView?.Visibility = ViewStates.Visible;
         _emojiPanel?.Visibility = ViewStates.Gone;
         _clipboardPanel?.Visibility = ViewStates.Gone;
+        _textEditPanel?.Visibility = ViewStates.Gone;
+        if (HandwritingOpen) ResetInk();
+        _handwritingPanel?.Visibility = ViewStates.Gone;
     }
 
     /// <summary>Panels so hoch wie die Tastatur, damit nichts springt.</summary>
@@ -142,7 +157,7 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
     void ApplyOneHanded()
     {
         if (_panelHost == null) return;
-        var mode = _settings.OneHanded;
+        var mode = Floating ? OneHandedMode.Off : _settings.OneHanded; // schwebend ist die Tastatur schon schmal
         int width = mode == OneHandedMode.Off
             ? ViewGroup.LayoutParams.MatchParent
             : (int)(Resources!.DisplayMetrics!.WidthPixels * OneHandedWidth);
@@ -198,6 +213,12 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
             case "clipboard":
                 ShowClipboardPanel();
                 break;
+            case "textedit":
+                ShowTextEditPanel();
+                break;
+            case "handwriting":
+                ShowHandwritingPanel();
+                break;
             case "voice":
                 StartVoice();
                 break;
@@ -209,6 +230,10 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
                     _ => OneHandedMode.Off,
                 };
                 ApplyOneHanded();
+                ApplySplit();
+                break;
+            case "floating":
+                ToggleFloating();
                 break;
             case "settings":
                 var intent = new Intent(this, typeof(SettingsActivity));
@@ -294,6 +319,8 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _emojiPanel.ShowStart();
         _keyboardView.Visibility = ViewStates.Gone;
         _clipboardPanel?.Visibility = ViewStates.Gone;
+        _textEditPanel?.Visibility = ViewStates.Gone;
+        _handwritingPanel?.Visibility = ViewStates.Gone;
         _emojiPanel.Visibility = ViewStates.Visible;
         ShowToolbar();
     }
@@ -437,6 +464,8 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         RefreshClipboardPanel();
         _keyboardView.Visibility = ViewStates.Gone;
         _emojiPanel?.Visibility = ViewStates.Gone;
+        _textEditPanel?.Visibility = ViewStates.Gone;
+        _handwritingPanel?.Visibility = ViewStates.Gone;
         _clipboardPanel.Visibility = ViewStates.Visible;
     }
 
@@ -482,7 +511,7 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         root.RequestApplyInsets();
         root.Post(() =>
         {
-            if (root.RootWindowInsets is { } insets) SystemBarInsets.Apply(root, insets);
+            if (root.RootWindowInsets is { } insets) SystemBarInsets.Apply(root, insets, Floating);
         });
     }
 
@@ -495,17 +524,26 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         }
     }
 
-    sealed class SystemBarInsets : Java.Lang.Object, View.IOnApplyWindowInsetsListener
+    sealed class SystemBarInsets(ZBoardImeService service) : Java.Lang.Object, View.IOnApplyWindowInsetsListener
     {
         public WindowInsets OnApplyWindowInsets(View v, WindowInsets insets)
         {
-            Apply(v, insets);
+            Apply(v, insets, service.Floating);
             return insets;
         }
 
-        /// <summary>Innenabstand links, rechts und unten so groß wie Navigationsleiste und Display-Aussparung.</summary>
-        public static void Apply(View v, WindowInsets insets)
+        /// <summary>
+        /// Innenabstand links, rechts und unten so groß wie Navigationsleiste und Display-Aussparung. Die schwebende
+        /// Tastatur liegt frei auf dem Bildschirm und braucht keinen.
+        /// </summary>
+        public static void Apply(View v, WindowInsets insets, bool floating)
         {
+            if (floating)
+            {
+                if (v.PaddingLeft != 0 || v.PaddingRight != 0 || v.PaddingBottom != 0) v.SetPadding(0, 0, 0, 0);
+                return;
+            }
+
             int left, right, bottom;
             if (OperatingSystem.IsAndroidVersionAtLeast(30))
             {
