@@ -334,6 +334,10 @@ public sealed class KeyboardView : View
 
     // ---------- Zeichnen ----------
 
+#if DEBUG || ZBOARD_TESTHOOKS
+    static bool s_firstDrawLogged;
+#endif
+
     protected override void OnDraw(Canvas canvas)
     {
         base.OnDraw(canvas);
@@ -343,6 +347,11 @@ public sealed class KeyboardView : View
         canvas.DrawRect(0, 0, Width, Height, _fill);
 #if DEBUG || ZBOARD_TESTHOOKS
         LogKeyPositions();
+        if (!s_firstDrawLogged)
+        {
+            s_firstDrawLogged = true;
+            ZBoard.Testing.Perf.Log("first-draw-since-process-start", ZBoard.Testing.Perf.SinceProcessStart);
+        }
 #endif
 
         float radius = 7 * _dp;

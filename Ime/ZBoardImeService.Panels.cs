@@ -111,7 +111,8 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
 
     void FinishPanels()
     {
-        _settings.RecentEmoji = _recentEmoji.Serialize();
+        string recent = _recentEmoji.Serialize();
+        if (recent != _settings.RecentEmoji) _settings.RecentEmoji = recent; // nicht bei jedem Schließen schreiben
         _emojiSearchActive = false;
         ShowKeyboardPanel();
     }

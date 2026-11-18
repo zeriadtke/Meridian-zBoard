@@ -162,11 +162,14 @@ def tap_text(text):
 def dismiss_system_dialogs():
     """Der Emulator zeigt gelegentlich „… isn't responding“ für System-Apps: mit „Wait“ schließen."""
     try:
-        for node in ui_nodes():
+        nodes = list(ui_nodes())
+        for node in nodes:
             if node.get("text") in ("Wait", "Warten"):
                 x1, y1, x2, y2 = map(int, re.findall(r"\d+", node.get("bounds")))
                 shell(f"input tap {(x1 + x2) // 2} {(y1 + y2) // 2}")
-                print("Systemdialog geschlossen")
+                # Welche App gemeint ist, steht im Dialog („… isn't responding“)
+                texts = [n.get("text") for n in nodes if n.get("text")]
+                print("Systemdialog geschlossen:", " / ".join(texts)[:200])
                 time.sleep(1)
                 return True
     except Exception:  # noqa: BLE001
@@ -486,6 +489,30 @@ def main():
 
         found = crashes()
         check("Keine Abstürze", not found, "; ".join(found[:3]))
+
+        # Zeitmessung: Tastatur noch dreimal ganz neu laden (Prozess beenden, Testfeld öffnen). Nur Messwerte,
+        # kein Prüfergebnis: Die Zeiten im Emulator schwanken stark.
+        try:
+            for _ in range(3):
+                loaded = lambda: len(perf_values().get("ready-de-since-process-start", []))  # noqa: E731
+                before = loaded()
+                shell(f"am force-stop {PACKAGE}")
+                time.sleep(2)
+                shell(f"ime enable {IME}", check=False)  # Android wählt eine beendete Tastatur ab
+                shell(f"ime set {IME}", check=False)
+                shell(f"am start -W -n {TEST_ACTIVITY}")  # ohne -S: Das würde die Tastatur (dasselbe Paket) erneut beenden
+                end = time.time() + 60
+                while time.time() < end and loaded() <= before:
+                    time.sleep(1)
+                time.sleep(3)
+                print("Neu geladen:", loaded() > before,
+                      "– Tastatur:", shell("settings get secure default_input_method", check=False).strip())
+
+            # Lange Wörter kosten je Tastendruck am meisten Rechenzeit (Messwert „suggest-long“: ab zehn Buchstaben)
+            type_text(None, "krankenversicherungskarte geschwindigkeitsbegrenzung zusammenhang entschuldigung ")
+            time.sleep(1)
+        except Exception as e:  # noqa: BLE001
+            print(f"Zeitmessung abgebrochen: {e}")
     except Exception as e:  # noqa: BLE001 – jeder Fehler ist ein Testfehler
         check("Testablauf", False, str(e))
         try:
@@ -501,17 +528,42 @@ def main():
                         data = base64.b64encode(f.read()).decode()
                     for i in range(0, len(data), 3000):  # lange Zeilen kürzt das Log
                         print(f"SCREENSHOT {name} {i // 3000} {data[i:i + 3000]}")
+        full_log = adb("logcat", "-d", check=False)
         with open(os.path.join(out_dir, "logcat.txt"), "w", encoding="utf-8") as f:
-            f.write(adb("logcat", "-d", check=False))
-        write_summary(out_dir, results)
+            f.write(full_log)
+        if not all(ok for _, ok, _ in results):
+            # Bei Fehlern die Zeilen, die meist die Ursache zeigen, gleich ins Protokoll des Laufs
+            # (z. B. „ANR in …“: Der Emulator meldet gelegentlich eine System-App als nicht reagierend; dann kommt kein Tippen an)
+            wanted = r"ANR in|not responding|Input dispatching timed out|FATAL EXCEPTION|mono-rt|zBoard\s*:|Unhandled"
+            noise = r"zBoardTest"
+            lines = [l for l in full_log.splitlines() if re.search(wanted, l) and not re.search(noise, l)]
+            print("Log (Auszug, Fehlersuche):\n" + "\n".join(l[:300] for l in lines[-150:]))
+        write_summary(out_dir, results, perf_values())
 
     sys.exit(0 if results and all(ok for _, ok, _ in results) else 1)
 
 
-def write_summary(out_dir, results):
+def perf_values():
+    """Messwerte der Testversion aus dem Log: Zeilen „PERF name millisekunden“, je Name in zeitlicher Reihenfolge."""
+    values = {}
+    for name, value in re.findall(r"PERF (\S+) ([0-9.]+)", adb("logcat", "-d", "-s", "zBoardTest:I", check=False)):
+        values.setdefault(name, []).append(float(value))
+    return values
+
+
+def write_summary(out_dir, results, perf=None):
     lines = ["## zBoard im Emulator", "", "| Prüfung | Ergebnis | Detail |", "| --- | --- | --- |"]
     for name, ok, detail in results:
         lines.append(f"| {name} | {'✅' if ok else '❌'} | {detail.replace('|', '/')} |")
+    if perf:
+        lines += ["", "### Zeiten (ms)", "", "| Messwert | Anzahl | Median | kleinster | größter | erste Werte |",
+                  "| --- | --- | --- | --- | --- | --- |"]
+        for name in sorted(perf):
+            v = perf[name]
+            ordered = sorted(v)
+            first = " · ".join(f"{x:.0f}" for x in v[:6])
+            lines.append(f"| {name} | {len(v)} | {ordered[len(v) // 2]:.0f} | {ordered[0]:.0f} | {ordered[-1]:.0f} | {first} |")
+        print("\n".join(lines[-len(perf) - 4:]))
     lines += ["", "Screenshots und Log: Artefakt **emulator-test**."]
     summary = "\n".join(lines) + "\n"
     with open(os.path.join(out_dir, "zusammenfassung.md"), "w", encoding="utf-8") as f:

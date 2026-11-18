@@ -12,6 +12,7 @@ using Android.Widget;
 using ZBoard.Keyboard;
 using ZBoard.Settings;
 using ZBoard.Suggestions;
+using ZBoard.Testing;
 // Gleichnamige Typen in Android.InputMethodServices / Android.Content.Res eindeutig machen
 using KeyboardView = ZBoard.Keyboard.KeyboardView;
 using Keycode = Android.Views.Keycode;
@@ -91,6 +92,14 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
         _audio = GetSystemService(AudioService) as Android.Media.AudioManager;
         InitClipboard();
+        Perf.Log("process-to-service", Perf.SinceProcessStart);
+
+        // Wörterbücher schon jetzt im Hintergrund laden, nicht erst, wenn die Tastatur aufgebaut ist: Nach einem
+        // Neustart des Dienstes sind die Vorschläge so früher wieder da.
+        foreach (var language in MultilingualEngine.ActiveLanguages(_settings.CurrentLanguage, _settings.Languages, _settings.MultilingualTyping))
+        {
+            EngineTask(language);
+        }
     }
 
     static string LearningFile(Context context, string language) =>
@@ -124,11 +133,18 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         SavePinyinLearning();
     }
 
-    public override View? OnCreateInputView() => BuildInputView();
+    public override View? OnCreateInputView()
+    {
+        long started = Perf.Now;
+        var view = BuildInputView();
+        Perf.Log("create-input-view", Perf.Since(started));
+        return view;
+    }
 
     public override void OnStartInputView(EditorInfo? info, bool restarting)
     {
         base.OnStartInputView(info, restarting);
+        long started = Perf.Now;
         MeridianStartInput(info); // Meridian: neue Messsitzung je Eingabefeld
 
         _profile = EditorProfile.From(info);
@@ -151,13 +167,22 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         StartPanels();
         RefreshSystemBarPadding();
         UpdatePopupSpace(); // Platz für Popups über der Tastatur (falls Android das Fenster neu aufgebaut hat)
+        Perf.Log("start-panels-window", Perf.Since(started));
+        long step = Perf.Now;
         SetLanguage(_settings.CurrentLanguage);
+        Perf.Log("start-language", Perf.Since(step));
+        step = Perf.Now;
         ApplyTheme();
+        Perf.Log("start-theme", Perf.Since(step));
+        step = Perf.Now;
         _keyboardView?.EnterLabel = _profile.EnterLabel;
         _keyboardView?.GlideEnabled = _settings.GlideTyping && _profile.AllowSuggestions;
         _keyboardView?.ShowKeyPreview = _settings.KeyPreview;
         StartEmailInput();
+        Perf.Log("start-email", Perf.Since(step));
+        step = Perf.Now;
         StartPlugins();
+        Perf.Log("start-plugins", Perf.Since(step));
         if (_suggestionBar != null)
         {
             _suggestionBar.Visibility = ViewStates.Visible;
@@ -167,6 +192,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
         UpdateAutoShift();
         Sync.SyncManager.SyncIfDue(this); // holt Neues von anderen Geräten (höchstens alle 15 Minuten)
+        Perf.Log("start-input-view", Perf.Since(started));
     }
 
     public override void OnFinishInputView(bool finishingInput)
@@ -852,7 +878,9 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         var typed = _composing.ToString();
+        long suggestStarted = Perf.Now;
         var result = engine.Suggest(typed, SentenceContext(), touches: Touches());
+        Perf.Log(typed.Length >= 10 ? "suggest-long" : "suggest", Perf.Since(suggestStarted));
         _currentSuggestions = result;
         bool autocorrectActive = _settings.AutoCorrect && _profile.AllowAutocorrect;
 
@@ -956,13 +984,25 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     void SetLanguage(string language)
     {
         _language = language;
-        _settings.CurrentLanguage = language;
+        if (_settings.CurrentLanguage != language) _settings.CurrentLanguage = language; // nicht bei jedem Öffnen schreiben
         EnsurePinyin();
         var languages = InputLanguages();
-        var tasks = languages.Select(l => Engines.GetOrAdd(l, lang => Task.Run(() => LoadEngine(lang)))).ToArray();
+        long started = Perf.Now;
+        var tasks = languages.Select(EngineTask).ToArray();
+        bool loading = tasks.Any(t => !t.IsCompleted);
         _engineTask = CombineEngines(languages, tasks);
         _engineTask.ContinueWith(
-            _ => new Handler(Looper.MainLooper!).Post(UpdateSuggestions),
+            _ =>
+            {
+                if (loading)
+                {
+                    Perf.Log("engines-ready", Perf.Since(started));
+                    Perf.Log("engines-ready-since-process-start", Perf.SinceProcessStart);
+                    Perf.Log("managed-heap-mb", GC.GetTotalMemory(false) / 1048576.0);
+                }
+
+                new Handler(Looper.MainLooper!).Post(UpdateSuggestions);
+            },
             TaskContinuationOptions.OnlyOnRanToCompletion);
         ApplyLayout();
     }
@@ -994,25 +1034,64 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         return new MultilingualEngine(loaded);
     }
 
-    SuggestionEngine LoadEngine(string language)
+    /// <summary>
+    /// Lässt Vorschläge, Korrektur, Vorhersage und Wischeingabe einmal im Hintergrund laufen. Der erste Aufruf ist
+    /// langsam, weil die Laufzeit den Code dafür erst übersetzt; ohne das Aufwärmen träfe diese Wartezeit den ersten
+    /// Tastendruck. Die Ergebnisse werden verworfen.
+    /// </summary>
+    /// <param name="engine">
+    /// Eine eigene Engine nur für diesen Zweck (mit leerer Lernliste): Die echte wird währenddessen schon benutzt,
+    /// und ihre Lernliste verträgt keinen gleichzeitigen Zugriff. Wortliste und Sprachmodell ändern sich nicht mehr
+    /// und dürfen geteilt werden.
+    /// </param>
+    static void WarmUp(string language, SuggestionEngine engine)
     {
-        WordDictionary dictionary;
-        using (var stream = Assets!.Open($"dict/{language}.txt"))
-        {
-            // Gemeinsamer Maßstab, damit sich die Sprachen bei mehrsprachiger Eingabe vergleichen lassen
-            dictionary = WordDictionary.Load(stream, WordDictionary.ReferenceTotal, language);
-        }
-
-        var model = NgramModel.Empty;
+        long started = Perf.Now;
         try
         {
-            using var stream = Assets!.Open($"dict/{language}.ngrams.bin");
-            model = NgramModel.Load(stream);
+            var context = new WordContext("und", "ich");
+            new MultilingualEngine(language, engine).Suggest("hal", context);
+
+            // Der Verbund mehrerer Sprachen hat eigenen Code: dieselbe Engine doppelt, nur für diesen Zweck
+            var warm = new MultilingualEngine([(language, engine), (language, engine)]);
+            warm.Suggest("h", WordContext.None);
+            warm.Suggest("hallp", context);
+            warm.Suggest("esist", WordContext.FromText("Das ist ein ")); // fehlendes Leerzeichen
+            warm.Predict(context);
+            warm.ContinuePhrase("mit");
+
+            // Kurze Wischspur von q nach p auf einem gedachten QWERTY-Feld
+            var keys = new Dictionary<char, Vector2>();
+            string[] rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+            for (int r = 0; r < rows.Length; r++)
+            {
+                for (int i = 0; i < rows[r].Length; i++) keys[rows[r][i]] = new Vector2(i + 0.5f * (r + 1), r * 1.45f);
+            }
+
+            Vector2 from = keys['q'], to = keys['p'];
+            warm.Glide([.. Enumerable.Range(0, 12).Select(i => Vector2.Lerp(from, to, i / 11f))], keys, context);
         }
-        catch (Java.IO.FileNotFoundException)
+        catch (Exception e)
         {
-            // Sprache ohne Sprachmodell: Vorhersage nur aus Gelerntem
+            // Das Aufwärmen ist nur eine Beschleunigung: Ein Fehler hier darf nichts weiter stören.
+            Android.Util.Log.Warn("zBoard", $"Aufwärmen für {language} abgebrochen: {e.Message}");
         }
+
+        Perf.Log($"warm-up-{language}", Perf.Since(started));
+    }
+
+    /// <summary>Die Engine einer Sprache; beim ersten Mal beginnt das Laden im Hintergrund.</summary>
+    Task<SuggestionEngine> EngineTask(string language) =>
+        Engines.GetOrAdd(language, lang => Task.Run(() => LoadEngine(lang)));
+
+    SuggestionEngine LoadEngine(string language)
+    {
+        long started = Perf.Now;
+
+        // Sprachmodell und Wortliste gleichzeitig laden
+        var modelTask = Task.Run(() => LoadModel(language));
+        var dictionary = LoadDictionary(language);
+        var model = modelTask.GetAwaiter().GetResult();
 
         var history = new UserHistory();
         var learningFile = LearningFile(this, language);
@@ -1023,7 +1102,112 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         var proximity = KeyProximity.FromLayout(Layouts.Alphabet(language, showLanguageKey: false));
+        Perf.Log($"load-{language}", Perf.Since(started));
+        Perf.Log($"ready-{language}-since-process-start", Perf.SinceProcessStart);
+        Task.Run(() => WarmUp(language, new SuggestionEngine(dictionary, proximity, model))); // hält das Laden nicht auf
         return new SuggestionEngine(dictionary, proximity, model, history);
+    }
+
+    NgramModel LoadModel(string language)
+    {
+        long started = Perf.Now;
+        try
+        {
+            using var stream = Assets!.Open($"dict/{language}.ngrams.bin");
+            var model = NgramModel.Load(stream);
+            Perf.Log($"load-{language}-model", Perf.Since(started));
+            return model;
+        }
+        catch (Java.IO.FileNotFoundException)
+        {
+            // Sprache ohne Sprachmodell: Vorhersage nur aus Gelerntem
+            return NgramModel.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Lädt die Wortliste einer Sprache. Das Auswerten der mitgelieferten Textdatei (Normieren, Sortieren) dauert auf
+    /// einem Telefon spürbar; deshalb legt zBoard nach dem ersten Laden eine fertig vorbereitete Fassung im
+    /// Zwischenspeicher der App ab. Jedes weitere Neuladen der Tastatur liest diese um ein Vielfaches schneller.
+    /// </summary>
+    WordDictionary LoadDictionary(string language)
+    {
+        long started = Perf.Now;
+        string? cache = DictionaryCacheFile(language);
+        if (cache != null && File.Exists(cache))
+        {
+            try
+            {
+                using var stream = File.OpenRead(cache);
+                var compiled = WordDictionary.LoadCompiled(stream, language);
+                Perf.Log($"load-{language}-dictionary-cached", Perf.Since(started));
+                return compiled;
+            }
+            catch (Exception e) when (e is IOException or InvalidDataException or UnauthorizedAccessException)
+            {
+                Android.Util.Log.Warn("zBoard", $"Zwischenspeicher für {language} unbrauchbar, lade die Wortliste: {e.Message}");
+            }
+        }
+
+        WordDictionary dictionary;
+        using (var stream = Assets!.Open($"dict/{language}.txt"))
+        {
+            // Gemeinsamer Maßstab, damit sich die Sprachen bei mehrsprachiger Eingabe vergleichen lassen
+            dictionary = WordDictionary.Load(stream, WordDictionary.ReferenceTotal, language);
+        }
+
+        Perf.Log($"load-{language}-dictionary", Perf.Since(started));
+        if (cache != null) Task.Run(() => SaveDictionaryCache(dictionary, cache, language)); // hält das Laden nicht auf
+        return dictionary;
+    }
+
+    static string? s_dictionaryCacheStamp;
+
+    /// <summary>
+    /// Datei der vorbereiteten Wortliste. Der Name enthält den Zeitpunkt der Installation: Nach einem Update (neue
+    /// Wortlisten, anderer Maßstab) gilt der alte Zwischenspeicher nicht mehr. null: kein Zwischenspeicher möglich.
+    /// </summary>
+    string? DictionaryCacheFile(string language)
+    {
+        try
+        {
+            if (s_dictionaryCacheStamp == null)
+            {
+                var installed = File.GetLastWriteTimeUtc(ApplicationInfo!.SourceDir!);
+                if (installed.Year < 2000) return null; // Zeitpunkt unbekannt: lieber ohne Zwischenspeicher
+                s_dictionaryCacheStamp = installed.Ticks.ToString("x");
+            }
+
+            return Path.Combine(CacheDir!.AbsolutePath, "dict", $"{language}.{s_dictionaryCacheStamp}.zbwd");
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or NullReferenceException)
+        {
+            return null;
+        }
+    }
+
+    static void SaveDictionaryCache(WordDictionary dictionary, string file, string language)
+    {
+        try
+        {
+            string dir = Path.GetDirectoryName(file)!;
+            Directory.CreateDirectory(dir);
+
+            // Erst fertig schreiben, dann umbenennen: Eine halb geschriebene Datei wird nie gelesen.
+            string temp = $"{file}.{System.Environment.CurrentManagedThreadId}.tmp";
+            using (var stream = File.Create(temp)) dictionary.Save(stream);
+            File.Move(temp, file, overwrite: true);
+
+            foreach (var old in Directory.GetFiles(dir, $"{language}.*"))
+            {
+                if (old != file) File.Delete(old); // Fassungen früherer Versionen
+            }
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Ohne Zwischenspeicher lädt die Tastatur beim nächsten Mal wieder aus der Wortliste.
+            Android.Util.Log.Warn("zBoard", $"Zwischenspeicher für {language} nicht geschrieben: {e.Message}");
+        }
     }
 
     public void OnLanguageSelected(string language)

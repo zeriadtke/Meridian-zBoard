@@ -8,6 +8,7 @@ Ausgabe:
   docs/logo/zboard-logo.svg                      – Logo als SVG (README, Web)
   docs/logo/zboard-logo-transparent.svg          – Logo ohne Hintergrundfläche
   docs/logo/plugin-<name>.svg                    – Symbole der Plugin-Apps
+  (PNG-Fassungen aller Logos: docs/logo/*.png via tools/render_store_graphics.js)
   docs/store/icon-512.svg                        – Play-Store-Symbol (PNG via tools/render_store_graphics.js)
   Resources/drawable/ic_launcher_*.xml           – adaptives App-Symbol (Hintergrund, Vordergrund, einfarbig)
   Resources/mipmap-anydpi-v26/ic_launcher(.xml|_round.xml)

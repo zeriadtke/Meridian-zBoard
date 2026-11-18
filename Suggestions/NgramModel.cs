@@ -1,3 +1,5 @@
+using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ZBoard.Suggestions;
@@ -126,10 +128,15 @@ public sealed class NgramModel
         (_words, _unigram, _bigramStart, _bigramNext, _bigramP) = (words, unigram, bigramStart, bigramNext, bigramP);
         (_trigramKey, _trigramNext, _trigramP) = (trigramKey, trigramNext, trigramP);
 
-        for (int i = 0; i < words.Length; i++) _ids[words[i]] = i;
-        foreach (var group in Enumerable.Range(0, words.Length).GroupBy(i => words[i].ToLowerInvariant()))
+        _ids.EnsureCapacity(words.Length);
+        _idsIgnoringCase.EnsureCapacity(words.Length);
+        for (int i = 0; i < words.Length; i++)
         {
-            _idsIgnoringCase[group.Key] = [.. group];
+            _ids[words[i]] = i;
+
+            // Fast jedes Wort hat nur eine Schreibweise; weitere kommen in aufsteigender Reihenfolge dazu.
+            ref int[]? same = ref CollectionsMarshal.GetValueRefOrAddDefault(_idsIgnoringCase, words[i].ToLowerInvariant(), out _);
+            same = same == null ? [i] : [.. same, i];
         }
     }
 
@@ -289,50 +296,109 @@ public sealed class NgramModel
 
     public static NgramModel Load(Stream stream)
     {
-        // Erst ganz in den Speicher: Das Modell wird in vielen kleinen Schritten gelesen, und die Asset-Streams von
-        // Android sind dafür zu langsam.
-        if (stream is not MemoryStream)
+        // Erst ganz in den Speicher (die Asset-Streams von Android sind für viele kleine Schritte zu langsam), dann
+        // die Zahlenreihen am Stück lesen statt Wert für Wert.
+        ReadOnlySpan<byte> data;
+        if (stream is MemoryStream memory && memory.TryGetBuffer(out var segment))
         {
-            var buffer = new MemoryStream();
+            data = segment.AsSpan((int)memory.Position);
+        }
+        else
+        {
+            var buffer = new MemoryStream(stream.CanSeek ? (int)Math.Max(0, stream.Length - stream.Position) : 4 << 20);
             stream.CopyTo(buffer);
-            buffer.Position = 0;
-            stream = buffer;
+            data = buffer.GetBuffer().AsSpan(0, (int)buffer.Length);
         }
 
-        using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
-        if (reader.ReadByte() != 'Z' || reader.ReadByte() != 'B' || reader.ReadByte() != 'N' || reader.ReadByte() != 'G')
+        try
+        {
+            return Parse(data);
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            throw new EndOfStreamException("Sprachmodell ist unvollständig.", e);
+        }
+    }
+
+    static NgramModel Parse(ReadOnlySpan<byte> data)
+    {
+        if (data.Length < 5 || data[0] != 'Z' || data[1] != 'B' || data[2] != 'N' || data[3] != 'G')
         {
             throw new InvalidDataException("Kein zBoard-Sprachmodell.");
         }
 
-        byte version = reader.ReadByte();
+        byte version = data[4];
         if (version != FormatVersion) throw new InvalidDataException($"Unbekannte Version des Sprachmodells: {version}.");
+        data = data[5..];
 
-        float logMin = reader.ReadSingle(), logStep = reader.ReadSingle();
-        float Probability() => MathF.Exp(logMin + reader.ReadUInt16() * logStep);
+        float logMin = BinaryPrimitives.ReadSingleLittleEndian(Take(ref data, 4));
+        float logStep = BinaryPrimitives.ReadSingleLittleEndian(Take(ref data, 4));
 
-        var words = new string[reader.ReadInt32()];
-        for (int i = 0; i < words.Length; i++) words[i] = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadByte()));
+        // Wahrscheinlichkeiten stehen als 16-Bit-Stufen in der Datei: jede Stufe nur einmal umrechnen.
+        var levels = new float[ushort.MaxValue + 1];
+        levels.AsSpan().Fill(float.NaN);
+        void Probabilities(ReadOnlySpan<byte> source, float[] target)
+        {
+            for (int i = 0; i < target.Length; i++)
+            {
+                int q = BinaryPrimitives.ReadUInt16LittleEndian(source[(2 * i)..]);
+                float p = levels[q];
+                if (float.IsNaN(p)) levels[q] = p = MathF.Exp(logMin + q * logStep);
+                target[i] = p;
+            }
+        }
+
+        var words = new string[Count(ref data)];
+        for (int i = 0; i < words.Length; i++)
+        {
+            int length = Take(ref data, 1)[0];
+            words[i] = Encoding.UTF8.GetString(Take(ref data, length));
+        }
+
         var unigram = new float[words.Length];
-        for (int i = 0; i < unigram.Length; i++) unigram[i] = Probability();
+        Probabilities(Take(ref data, 2 * unigram.Length), unigram);
 
-        int bigrams = reader.ReadInt32();
+        int bigrams = Count(ref data);
         var bigramStart = new int[words.Length + 1];
-        for (int i = 0; i < bigramStart.Length; i++) bigramStart[i] = reader.ReadInt32();
+        Numbers(Take(ref data, 4 * bigramStart.Length), bigramStart.AsSpan());
         var bigramNext = new ushort[bigrams];
         var bigramP = new float[bigrams];
-        for (int i = 0; i < bigrams; i++) bigramNext[i] = reader.ReadUInt16();
-        for (int i = 0; i < bigrams; i++) bigramP[i] = Probability();
+        Numbers(Take(ref data, 2 * bigrams), bigramNext.AsSpan());
+        Probabilities(Take(ref data, 2 * bigrams), bigramP);
 
-        int trigrams = reader.ReadInt32();
+        int trigrams = Count(ref data);
         var trigramKey = new uint[trigrams];
         var trigramNext = new ushort[trigrams];
         var trigramP = new float[trigrams];
-        for (int i = 0; i < trigrams; i++) trigramKey[i] = reader.ReadUInt32();
-        for (int i = 0; i < trigrams; i++) trigramNext[i] = reader.ReadUInt16();
-        for (int i = 0; i < trigrams; i++) trigramP[i] = Probability();
+        Numbers(Take(ref data, 4 * trigrams), trigramKey.AsSpan());
+        Numbers(Take(ref data, 2 * trigrams), trigramNext.AsSpan());
+        Probabilities(Take(ref data, 2 * trigrams), trigramP);
 
         return new NgramModel(words, unigram, bigramStart, bigramNext, bigramP, trigramKey, trigramNext, trigramP);
+
+        static ReadOnlySpan<byte> Take(ref ReadOnlySpan<byte> source, int length)
+        {
+            var taken = source[..length];
+            source = source[length..];
+            return taken;
+        }
+
+        static int Count(ref ReadOnlySpan<byte> source)
+        {
+            int count = BinaryPrimitives.ReadInt32LittleEndian(Take(ref source, 4));
+            return count >= 0 ? count : throw new InvalidDataException("Sprachmodell ist beschädigt.");
+        }
+
+        // Zahlenreihe (Little Endian) am Stück übernehmen
+        static void Numbers<T>(ReadOnlySpan<byte> source, Span<T> target) where T : unmanaged
+        {
+            source.CopyTo(MemoryMarshal.AsBytes(target));
+            if (BitConverter.IsLittleEndian) return;
+            for (int i = 0; i < target.Length; i++)
+            {
+                MemoryMarshal.AsBytes(target.Slice(i, 1)).Reverse();
+            }
+        }
     }
 
     public void Save(Stream stream)

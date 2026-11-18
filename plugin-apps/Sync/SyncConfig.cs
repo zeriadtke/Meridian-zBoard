@@ -11,13 +11,13 @@ public static class SyncConfig
     /// Google Cloud: OAuth-Client vom Typ „iOS“ (Bundle-ID = Paketname) oder „Android“ mit aktiviertem benutzerdefiniertem
     /// URI-Schema. Hier nur der Teil vor ".apps.googleusercontent.com", z. B. "123456789012-abc123def456".
     /// </summary>
-    public const string GoogleClientIdPrefix = "";
+    public const string GoogleClientIdPrefix = "724345340577-6mk0gpile8krtbbg27f87cnisv1ml0ve";
 
     /// <summary>Microsoft Entra: Anwendungs-ID (Client-ID) der App-Registrierung, z. B. "0b1c2d3e-…".</summary>
-    public const string MicrosoftClientId = "";
+    public const string MicrosoftClientId = "e42f3439-47af-42de-bd12-154409ca9994";
 
     /// <summary>Dropbox App Console: „App key“ einer App mit Zugriff „App folder“.</summary>
-    public const string DropboxAppKey = "";
+    public const string DropboxAppKey = "orqlkupndbrjbkt";
 
     // ---------- abgeleitet ----------
 
