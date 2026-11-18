@@ -97,6 +97,43 @@ jobs:
           dotnet build plugin-apps/DeepL/ZBoard.DeepL.csproj -c Release -f net10.0-android -p:AndroidPackageFormats=apk @sign -v:n *>&1 | Tee-Object ci-logs/deepl.log
           exit $LASTEXITCODE
 
+      # Plugin-App "zBoard Sync" (Transport zu Cloud-Speicher: Drive, OneDrive, Dropbox, WebDAV; siehe docs/PLUGINS.md).
+      # Gleicher Schlüssel wie die Tastatur, damit zBoard sie als "vom selben Entwickler" anzeigt.
+      - name: Plugin zBoard Sync bauen
+        id: sync
+        continue-on-error: true
+        run: |
+          $sign = @("-p:AndroidKeyStore=true")
+          if ($env:MERIDIAN_KEYSTORE_PASSWORD -and (Test-Path $env:MERIDIAN_KEYSTORE)) {
+            $keyPass = if ($env:MERIDIAN_KEY_PASSWORD) { "env:MERIDIAN_KEY_PASSWORD" } else { "env:MERIDIAN_KEYSTORE_PASSWORD" }
+            $sign += "-p:AndroidSigningKeyStore=$($env:MERIDIAN_KEYSTORE)", "-p:AndroidSigningStorePass=env:MERIDIAN_KEYSTORE_PASSWORD",
+                     "-p:AndroidSigningKeyAlias=$($env:MERIDIAN_KEY_ALIAS)", "-p:AndroidSigningKeyPass=$keyPass"
+          } else {
+            $ks = Join-Path $PWD "signing/zboard-test.keystore"
+            $sign += "-p:AndroidSigningKeyStore=$ks", "-p:AndroidSigningStorePass=zboard-test",
+                     "-p:AndroidSigningKeyAlias=zboard-test", "-p:AndroidSigningKeyPass=zboard-test"
+          }
+          dotnet build plugin-apps/Sync/ZBoard.Sync.csproj -c Release -f net10.0-android -p:AndroidPackageFormats=apk @sign -v:n *>&1 | Tee-Object ci-logs/sync.log
+          exit $LASTEXITCODE
+
+      # Plugin-App "zBoard Pen" (Handschrift-Erkennung, siehe docs/PLUGINS.md). Gleicher Schlüssel.
+      - name: Plugin zBoard Pen bauen
+        id: pen
+        continue-on-error: true
+        run: |
+          $sign = @("-p:AndroidKeyStore=true")
+          if ($env:MERIDIAN_KEYSTORE_PASSWORD -and (Test-Path $env:MERIDIAN_KEYSTORE)) {
+            $keyPass = if ($env:MERIDIAN_KEY_PASSWORD) { "env:MERIDIAN_KEY_PASSWORD" } else { "env:MERIDIAN_KEYSTORE_PASSWORD" }
+            $sign += "-p:AndroidSigningKeyStore=$($env:MERIDIAN_KEYSTORE)", "-p:AndroidSigningStorePass=env:MERIDIAN_KEYSTORE_PASSWORD",
+                     "-p:AndroidSigningKeyAlias=$($env:MERIDIAN_KEY_ALIAS)", "-p:AndroidSigningKeyPass=$keyPass"
+          } else {
+            $ks = Join-Path $PWD "signing/zboard-test.keystore"
+            $sign += "-p:AndroidSigningKeyStore=$ks", "-p:AndroidSigningStorePass=zboard-test",
+                     "-p:AndroidSigningKeyAlias=zboard-test", "-p:AndroidSigningKeyPass=zboard-test"
+          }
+          dotnet build plugin-apps/Pen/ZBoard.Pen.csproj -c Release -f net10.0-android -p:AndroidPackageFormats=apk @sign -v:n *>&1 | Tee-Object ci-logs/pen.log
+          exit $LASTEXITCODE
+
       - name: APK für den Download sammeln
         id: collect
         if: steps.apk.outcome == 'success'
@@ -109,6 +146,10 @@ jobs:
           Copy-Item $apk.FullName (Join-Path $out "de.World_of_Bytes.zHealth.Meridian.Keyboard.apk")
           $plugin = Get-ChildItem plugin-apps/DeepL/bin/Release/net10.0-android -Filter *-Signed.apk -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($plugin) { Copy-Item $plugin.FullName (Join-Path $out "de.World_of_Bytes.zBoard.DeepL.apk") }
+          $sync = Get-ChildItem plugin-apps/Sync/bin/Release/net10.0-android -Filter *-Signed.apk -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($sync) { Copy-Item $sync.FullName (Join-Path $out "de.World_of_Bytes.zBoard.Sync.apk") }
+          $pen = Get-ChildItem plugin-apps/Pen/bin/Release/net10.0-android -Filter *-Signed.apk -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($pen) { Copy-Item $pen.FullName (Join-Path $out "de.World_of_Bytes.zBoard.Pen.apk") }
 
       - name: APK hochladen
         if: steps.collect.outcome == 'success'
@@ -132,7 +173,9 @@ jobs:
           Copy-Item out/apk-upload/* $dir
           Set-Content (Join-Path $dir "README.md") @("Letzter Build von main (Lauf ${{ github.run_id }}, Commit ${{ github.sha }}).", "",
             "- [Tastatur](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zHealth.Meridian.Keyboard.apk)",
-            "- [zBoard DeepL](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zBoard.DeepL.apk)")
+            "- [zBoard DeepL](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zBoard.DeepL.apk)",
+            "- [zBoard Sync](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zBoard.Sync.apk)",
+            "- [zBoard Pen](https://github.com/${{ github.repository }}/raw/apk/de.World_of_Bytes.zBoard.Pen.apk)")
           Push-Location $dir
           git init -q -b apk
           git -c user.name=ci -c user.email=ci@localhost add -A
@@ -152,7 +195,8 @@ jobs:
               Select-Object -First 200 | ForEach-Object { $_.Line } | Set-Content ($f.FullName -replace '\.log$', '.errors.txt')
           }
           Set-Content (Join-Path $dir "RESULT.txt") @("run=${{ github.run_id }}", "sha=${{ github.sha }}",
-            "tests=${{ steps.tests.outcome }}", "zboardtests=${{ steps.zboardtests.outcome }}", "apk=${{ steps.apk.outcome }}", "deepl=${{ steps.deepl.outcome }}")
+            "tests=${{ steps.tests.outcome }}", "zboardtests=${{ steps.zboardtests.outcome }}", "apk=${{ steps.apk.outcome }}", "deepl=${{ steps.deepl.outcome }}",
+            "sync=${{ steps.sync.outcome }}", "pen=${{ steps.pen.outcome }}")
           Push-Location $dir
           git init -q -b ci-logs
           git -c user.name=ci -c user.email=ci@localhost add -A
@@ -163,4 +207,4 @@ jobs:
       - name: Ergebnis
         if: always()
         run: |
-          if ('${{ steps.tests.outcome }}' -eq 'failure' -or '${{ steps.zboardtests.outcome }}' -eq 'failure' -or '${{ steps.apk.outcome }}' -eq 'failure' -or '${{ steps.deepl.outcome }}' -eq 'failure') { exit 1 }
+          if ('${{ steps.tests.outcome }}' -eq 'failure' -or '${{ steps.zboardtests.outcome }}' -eq 'failure' -or '${{ steps.apk.outcome }}' -eq 'failure' -or '${{ steps.deepl.outcome }}' -eq 'failure' -or '${{ steps.sync.outcome }}' -eq 'failure' -or '${{ steps.pen.outcome }}' -eq 'failure') { exit 1 }
