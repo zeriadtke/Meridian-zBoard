@@ -42,6 +42,14 @@ Datenschutzerklärung. World of Bytes erhält nichts. Die Anmeldedaten bleiben v
 in zBoard Sync löscht sie. Um die Daten aus der Cloud zu entfernen, lösche dort die Datei `zboard-sync.zip` (bei
 Google Drive: Drive-Einstellungen → Apps verwalten → zBoard Sync → Ausgeblendete App-Daten löschen).
 
+## Handschrift (Plugin „zBoard Pen“)
+
+Installierst du die separate App „zBoard Pen“ und schaltest sie ein, übergibt zBoard ihr, was du auf der
+Schreibfläche schreibst (die Striche), und bis zu 20 Zeichen vor dem Cursor. zBoard Pen erkennt den Text mit Google ML
+Kit auf dem Gerät; die Striche verlassen das Gerät nicht. Internet nutzt zBoard Pen, um die Schriftmodelle der
+Sprachen von Google zu laden. Google ML Kit kann dabei und bei der Nutzung anonyme Nutzungsdaten (z. B. Laufzeiten,
+Fehler, Geräteangaben) an Google senden; es gilt die Datenschutzerklärung von Google. World of Bytes erhält nichts.
+
 ## Spracheingabe
 
 Wenn du auf das Mikrofon tippst, nutzt zBoard die Spracherkennung, die auf deinem Gerät installiert ist
@@ -111,6 +119,14 @@ addresses to that app, which stores them as a file in the cloud storage you chos
 a WebDAV server such as HiDrive). That provider's privacy policy applies. World of Bytes receives nothing. The sign-in
 data stays encrypted on your device; signing out in zBoard Sync deletes it. To remove the data from the cloud, delete
 the file `zboard-sync.zip` there (for Google Drive: Drive settings → Manage apps → zBoard Sync → Delete hidden data).
+
+## Handwriting (plugin "zBoard Pen")
+
+If you install the separate app "zBoard Pen" and turn it on, zBoard hands it what you write on the writing area (the
+strokes) and up to 20 characters before the cursor. zBoard Pen recognizes the text with Google ML Kit on the device;
+the strokes do not leave the device. zBoard Pen uses the internet to download the languages' handwriting models from
+Google. Google ML Kit may send anonymous usage data (such as timings, errors, device details) to Google in the
+process and during use; Google's privacy policy applies. World of Bytes receives nothing.
 
 ## Voice typing
 

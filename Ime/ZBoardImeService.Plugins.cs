@@ -14,15 +14,18 @@ namespace ZBoard.Ime;
 /// </summary>
 public sealed partial class ZBoardImeService
 {
-    /// <summary>Werkzeugleiste mit Puzzle-Symbol, sobald mindestens ein Plugin freigeschaltet ist.</summary>
-    static readonly IReadOnlyList<ToolbarItem> ToolbarWithPlugins =
-    [
-        new("clipboard", Resource.Drawable.ms_content_paste),
-        new("onehanded", Resource.Drawable.ms_back_hand),
-        new("plugins", Resource.Drawable.ms_extension),
-        new("settings", Resource.Drawable.ms_settings),
-        new("voice", Resource.Drawable.ms_mic, Trailing: true),
-    ];
+    /// <summary>
+    /// Werkzeugleiste je nach freigeschalteten Plugins: Puzzle-Symbol für Plugins mit Aktionen (z. B. DeepL), Stift für
+    /// ein Handschrift-Plugin (zBoard Pen).
+    /// </summary>
+    static IReadOnlyList<ToolbarItem> ToolbarFor(bool actions, bool ink)
+    {
+        var items = Toolbar.Where(t => !t.Trailing).ToList();
+        if (ink) items.Insert(1, new ToolbarItem("handwriting", Resource.Drawable.ms_stylus_note));
+        if (actions) items.Insert(items.FindIndex(t => t.Id == "settings"), new ToolbarItem("plugins", Resource.Drawable.ms_extension));
+        items.AddRange(Toolbar.Where(t => t.Trailing));
+        return items;
+    }
 
     sealed record PluginUndo(int Start, string Result, string Original);
 
@@ -41,8 +44,10 @@ public sealed partial class ZBoardImeService
         _pluginSession++;
         CancelPlugin();
         _pluginUndo = null;
-        _enabledPlugins = _profile.IsPassword ? [] : [.. PluginRegistry.Enabled(this, _settings).Where(p => !p.CanSync)];
-        _suggestionBar?.ToolbarItems = _enabledPlugins.Count > 0 ? ToolbarWithPlugins : Toolbar;
+        var enabled = _profile.IsPassword ? [] : PluginRegistry.Enabled(this, _settings);
+        _enabledPlugins = [.. enabled.Where(p => !p.CanSync && !p.CanInk)];
+        _inkPlugin = enabled.FirstOrDefault(p => p.CanInk);
+        _suggestionBar?.ToolbarItems = ToolbarFor(_enabledPlugins.Count > 0, _inkPlugin != null);
     }
 
     void FinishPlugins()

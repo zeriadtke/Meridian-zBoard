@@ -22,6 +22,9 @@ public static class BackupMerge
         "recentEmoji",      // ändert sich bei jedem Emoji
         "pinnedClips",      // Zwischenablage ist bewusst nicht dabei
         "enabledPlugins",   // Plugins sind pro Gerät installiert und freigegeben
+        "floating",         // schwebende Tastatur und ihre Lage passen nur zu diesem Bildschirm
+        "floatingX",
+        "floatingY",
         SettingsModifiedKey,
     };
 

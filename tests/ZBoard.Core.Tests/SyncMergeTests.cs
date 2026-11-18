@@ -85,6 +85,8 @@ public class SyncMergeTests
             ["currentLanguage"] = "en",
             ["recentEmoji"] = "😀",
             ["enabledPlugins"] = "x",
+            ["floating"] = true,
+            ["floatingY"] = 0.3f,
             ["syncPlugin"] = "de.World_of_Bytes.zBoard.Sync",
             [BackupMerge.SettingsModifiedKey] = 5L,
         };

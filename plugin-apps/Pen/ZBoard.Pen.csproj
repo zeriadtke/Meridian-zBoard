@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- zBoard Pen: Handschrift-Plugin für zBoard (Erkennung mit Google ML Kit auf dem Gerät). Eigene App, damit nur sie Internet braucht (zum Laden der Schriftmodelle) – zBoard bleibt offline. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>26</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ZBoard.Pen</RootNamespace>
+    <AssemblyName>ZBoard.Pen</AssemblyName>
+
+    <ApplicationId>de.World_of_Bytes.zBoard.Pen</ApplicationId>
+    <ApplicationTitle>zBoard Pen</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+  </PropertyGroup>
+
+  <!--
+    Google ML Kit: Handschrifterkennung auf dem Gerät (dieselbe Technik wie in Gboard). Die Schriftmodelle (je Sprache
+    rund 20 MB) lädt ML Kit beim ersten Gebrauch aus dem Internet. Bewusst Version 18.1: dort liegen alle Klassen in
+    einem Paket (Xamarin.Google.MLKit.Vision.DigitalInk).
+  -->
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Google.MLKit.DigitalInk.Recognition" Version="118.1.0.6" />
+  </ItemGroup>
+
+  <!-- Gemeinsamer Vertrag mit zBoard -->
+  <ItemGroup>
+    <Compile Include="../../Plugins/PluginContract.cs" Link="Contract/PluginContract.cs" />
+  </ItemGroup>
+
+  <!-- Debug wie zBoard mit dem Testschlüssel signieren (zBoard zeigt dann "vom selben Entwickler") -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>$(MSBuildThisFileDirectory)../../signing/zboard-test.keystore</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>zboard-test</AndroidSigningStorePass>
+    <AndroidSigningKeyAlias>zboard-test</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass>zboard-test</AndroidSigningKeyPass>
+  </PropertyGroup>
+
+  <!-- Release für Google Play: Upload-Schlüssel per -p:AndroidSigningKeyStore=… usw. übergeben -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <AndroidPackageFormats>aab;apk</AndroidPackageFormats>
+  </PropertyGroup>
+
+</Project>

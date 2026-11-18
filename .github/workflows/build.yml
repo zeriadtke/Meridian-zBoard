@@ -80,6 +80,17 @@ jobs:
           path: plugin-apps/Sync/bin/Debug/net10.0-android/*-Signed.apk
           if-no-files-found: error
 
+      # Plugin-App "zBoard Pen" (Handschrift mit Google ML Kit), ebenfalls mit dem Testschlüssel
+      - name: Plugin zBoard Pen bauen (Debug-APK)
+        run: dotnet build plugin-apps/Pen/ZBoard.Pen.csproj -c Debug -f net10.0-android -p:EmbedAssembliesIntoApk=true
+
+      - name: Pen-Plugin-APK bereitstellen
+        uses: actions/upload-artifact@v5
+        with:
+          name: zboard-pen-debug-apk
+          path: plugin-apps/Pen/bin/Debug/net10.0-android/*-Signed.apk
+          if-no-files-found: error
+
   # Release-Build (AOT, getrimmt) mit Testhaken und Testschlüssel: so nah an der Store-Version wie möglich,
   # aber im Emulator prüfbar und über ältere Testversionen installierbar.
   release-test-build:
@@ -137,6 +148,11 @@ jobs:
           name: zboard-${{ matrix.variant }}-apk
           path: apk
 
+      - uses: actions/download-artifact@v5
+        with:
+          name: zboard-pen-debug-apk
+          path: apk-pen
+
       - name: KVM für den Emulator freigeben
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -152,7 +168,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: ZBOARD_LOG_SCREENSHOTS=1 python3 tools/emulator_test.py "$(ls apk/*.apk | head -n 1)" emulator-test
+          script: ZBOARD_LOG_SCREENSHOTS=1 python3 tools/emulator_test.py "$(ls apk/*.apk | head -n 1)" emulator-test "$(ls apk-pen/*.apk | head -n 1)"
 
       - name: Screenshots und Log bereitstellen
         if: always()
@@ -263,6 +279,19 @@ jobs:
           -p:AndroidSigningKeyAlias="$KEY_ALIAS"
           -p:AndroidSigningKeyPass="$KEY_PASS"
 
+      - name: Plugin zBoard Pen bauen (.aab und .apk)
+        env:
+          STORE_PASS: ${{ secrets.ZBOARD_UPLOAD_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ZBOARD_UPLOAD_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ZBOARD_UPLOAD_KEY_PASSWORD }}
+        run: >
+          dotnet publish plugin-apps/Pen/ZBoard.Pen.csproj -c Release -f net10.0-android -o store-pen
+          -p:AndroidKeyStore=true
+          -p:AndroidSigningKeyStore="$RUNNER_TEMP/upload.keystore"
+          -p:AndroidSigningStorePass="$STORE_PASS"
+          -p:AndroidSigningKeyAlias="$KEY_ALIAS"
+          -p:AndroidSigningKeyPass="$KEY_PASS"
+
       - name: Dateien benennen
         run: |
           VERSION=$(grep -oP '(?<=<ApplicationDisplayVersion>)[^<]+' ZBoard.csproj)
@@ -275,6 +304,9 @@ jobs:
           SYNC_VERSION=$(grep -oP '(?<=<ApplicationDisplayVersion>)[^<]+' plugin-apps/Sync/ZBoard.Sync.csproj)
           cp store-sync/*-Signed.aab "out/zboard-sync-$SYNC_VERSION.aab"
           cp store-sync/*-Signed.apk "out/zboard-sync-$SYNC_VERSION.apk"
+          PEN_VERSION=$(grep -oP '(?<=<ApplicationDisplayVersion>)[^<]+' plugin-apps/Pen/ZBoard.Pen.csproj)
+          cp store-pen/*-Signed.aab "out/zboard-pen-$PEN_VERSION.aab"
+          cp store-pen/*-Signed.apk "out/zboard-pen-$PEN_VERSION.apk"
           ls -l out
 
       - name: Bereitstellen

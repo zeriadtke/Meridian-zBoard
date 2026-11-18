@@ -11,6 +11,7 @@ using ZBoard.Ime;
 using ZBoard.Keyboard;
 using ZBoard.Localization;
 using ZBoard.Plugins;
+using ZBoard.Suggestions;
 using ZBoard.Sync;
 using Color = Android.Graphics.Color;
 using Orientation = Android.Widget.Orientation;
@@ -32,6 +33,7 @@ public sealed class SettingsActivity : Activity
     const int MicRequest = 42;
     const int CreateBackupRequest = 43;
     const int OpenBackupRequest = 44;
+    const int PickImageRequest = 45;
 
     ZBoardSettings _settings = null!;
     KeyboardTheme _colors = KeyboardTheme.Light;
@@ -44,7 +46,8 @@ public sealed class SettingsActivity : Activity
 
     const string Main = "main";
 
-    record Page(string Id, int Icon, string Title, Func<string?> Subtitle, Action<SettingsActivity> Build);
+    /// <param name="Parent">Seite, zu der „Zurück“ führt; nur Seiten unter der Startseite stehen dort in der Liste.</param>
+    record Page(string Id, int Icon, string Title, Func<string?> Subtitle, Action<SettingsActivity> Build, string Parent = Main);
 
     static readonly Page[] Pages =
     [
@@ -60,7 +63,11 @@ public sealed class SettingsActivity : Activity
         new("plugins", Resource.Drawable.ms_extension, L.T("Plugins", "Plugins"), () => null, a => a.BuildPlugins()),
         new("test", Resource.Drawable.ms_keyboard, L.T("Tastatur ausprobieren", "Try the keyboard"), () => null, a => a.BuildTest()),
         new("about", Resource.Drawable.ms_info, L.T("Über zBoard", "About zBoard"), () => null, a => a.BuildAbout()),
+        new("personal", Resource.Drawable.ms_menu_book, L.T("Persönliches Wörterbuch", "Personal dictionary"), () => null, a => a.BuildPersonal(), Parent: "dictionary"),
     ];
+
+    /// <summary>Wohin „Zurück“ von der aktuellen Seite führt.</summary>
+    string ParentPage => Pages.FirstOrDefault(p => p.Id == _page)?.Parent ?? Main;
 
     protected override void OnCreate(Bundle? savedInstanceState)
     {
@@ -127,7 +134,7 @@ public sealed class SettingsActivity : Activity
     void GoBack()
     {
         if (_page == Main) Finish();
-        else ShowPage(Main);
+        else ShowPage(ParentPage);
     }
 
     // Ab Android 13 (bei targetSdk 36 Pflicht): Zurück-Geste über OnBackInvokedDispatcher.
@@ -151,7 +158,7 @@ public sealed class SettingsActivity : Activity
 #pragma warning disable CS0618, CS0672, CA1422 // bis Android 12 der klassische Weg
     public override void OnBackPressed()
     {
-        if (_page != Main) ShowPage(Main);
+        if (_page != Main) ShowPage(ParentPage);
         else base.OnBackPressed();
     }
 #pragma warning restore CS0618, CS0672, CA1422
@@ -171,7 +178,7 @@ public sealed class SettingsActivity : Activity
 
         BuildSetupCard();
 
-        foreach (var page in Pages)
+        foreach (var page in Pages.Where(p => p.Parent == Main))
         {
             string? subtitle = page.Id == "languages" ? LanguageSummary() : page.Subtitle();
             Row(page.Icon, page.Title, subtitle, () => ShowPage(page.Id));
@@ -282,6 +289,17 @@ public sealed class SettingsActivity : Activity
             (L.T("Links", "Left"), _settings.OneHanded == OneHandedMode.Left, () => _settings.OneHanded = OneHandedMode.Left),
         ]);
 
+        Choice(L.T("Geteilte Tastatur (Tablets, Foldables)", "Split keyboard (tablets, foldables)"),
+        [
+            (L.T("Aus", "Off"), _settings.Split == SplitMode.Off, () => _settings.Split = SplitMode.Off),
+            (L.T("Im Querformat", "In landscape"), _settings.Split == SplitMode.Auto, () => _settings.Split = SplitMode.Auto),
+            (L.T("Immer", "Always"), _settings.Split == SplitMode.On, () => _settings.Split = SplitMode.On),
+        ]);
+        Note(L.T("Gilt auf Bildschirmen ab 600 dp Breite. Die schwebende Tastatur schaltest du in der Werkzeugleiste ein "
+                 + "und aus (Pfeilkreuz); verschieben lässt sie sich am Griff unter den Tasten.",
+            "Applies to screens at least 600 dp wide. Turn the floating keyboard on and off in the toolbar (four-way "
+            + "arrow); move it by the handle below the keys."));
+
         var heightLabel = Label($"{L.T("Tastaturhöhe", "Keyboard height")}: {_settings.HeightPercent} %", 17, _colors.Text);
         heightLabel.SetPadding(Dp(24), Dp(12), Dp(24), 0);
         _content.AddView(heightLabel);
@@ -302,17 +320,96 @@ public sealed class SettingsActivity : Activity
 
     void BuildTheme()
     {
+        bool hasImage = ThemeImage.Exists(this);
         List<(string, bool, Action)> options =
         [
             (OperatingSystem.IsAndroidVersionAtLeast(31)
                     ? L.T("Wie das System (Farben aus dem Hintergrundbild)", "System default (colors from your wallpaper)")
                     : L.T("Wie das System", "System default"),
-                _settings.Theme is ThemeMode.System or ThemeMode.Dynamic, () => _settings.Theme = ThemeMode.System),
+                _settings.Theme is ThemeMode.System or ThemeMode.Dynamic || (_settings.Theme == ThemeMode.Image && !hasImage),
+                () => _settings.Theme = ThemeMode.System),
             (L.T("Hell", "Light"), _settings.Theme == ThemeMode.Light, () => _settings.Theme = ThemeMode.Light),
             (L.T("Dunkel", "Dark"), _settings.Theme == ThemeMode.Dark, () => _settings.Theme = ThemeMode.Dark),
+            (L.T("Eigenes Bild", "My image"), _settings.Theme == ThemeMode.Image && hasImage, () =>
+            {
+                if (ThemeImage.Exists(this)) _settings.Theme = ThemeMode.Image;
+                else PickThemeImage();
+            }),
         ];
         Choice(L.T("Design", "Theme"), options);
-        Note(L.T("Die Einstellungen übernehmen das Design beim nächsten Öffnen.", "The settings pick up the theme the next time they open."));
+
+        if (hasImage)
+        {
+            Section(L.T("Eigenes Bild", "My image"));
+            if (ThemeImage.Load(this) is { } image)
+            {
+                var preview = new ImageView(this) { ContentDescription = L.T("Vorschau", "Preview") };
+                preview.SetScaleType(ImageView.ScaleType.CenterCrop);
+                var drawable = new ImageBackgroundDrawable(image.Bitmap, _settings.ThemeImageDim / 100f);
+                preview.SetImageDrawable(drawable);
+                preview.ClipToOutline = true;
+                preview.Background = Rounded(_colors.Key, 16);
+                var lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, Dp(140));
+                lp.SetMargins(Dp(24), Dp(8), Dp(24), Dp(8));
+                _content.AddView(preview, lp);
+
+                var dimLabel = Label($"{L.T("Abdunkeln", "Darken")}: {_settings.ThemeImageDim} %", 17, _colors.Text);
+                dimLabel.SetPadding(Dp(24), Dp(12), Dp(24), 0);
+                _content.AddView(dimLabel);
+                var dim = new SeekBar(this) { Max = 80, Progress = _settings.ThemeImageDim };
+                dim.SetPadding(Dp(24), Dp(8), Dp(24), Dp(16));
+                dim.ProgressChanged += (_, e) =>
+                {
+                    _settings.ThemeImageDim = e.Progress;
+                    dimLabel.Text = $"{L.T("Abdunkeln", "Darken")}: {_settings.ThemeImageDim} %";
+                    preview.SetImageDrawable(new ImageBackgroundDrawable(image.Bitmap, e.Progress / 100f));
+                };
+                _content.AddView(dim);
+            }
+
+            Row(Resource.Drawable.ms_palette, L.T("Anderes Bild wählen", "Choose another image"), null, PickThemeImage);
+            Row(Resource.Drawable.ms_restore_page, L.T("Bild entfernen", "Remove image"), null, () =>
+            {
+                ThemeImage.Delete(this);
+                if (_settings.Theme == ThemeMode.Image) _settings.Theme = ThemeMode.System;
+                ShowPage("theme");
+            });
+        }
+
+        Section(L.T("Tasten", "Keys"));
+        Toggle(L.T("Tastenrahmen", "Key borders"),
+            L.T("Tasten als Flächen zeichnen; aus: nur die Beschriftung", "Draw keys as shapes; off: labels only"),
+            _settings.KeyBorders, (_, v) => _settings.KeyBorders = v);
+
+        Note(L.T("Das eigene Bild bleibt auf diesem Gerät; Sicherung und Synchronisation nehmen es nicht mit. Die "
+                 + "Einstellungen übernehmen das Design beim nächsten Öffnen.",
+            "Your image stays on this device; backup and sync do not include it. The settings pick up the theme the "
+            + "next time they open."));
+    }
+
+    void PickThemeImage()
+    {
+        var intent = new Intent(Intent.ActionOpenDocument);
+        intent.AddCategory(Intent.CategoryOpenable);
+        intent.SetType("image/*");
+        StartFilePicker(intent, PickImageRequest);
+    }
+
+    void SaveThemeImage(Android.Net.Uri uri)
+    {
+        Task.Run(() => ThemeImage.Save(this, uri)).ContinueWith(task => RunOnUiThread(() =>
+        {
+            if (task.IsCompletedSuccessfully)
+            {
+                _settings.Theme = ThemeMode.Image;
+            }
+            else
+            {
+                Toast.MakeText(this, L.T("Das Bild konnte nicht geladen werden.", "The image could not be loaded."), ToastLength.Long)!.Show();
+            }
+
+            if (_page == "theme") ShowPage("theme");
+        }));
     }
 
     void BuildCorrections()
@@ -361,6 +458,12 @@ public sealed class SettingsActivity : Activity
 
     void BuildDictionary()
     {
+        int personal = PersonalDictionary.Parse(_settings.PersonalDictionary).Entries.Count;
+        Row(Resource.Drawable.ms_menu_book, L.T("Persönliches Wörterbuch", "Personal dictionary"),
+            personal == 0
+                ? L.T("Eigene Wörter und Kürzel, z. B. „mfg“ für „Mit freundlichen Grüßen“", "Your own words and shortcuts, e.g. “brb” for “be right back”")
+                : L.T($"{personal} Einträge", personal == 1 ? "1 entry" : $"{personal} entries"),
+            () => ShowPage("personal"));
         Toggle(L.T("Aus meinen Eingaben lernen", "Learn from my typing"), L.T("Häufig verwendete Wörter und Wortfolgen vorschlagen", "Suggest words and phrases you use often"),
             _settings.LearnWords, (_, v) => _settings.LearnWords = v);
         Row(Resource.Drawable.ms_menu_book, L.T("Gelernte Wörter löschen", "Delete learned words"), null, () =>
@@ -401,6 +504,87 @@ public sealed class SettingsActivity : Activity
             + "zBoard learns no words in password, email and "
             + "address fields. It only remembers email addresses entered in email fields – not in incognito windows "
             + "or fields where the app forbids learning."));
+    }
+
+    // ---------- Persönliches Wörterbuch ----------
+
+    void BuildPersonal()
+    {
+        var dictionary = PersonalDictionary.Parse(_settings.PersonalDictionary);
+        Row(Resource.Drawable.ms_add, L.T("Hinzufügen", "Add"), L.T("Wort oder Text, auf Wunsch mit Kürzel", "A word or phrase, optionally with a shortcut"),
+            () => EditPersonalEntry(null));
+
+        foreach (var entry in dictionary.Entries)
+        {
+            var captured = entry;
+            Row(Resource.Drawable.ms_menu_book, entry.Word,
+                entry.HasShortcut ? L.T($"Kürzel: {entry.Shortcut}", $"Shortcut: {entry.Shortcut}") : null,
+                () => EditPersonalEntry(captured));
+        }
+
+        Note(L.T("Eigene Wörter schlägt zBoard beim Tippen vor und korrigiert sie nicht. Tippst du ein Kürzel, erscheint sein "
+                 + "Text in der Vorschlagsleiste; Antippen setzt ihn ein. Die Einträge gelten in allen Sprachen und gehören zu "
+                 + "den Einstellungen: Sicherung und Synchronisation nehmen sie mit.",
+            "zBoard suggests your own words as you type and never corrects them. When you type a shortcut, its text appears "
+            + "in the suggestion bar; tap it to insert. Entries apply to all languages and are part of the settings: backup "
+            + "and sync include them."));
+    }
+
+    void EditPersonalEntry(PersonalEntry? existing)
+    {
+        var form = new LinearLayout(this) { Orientation = Orientation.Vertical };
+        form.SetPadding(Dp(24), Dp(8), Dp(24), 0);
+
+        var word = new EditText(this)
+        {
+            Hint = L.T("Wort oder Text", "Word or phrase"),
+            InputType = Android.Text.InputTypes.ClassText | Android.Text.InputTypes.TextFlagNoSuggestions,
+            ContentDescription = "zboard-personal-word",
+        };
+        word.Text = existing?.Word ?? string.Empty;
+        form.AddView(word);
+
+        var shortcut = new EditText(this)
+        {
+            Hint = L.T("Kürzel (optional)", "Shortcut (optional)"),
+            InputType = Android.Text.InputTypes.ClassText | Android.Text.InputTypes.TextFlagNoSuggestions,
+            ContentDescription = "zboard-personal-shortcut",
+        };
+        shortcut.Text = existing?.Shortcut ?? string.Empty;
+        form.AddView(shortcut);
+
+        var builder = new AlertDialog.Builder(this)
+            .SetTitle(existing == null ? L.T("Eintrag hinzufügen", "Add entry") : L.T("Eintrag bearbeiten", "Edit entry"))!
+            .SetView(form)!
+            .SetPositiveButton(L.T("Speichern", "Save"), (_, _) =>
+            {
+                var entry = PersonalDictionary.Normalize(word.Text, shortcut.Text);
+                if (entry == null)
+                {
+                    Toast.MakeText(this,
+                        L.T("Nicht gespeichert: Das Wort darf nicht leer sein, das Kürzel nur aus Buchstaben und Ziffern bestehen.",
+                            "Not saved: the word must not be empty, and the shortcut may only contain letters and digits."),
+                        ToastLength.Long)!.Show();
+                    return;
+                }
+
+                var dictionary = PersonalDictionary.Parse(_settings.PersonalDictionary);
+                _settings.PersonalDictionary = dictionary.With(entry, replaces: existing).Serialize();
+                if (_page == "personal") ShowPage("personal");
+            })!
+            .SetNegativeButton(L.T("Abbrechen", "Cancel"), (_, _) => { })!;
+
+        if (existing != null)
+        {
+            builder.SetNeutralButton(L.T("Löschen", "Delete"), (_, _) =>
+            {
+                var dictionary = PersonalDictionary.Parse(_settings.PersonalDictionary);
+                _settings.PersonalDictionary = dictionary.Without(existing).Serialize();
+                if (_page == "personal") ShowPage("personal");
+            });
+        }
+
+        builder.Show();
     }
 
     // ---------- Sichern & wiederherstellen ----------
@@ -607,7 +791,13 @@ public sealed class SettingsActivity : Activity
     protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
     {
         base.OnActivityResult(requestCode, resultCode, data);
-        if (resultCode != Result.Ok || data?.Data is not { } uri) return;
+        if (resultCode != Result.Ok || data?.Data is not { } uri)
+        {
+            if (requestCode == PickImageRequest && _page == "theme") ShowPage("theme"); // Auswahl abgebrochen: Optionsfeld zurücksetzen
+            return;
+        }
+
+        if (requestCode == PickImageRequest) SaveThemeImage(uri);
         if (requestCode == CreateBackupRequest) WriteBackup(uri);
         else if (requestCode == OpenBackupRequest) ReadBackup(uri);
     }
@@ -764,7 +954,14 @@ public sealed class SettingsActivity : Activity
                 if (_settings.EnabledPlugins.Contains(plugin.Package)) return;
                 new AlertDialog.Builder(this)
                     .SetTitle(L.T($"{plugin.Label} einschalten?", $"Turn on {plugin.Label}?"))!
-                    .SetMessage(plugin.CanSync
+                    .SetMessage(plugin.CanInk
+                        ? L.T("Das Plugin bekommt, was du auf der Schreibfläche schreibst (die Striche), und die letzten "
+                              + "20 Zeichen vor dem Cursor, damit es besser erkennt. Internet braucht zBoard Pen nur, um "
+                              + "die Schriftmodelle zu laden; erkannt wird auf dem Gerät.",
+                            "The plugin receives what you write on the writing area (the strokes) and the last 20 "
+                            + "characters before the cursor to recognize better. zBoard Pen only needs the internet to "
+                            + "download handwriting models; recognition runs on the device.")
+                        : plugin.CanSync
                         ? L.T("Das Plugin bekommt deine Einstellungen, gelernten Wörter und E-Mail-Adressen, sobald du unter "
                               + "„Sichern & wiederherstellen“ die Synchronisation einschaltest, und speichert sie in deinem Cloud-Speicher.",
                             "The plugin receives your settings, learned words and email addresses once you turn on sync under "
@@ -896,6 +1093,9 @@ public sealed class SettingsActivity : Activity
         {
             ThemeMode.Light => KeyboardTheme.Light,
             ThemeMode.Dark => KeyboardTheme.Dark,
+            // Eigenes Bild: die Einstellungen hell oder dunkel, passend zum abgedunkelten Bild
+            ThemeMode.Image when ThemeImage.Load(this) is { } image =>
+                ThemeImage.IsDark(ThemeImage.Dimmed(image.Average, _settings.ThemeImageDim / 100f)) ? KeyboardTheme.Dark : KeyboardTheme.Light,
             _ when OperatingSystem.IsAndroidVersionAtLeast(31) => KeyboardTheme.FromSystem(this, systemDark),
             _ => systemDark ? KeyboardTheme.Dark : KeyboardTheme.Light,
         };
@@ -963,7 +1163,7 @@ public sealed class SettingsActivity : Activity
         back.SetImageResource(Resource.Drawable.ms_arrow_back);
         back.SetColorFilter(_colors.Text);
         back.SetPadding(Dp(12), Dp(12), Dp(12), Dp(12));
-        back.Click += (_, _) => ShowPage(Main);
+        back.Click += (_, _) => ShowPage(ParentPage);
         var lp = new LinearLayout.LayoutParams(Dp(48), Dp(48));
         lp.SetMargins(Dp(8), Dp(16), 0, 0);
         _content.AddView(back, lp);

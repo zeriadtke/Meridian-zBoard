@@ -16,10 +16,13 @@ ICONS = [
     "shift", "shift_fill1", "shift_lock_fill1", "backspace", "keyboard_return", "search", "send", "arrow_forward",
     "check", "keyboard_tab", "keyboard_tab_rtl", "sentiment_satisfied", "language",
     # Leiste
-    "mic", "content_paste", "settings", "back_hand",
+    "mic", "content_paste", "settings", "back_hand", "text_select_move_forward_character", "open_with", "stylus_note",
+    # Textbearbeitung
+    "keyboard_arrow_up", "keyboard_arrow_down", "keyboard_arrow_left", "keyboard_arrow_right", "first_page", "last_page",
+    "select_all", "content_copy", "content_cut",
     # Einstellungen
     "tune", "palette", "spellcheck", "gesture", "menu_book", "keyboard", "info", "arrow_back",
-    "settings_backup_restore", "save", "restore_page",
+    "settings_backup_restore", "save", "restore_page", "add",
 ]
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

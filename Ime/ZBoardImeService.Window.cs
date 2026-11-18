@@ -27,6 +27,9 @@ public partial class ZBoardImeService
         UpdatePopupSpace();
     }
 
+    /// <summary>Schwebend nie im Vollbildmodus (Querformat mit eigenem Textfeld): Die Tastatur liegt ja über der App.</summary>
+    public override bool OnEvaluateFullscreenMode() => !_settings.Floating && base.OnEvaluateFullscreenMode();
+
     void UpdatePopupSpace()
     {
         var window = Window?.Window;
@@ -54,8 +57,11 @@ public partial class ZBoardImeService
         var location = new int[2];
         root.GetLocationInWindow(location);
         int top = location[1];
-        outInsets.ContentTopInsets = top;
-        outInsets.VisibleTopInsets = top;
+
+        // Schwebend: Die App soll nicht ausweichen (wie bei Gboard), also gilt das ganze Fenster als frei
+        int contentTop = Floating && root.Parent is View frame ? frame.Height : top;
+        outInsets.ContentTopInsets = contentTop;
+        outInsets.VisibleTopInsets = contentTop;
 
         // Berührbar nur die Tastatur selbst (wie AOSP LatinIME: TOUCHABLE_INSETS_REGION). Den Wert 3 direkt ins
         // Java-Feld schreiben: Je nach .NET-Version ist das Feld als int oder als Aufzählung gebunden.
@@ -125,8 +131,10 @@ public partial class ZBoardImeService
     {
         var window = Window?.Window;
         if (window == null) return;
-        var bg = _theme.Background;
-        bool light = (0.299 * bg.R + 0.587 * bg.G + 0.114 * bg.B) / 255 >= 0.5;
+        // Schwebend liegt unter der Navigationsleiste die App, nicht die Tastatur
+        var bg = Floating ? Android.Graphics.Color.Transparent : _theme.BarColor;
+        var solid = _theme.BarColor;
+        bool light = (0.299 * solid.R + 0.587 * solid.G + 0.114 * solid.B) / 255 >= 0.5;
 
         window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
         if (OperatingSystem.IsAndroidVersionAtLeast(29)) window.NavigationBarContrastEnforced = false;
