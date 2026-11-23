@@ -560,7 +560,8 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         // Derselbe Kontext wie in der Vorschlagsleiste, damit eingesetzt wird, was dort hervorgehoben ist.
         string? previous = PreviousWord();
         var context = SentenceContext();
-        bool mayCorrect = autocorrect && !restored && _settings.AutoCorrect && _profile.AllowAutocorrect;
+        bool inUrl = InUrlOrAddress();
+        bool mayCorrect = autocorrect && !restored && !inUrl && _settings.AutoCorrect && _profile.AllowAutocorrect;
 
         // Leertaste mitten im Wort ("da ke", "ha llo"): Das Stück davor und dieses ergeben zusammen das gemeinte Wort.
         var before = _lastSpaceCommit;
@@ -607,7 +608,20 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         _composing.Clear();
         _glideActive = false;
         _currentSuggestions = SuggestionResult.Empty;
-        Learn(previous, final, accepted: restored);
+        if (!inUrl) Learn(previous, final, accepted: restored); // Teile von Links nicht als Wörter lernen
+    }
+
+    /// <summary>
+    /// Gehört das Wort in Bearbeitung zu einem Link oder einer Adresse ("https://…", "www.…", "name@…", "example.de")?
+    /// Dann wie bei Gboard keine Autokorrektur und nichts lernen, auch wenn das Feld selbst ein normales Textfeld ist.
+    /// </summary>
+    bool InUrlOrAddress()
+    {
+        if (_composing.Length == 0) return false;
+        string current = _composing.ToString();
+        string before = TextBeforeCursor(256);
+        if (before.EndsWith(current, StringComparison.Ordinal)) before = before[..^current.Length];
+        return TextBoundaries.IsInUrlOrAddress(before, current);
     }
 
     /// <summary>Steht der Cursor direkt hinter dem autokorrigierten Wort samt Trennzeichen?</summary>
@@ -896,7 +910,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         var result = engine.Suggest(typed, SentenceContext(), touches: Touches());
         Perf.Log(typed.Length >= 10 ? "suggest-long" : "suggest", Perf.Since(suggestStarted));
         _currentSuggestions = result;
-        bool autocorrectActive = _settings.AutoCorrect && _profile.AllowAutocorrect;
+        bool autocorrectActive = _settings.AutoCorrect && _profile.AllowAutocorrect && !InUrlOrAddress();
 
         if (autocorrectActive && result.AutoCorrection is { } correction)
         {
