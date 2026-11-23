@@ -1,0 +1,8 @@
+  Wiederherzustellende Projekte werden ermittelt...
+  "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\tests\ZBoard.Core.Tests\ZBoard.Core.Tests.csproj" wiederhergestellt (in 196 ms.).
+C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\tests\ZBoard.Core.Tests\SimilarWordsTests.cs(145,9): warning xUnit2029: Do not use Assert.Empty to check if a value does not exist in a collection. Use Assert.DoesNotContain instead. (https://xunit.net/xunit.analyzers/rules/xUnit2029) [C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\tests\ZBoard.Core.Tests\ZBoard.Core.Tests.csproj]
+  ZBoard.Core.Tests -> C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\tests\ZBoard.Core.Tests\bin\Debug\net10.0\ZBoard.Core.Tests.dll
+Testlauf für "C:\r\Meridian-zBoard\_work\Meridian-zBoard\Meridian-zBoard\tests\ZBoard.Core.Tests\bin\Debug\net10.0\ZBoard.Core.Tests.dll" (.NETCoreApp,Version=v10.0)
+Insgesamt 1 Testdateien stimmten mit dem angegebenen Muster überein.
+
+Bestanden!   : Fehler:     0, erfolgreich:   437, übersprungen:     0, gesamt:   437, Dauer: 6 s - ZBoard.Core.Tests.dll (net10.0)

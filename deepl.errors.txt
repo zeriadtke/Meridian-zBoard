@@ -1,0 +1,4 @@
+         --warnaserror- --warnaserror ";NU1605;SYSLIB0011"
+         --custom-step "MonoDroid.Tuner.PreserveJavaExceptions,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
+         --warnaserror- --warnaserror ";NU1605;SYSLIB0011"
+         --custom-step "MonoDroid.Tuner.PreserveJavaExceptions,C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\36.1.118\targets\..\tools\Microsoft.Android.Sdk.ILLink.dll"
