@@ -44,7 +44,7 @@ public sealed partial class ZBoardImeService
         _currentSuggestions = result;
 
         // Fett ist nur, was die Leertaste einsetzt: die gespeicherte Schreibweise eines eigenen Worts
-        bool corrects = own != null && own != typed && _settings.AutoCorrect && _profile.AllowAutocorrect;
+        bool corrects = own != null && own != typed && _settings.AutoCorrect && _profile.AllowAutocorrect && !InUrlOrAddress();
         var slots = new List<SuggestionSlot>();
         if (own != null) slots.Add(new SuggestionSlot(own, own, corrects, false));
         foreach (var text in expansions)

@@ -39,5 +39,35 @@ public static class TextBoundaries
         return trimmed[i] is '.' or '!' or '?' or '…' or '。' or '！' or '？' or '؟';
     }
 
+    /// <summary>
+    /// Gehört das Wort <paramref name="word"/> zu einem Link, einer Adresse oder einem Domainnamen? Dann darf es weder
+    /// autokorrigiert noch gelernt werden ("https://BeSoci" + "." darf nicht zu "https://Besuch." werden).
+    /// <paramref name="before"/>: Text vor dem Wort (ohne das Wort selbst).
+    /// </summary>
+    public static bool IsInUrlOrAddress(string before, string word)
+    {
+        // Das Wort selbst beginnt einen Link ("https" vor ":", "www" vor ".")
+        if (word.ToLowerInvariant() is "http" or "https" or "ftp" or "www") return true;
+
+        // Zeichen seit dem letzten Leerraum: das Stück des Links vor dem Wort
+        int start = before.Length;
+        while (start > 0 && !char.IsWhiteSpace(before[start - 1])) start--;
+        var token = before.AsSpan(start);
+        if (token.Length == 0) return false;
+
+        if (token.Contains("://", StringComparison.Ordinal)) return true;                // https://…, ftp://…
+        if (token.StartsWith("www.", StringComparison.OrdinalIgnoreCase)) return true;  // www.…
+        if (token.Contains('@')) return true;                                           // name@…, @Erwähnung
+
+        // Direkt hinter einem Punkt ohne Leerzeichen ("zeriadtke.de", "z.B"): in Fließtext folgt auf einen Punkt ein
+        // Leerzeichen, hier also Domain oder Abkürzung.
+        if (token.Length >= 2 && token[^1] == '.' && char.IsLetterOrDigit(token[^2])) return true;
+
+        // Pfad hinter einer Domain ("github.com/World"); ein einzelner Schrägstrich ("und/oder") zählt nicht
+        if (token[^1] == '/' && token.Contains('.')) return true;
+
+        return false;
+    }
+
     static bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c is '\'' or '-';
 }
