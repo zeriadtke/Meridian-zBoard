@@ -28,6 +28,19 @@
   </ItemGroup>
 
   <!--
+    ONNX Runtime führt das neuronale Sprachmodell aus (Assets/lm/, erzeugt mit tools/LanguageModel/train_lm.py).
+    Ohne Modelle in Assets/lm/ bleibt es ungenutzt. Lizenz: MIT (THIRD_PARTY_NOTICES.md).
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.29.0" />
+  </ItemGroup>
+
+  <!-- Die Modelle sind schon komprimiert (int8); unkomprimiert im Paket lädt ONNX Runtime sie schneller. -->
+  <PropertyGroup>
+    <AndroidStoreUncompressedFileExtensions>$(AndroidStoreUncompressedFileExtensions);.onnx</AndroidStoreUncompressedFileExtensions>
+  </PropertyGroup>
+
+  <!--
     Testhaken (Tastenpositionen im Log, Testfeld-Activity) für den Emulator-Test. In Debug immer an; ein
     Release-Build bekommt sie nur mit -p:ZBoardTestHooks=true (Prüfung der AOT-Version im Emulator), nie im Store-Build.
   -->

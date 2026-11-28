@@ -36,7 +36,7 @@ wenn hast nichts muss will etwas hab soll halt hatten würden letzten letzter le
 rum fürs wegen kamen weh scheiß hau dreh tritt steig fang is to on no my pa aye don van
 ich sie ist du die es er ja mir wie aber für von nein habe gut als sein jetzt aus im weiß oder man werden mehr
 bei bitte los danke tun einer werde viel weg würde am des weil heute wollen macht hallo seine zwei waren ab wohl
-ob selbst gute lange ach denke drei warte bleiben unter rein ganze gegen niemand brauche halten all eins ganzen
+ob selbst lange ach denke drei warte bleiben unter rein ganze gegen niemand brauche halten all eins ganzen
 suchen lang gewesen versuchen anders fünf hoch vier ersten kleinen allen falls stellen dies ehrlich alt frei
 besten alten früh großen zehn sechs lieben leider tat suche groß versuche rufen heiraten super total halte laut
 sitzen böse heißen hart tragen stolz schöne schätze anrufen hasse führen schauen perfekt acht rufe bitten hole
@@ -45,7 +45,7 @@ jung links reich schade bleibe toten manche gegenüber gehören stecken rechts e
 verstecken besuchen teilen feiern gelassen gefahren gebeten nahe beginnen neun melden übel leisten drehen
 schließen mitten neuer hängen armen schätzen ehren reichen schreien spreche leer weißen weinen nutzen wünschen
 zweiten gehalten prima stören küssen schwarzen halbe steigen junger geschossen schwarz fick rot nette langer
-scheinen bösen schaffe lauter enden raten wachen verboten dunkel schick trage schicke trotz voraus streiten
+scheinen bösen schaffe lauter enden raten wachen verboten dunkel schick trage schicke trotz streiten morgens
 schlage matt englisch roten zwölf schrieb abends heiligen leichter halben packen drücken schreibe fremden landen
 extra perfekte trug verbunden prost wild träumen hauen dritten gucken anstatt langen rechten harte schwere feuern
 blau gemein esse wechseln melde null schlafe starten zwingen tausend gründen frische verdächtigen menschliche
@@ -71,6 +71,7 @@ knarre personal sinne ratten wunden beute orten kugeln dutzend lehrer patienten 
 # Wörter, die als Substantiv UND klein häufig sind, von den Regeln aber nicht erkannt werden
 DE_FORCE_BOTH = set("""
 vertrauen verschwinden versprechen vermögen lauf ruf brauch mal morgen leben essen wissen
+gute voraus treffen
 """.split())
 
 # Anteil der Häufigkeit für die zweite Schreibweise bei mehrdeutigen Wörtern
@@ -199,6 +200,8 @@ def build_german(args):
         if len(word) < 2:
             continue
         noun = nouns.get(word)
+        if word in DE_FORCE_BOTH and noun is None:
+            noun = word[0].upper() + word[1:]  # "Alles Gute", "im Voraus": in der Substantivliste fehlt die Form
         if noun is None or word in DE_FORCE_LOWER:
             lines.append((word, freq))
         elif word in DE_FORCE_NOUN:

@@ -5,3 +5,8 @@ obj/
 *.user
 *.apk
 *.aab
+
+# Trainingsprotokolle von tools/LanguageModel
+tools/LanguageModel/logs/
+*.fp32.onnx
+__pycache__/

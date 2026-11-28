@@ -229,6 +229,7 @@ Nacht	85102
 finden	83987
 diesen	83932
 gute	83835
+Gute	50301
 wirst	83791
 lange	82872
 natürlich	82710
@@ -431,6 +432,7 @@ fast	39542
 runter	39290
 vorbei	38763
 treffen	38758
+Treffen	23254
 gerne	38739
 dran	38593
 wurden	38564
@@ -1924,7 +1926,7 @@ Dan	6106
 geschieht	6101
 einiges	6100
 entdeckt	6097
-Morgens	6094
+morgens	6094
 schlechter	6092
 vollkommen	6082
 gelogen	6081
@@ -2265,6 +2267,7 @@ bewusst	4958
 deutschen	4958
 Deutschen	2974
 voraus	4953
+Voraus	2971
 sterbe	4948
 solltet	4941
 begleiten	4940

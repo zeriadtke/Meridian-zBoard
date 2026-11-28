@@ -31,7 +31,7 @@ Finished versions: [Releases](https://github.com/World-of-Bytes/zBoard/releases)
 | Languages | a great many languages and layouts | 18 languages: German, Czech, Hungarian (QWERTZ); English, Spanish, Italian, Dutch, Polish, Romanian, Turkish, Vietnamese (QWERTY); French (AZERTY); Greek; Russian, Ukrainian, Bulgarian (Cyrillic); Arabic; Chinese (Pinyin, simplified characters) |
 | Typing, shift, symbols, long press for accented characters | ✓ | ✓ in Gboard's order, most frequent character preselected |
 | Word suggestions and autocorrect | ✓ | ✓ 120,000 German, 100,000 English words, up to 80,000 for each further language; uses where the finger hit each key; swapped letters, left-out umlauts and apostrophes |
-| Language model | neural network, sees the whole sentence | count table of frequent word sequences, sees the two words before; every value traceable, up to about 2.5 MB per language |
+| Language model | neural network, sees the whole sentence | count table of frequent word sequences (two words before) plus a small on-device neural network that sees the whole sentence (can be turned off); each up to about 2.5 MB per language |
 | Correction that follows the sentence | ✓ | ✓ "ich hae" → "habe"; correctly spelled words only when the finger was almost on the key border ("heute drei" → "frei") |
 | Missing and accidental spaces | ✓ | ✓ "ihave" → "I have", "da ke" → "danke" |
 | German compound nouns | ✓ | ✓ recognised from known nouns, capitalised and completed ("Haustürschlüssel") |
@@ -133,17 +133,18 @@ prepared form in the app's cache after loading it for the first time (`cache/dic
 | `Keyboard/` | `HandwritingPanelView` (writing area), `TextEditPanelView` (text editing), layout model, all layouts, `KeyboardView` (drawing and touch), `PopupGrid` (popup layout), colours |
 | `Emoji/` | `EmojiCatalog` (data, search, skin tones), `EmojiPanelView` |
 | `Clipboard/` | `ClipboardHistory`, `ClipboardPanelView` |
-| `Suggestions/` | `WordDictionary` (sorted array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (language model), `TouchTrace` (finger positions), `UserHistory`, `EmailMemory`, `PersonalDictionary` (own words and shortcuts), `KeyProximity`, `TextCase` (upper and lower case per language), `PinyinEngine` and `PinyinLearned` (Chinese), `Telex` (Vietnamese), `CandidateStrip` (layout of the candidate row), `SuggestionBarView` |
+| `Suggestions/` | `WordDictionary` (sorted array), `SuggestionEngine`, `GlideDecoder`, `NgramModel` (language model), `NeuralModel` and `OnnxLanguageModel` (AI prediction), `TouchTrace` (finger positions), `UserHistory`, `EmailMemory`, `PersonalDictionary` (own words and shortcuts), `KeyProximity`, `TextCase` (upper and lower case per language), `PinyinEngine` and `PinyinLearned` (Chinese), `Telex` (Vietnamese), `CandidateStrip` (layout of the candidate row), `SuggestionBarView` |
 | `Settings/` | `SettingsActivity` (start screen), `ZBoardSettings` |
 | `Backup/` | `BackupArchive` (backup file: writing, reading, validation) |
 | `Assets/dict/` | word lists and language models per language |
+| `Assets/lm/` | neural language models (`<language>.lm.onnx`, `<language>.vocab.txt`) |
 | `Assets/emoji/` | emoji by category, names and search terms per language |
 | `Plugins/` | `PluginContract` (interface), `PluginRegistry` (installed plugins), `PluginClient` (messenger) |
 | `plugin-apps/DeepL/` | plugin app "zBoard DeepL" (a separate app with internet permission) |
 | `plugin-apps/Pen/` | plugin app "zBoard Pen" (handwriting with Google ML Kit) |
 | `Sync/` | `SyncManager` (sync through a plugin), `SyncFileProvider` (hands the file to the plugin) |
 | `plugin-apps/Sync/` | plugin app "zBoard Sync" (Google Drive, OneDrive, Dropbox, WebDAV); provider setup in its README |
-| `tools/` | `build_dictionaries.py` (word lists), `NgramBuilder` (language models), `SuggestionEval` (suggestion measurement), `LoadBench` (loading times, time per keystroke), `build_emoji.py` (emoji data), `emulator_test.py` |
+| `tools/` | `build_dictionaries.py` (word lists), `NgramBuilder` (language models), `LanguageModel/train_lm.py` (AI prediction), `SuggestionEval` (suggestion measurement), `LoadBench` (loading times, time per keystroke), `build_emoji.py` (emoji data), `emulator_test.py` |
 | `tests/` | unit tests for the platform-independent logic |
 
 ## Dictionaries
@@ -221,7 +222,7 @@ The app credits the sources under "About zBoard".
 
 ## Suggestions and autocorrect
 
-Suggestions and corrections come from five sources. All of them live on the device, and none is a neural network:
+Suggestions and corrections come from six sources. All of them live on the device:
 
 - **Dictionary** (`WordDictionary`): how frequent a word is.
 - **Language model** (`NgramModel`): a count table of which word follows the one or two words before it, and how
@@ -229,6 +230,12 @@ Suggestions and corrections come from five sources. All of them live on the devi
   order of suggestions, the choice of correction ("ich hae" → "habe", not the more frequent "hat") and the
   capitalisation of ambiguous words. Every value is a count you can trace; the model sees no further back than two
   words.
+- **AI prediction** (`NeuralLanguageModel`, `Assets/lm/`): a small LSTM network per language (about 2.5 MB, int8, run
+  with ONNX Runtime) that sees the whole sentence up to the cursor. It is mixed with the count model for prediction,
+  the order of suggestions, the choice of correction and glide typing. It never decides whether a correctly spelled
+  word gets corrected. Runs offline, learns nothing from your typing and can be turned off under Settings →
+  Suggestions → "AI prediction". Training and measuring: [tools/LanguageModel](tools/LanguageModel/README.md)
+  (German).
 - **Finger position** (`TouchTrace`): the keyboard remembers where the finger hit the key for every letter. A hit
   on the border between "g" and "h" leaves both letters almost equally likely; a hit in the middle of "g" speaks
   against "h".
@@ -338,6 +345,14 @@ used. zBoard has no internet permission (release build).
   applies the stored spelling (“zboard” → “zBoard”). When you type a shortcut (“brb”), the bar shows its text (“be
   right back”); as in Gboard it is only inserted when you tap it. Entries apply to all languages and are part of the
   settings – backup and sync include them.
+- **Formal address (German):** once the field contains "Sehr geehrte …" or a capitalised "Sie", "Ihnen", "Ihre" in
+  mid-sentence, zBoard capitalises these words from then on ("erhalten sie" → "Sie"; deleting right after undoes it).
+  Otherwise the capitalised form is offered in the bar.
+- **Personal touch pattern:** zBoard learns how far your finger lands from each key's centre on average (many people
+  tap slightly low) and reads touches accordingly, both for the key that was hit and for autocorrect. Only an offset
+  per key is stored, no text; separately for portrait and landscape, deleted together with what was learned.
+- **Similar words:** if a similar word fits the sentence better than the correctly spelled one ("ich bin in Urlaub" →
+  "im"), it appears on the left of the bar; nothing is corrected.
 - **Clipboard:** history of the last hour, pinning (📌) keeps items permanently. Only pinned items are saved;
   content marked as sensitive (e.g. from password managers) and copies from password fields are never taken.
 - **Backup & restore:** Settings → Backup & restore saves your settings, learned words and phrases, remembered email

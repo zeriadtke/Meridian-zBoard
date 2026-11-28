@@ -22,7 +22,7 @@ if (!File.Exists(textPath))
 WordDictionary dictionary;
 using (var stream = File.OpenRead(Path.Combine(dictDir, $"{options.Language}.txt")))
 {
-    dictionary = WordDictionary.Load(stream, WordDictionary.ReferenceTotal);
+    dictionary = WordDictionary.Load(stream, WordDictionary.ReferenceTotal, options.Language); // wie im Tastaturdienst
 }
 
 var model = NgramModel.Empty;
@@ -34,7 +34,20 @@ if (File.Exists(modelPath))
 }
 
 var layout = Layouts.Alphabet(options.Language, showLanguageKey: false);
-var engine = new SuggestionEngine(dictionary, KeyProximity.FromLayout(layout), model, new UserHistory());
+NeuralLanguageModel? neural = null;
+string neuralPath = options.Neural ?? Path.Combine(root, "Assets", "lm", $"{options.Language}.lm.onnx");
+if (options.UseNeural && File.Exists(neuralPath))
+{
+    string vocabPath = neuralPath.EndsWith(".lm.onnx", StringComparison.Ordinal)
+        ? neuralPath[..^".lm.onnx".Length] + ".vocab.txt"
+        : Path.ChangeExtension(neuralPath, ".vocab.txt");
+    using var vocabulary = File.OpenRead(vocabPath);
+    var loaded = OnnxLanguageModel.Load(File.ReadAllBytes(neuralPath), vocabulary, options.Language);
+    neural = new NeuralLanguageModel(() => loaded, loadSynchronously: true);
+    Console.WriteLine($"Neuronales Sprachmodell: {neuralPath} ({loaded.Vocabulary.Count} Einträge)");
+}
+
+var engine = new SuggestionEngine(dictionary, KeyProximity.FromLayout(layout), model, new UserHistory(), neural);
 var words = Corpus.Load(textPath);
 if (words.Count == 0)
 {
@@ -104,13 +117,19 @@ foreach (var word in words)
 // ---------- 2. Autokorrektur bei ungenauem Tippen ----------
 
 int wrongJoins = 0;
+// Persönliches Tippmuster: lernt über alle Durchläufe mit, wie auf dem Gerät über die Zeit
+var touchModel = options.Adapt ? new TouchModel() : null;
 var noisy = new Outcome();
 var clean = new Outcome();
 List<string> examples = [];
 
 for (int run = 0; run < options.Runs; run++)
 {
-    var noise = new TypingNoise(layout, options.Seed + run) { Sigma = options.Sigma, LazyAccentRate = options.Lazy };
+    var noise = new TypingNoise(layout, options.Seed + run)
+    {
+        Sigma = options.Sigma, LazyAccentRate = options.Lazy, Bias = options.Bias, ThumbPull = options.Thumbs,
+        HitShift = touchModel == null ? null : () => touchModel.HitShift,
+    };
     string? previousTyped = null;
     foreach (var word in words)
     {
@@ -118,8 +137,9 @@ for (int run = 0; run < options.Runs; run++)
         var (typed, points) = noise.Type(intended);
         bool typo = !string.Equals(typed, intended, StringComparison.OrdinalIgnoreCase);
 
-        var result = engine.Suggest(typed, Context(word), touches: Touches(points, noise.Keys, points.Length));
+        var result = engine.Suggest(typed, Context(word), touches: Touches(points, touchModel?.Shift(noise.Keys) ?? noise.Keys, points.Length));
         string final = result.AutoCorrection ?? typed;
+        touchModel?.Learn(final, points, noise.Keys);
 
         // Fehlalarm der Leertasten-Regel: Zwei Wörter dürfen nicht verschmelzen, auch wenn eines vertippt ist –
         // weder das richtige vorherige mit diesem noch das vertippte vorherige mit dem richtigen hier.
@@ -323,11 +343,12 @@ namespace ZBoard.Tools.SuggestionEval
     }
 
     sealed record Options(
-        string Language, string? Text, string? Root, string? Model, int Seed, int Runs, double Sigma, double Lazy, bool UseContext, bool UseTouch, bool Verbose)
+        string Language, string? Text, string? Root, string? Model, string? Neural, bool UseNeural, int Seed, int Runs, double Sigma, double Lazy, bool UseContext, bool UseTouch, bool Verbose,
+        System.Numerics.Vector2 Bias = default, float Thumbs = 0, bool Adapt = false)
     {
         public static Options? Parse(string[] args)
         {
-            var options = new Options("de", null, null, null, Seed: 1, Runs: 5, Sigma: 0.24, Lazy: 0.3, UseContext: true, UseTouch: true, Verbose: false);
+            var options = new Options("de", null, null, null, null, UseNeural: true, Seed: 1, Runs: 5, Sigma: 0.24, Lazy: 0.3, UseContext: true, UseTouch: true, Verbose: false);
             for (int i = 0; i < args.Length; i++)
             {
                 string? Value() => i + 1 < args.Length ? args[++i] : null;
@@ -336,6 +357,8 @@ namespace ZBoard.Tools.SuggestionEval
                     case "--lang" when Value() is { } v: options = options with { Language = v }; break;
                     case "--text" when Value() is { } v: options = options with { Text = v }; break;
                     case "--model" when Value() is { } v: options = options with { Model = v }; break;
+                    case "--neural" when Value() is { } v: options = options with { Neural = v }; break;
+                    case "--no-neural": options = options with { UseNeural = false }; break;
                     case "--root" when Value() is { } v: options = options with { Root = v }; break;
                     case "--seed" when Value() is { } v && int.TryParse(v, out var n): options = options with { Seed = n }; break;
                     case "--runs" when Value() is { } v && int.TryParse(v, out var n) && n > 0: options = options with { Runs = n }; break;
@@ -348,6 +371,16 @@ namespace ZBoard.Tools.SuggestionEval
                         options = options with { Lazy = l };
                         break;
                     case "--no-touch": options = options with { UseTouch = false }; break;
+                    case "--bias" when Value() is { } v && v.Split(',') is [var bx, var by]
+                        && float.TryParse(bx, NumberStyles.Float, CultureInfo.InvariantCulture, out var x)
+                        && float.TryParse(by, NumberStyles.Float, CultureInfo.InvariantCulture, out var y):
+                        options = options with { Bias = new System.Numerics.Vector2(x, y) };
+                        break;
+                    case "--thumbs" when Value() is { } v
+                        && float.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out var t):
+                        options = options with { Thumbs = t };
+                        break;
+                    case "--adapt": options = options with { Adapt = true }; break;
                     case "--no-context": options = options with { UseContext = false }; break;
                     case "--verbose": options = options with { Verbose = true }; break;
                     default:
@@ -360,10 +393,16 @@ namespace ZBoard.Tools.SuggestionEval
                               --sigma <x>             Streuung der Fingerposition in Tastenbreiten; Vorgabe 0.24
                               --lazy <x>              Anteil der Umlaute/Akzente, die als Grundbuchstabe getippt werden; Vorgabe 0.3
                               --seed <n>              Startwert des Zufallsgenerators; Vorgabe 1
+                              --bias <x,y>            systematische Abweichung der Finger in Tastenbreiten (y > 0: zu tief)
+                              --thumbs <t>            Daumen ziehen zur Mitte: am Rand t Tastenbreiten
+                              --adapt                 persönliches Tippmuster lernen (TouchModel) und nutzen
                               --no-touch              ohne Fingerpositionen messen (nur Nachbartasten)
                               --no-context            ohne vorheriges Wort messen
                               --verbose               Fehlerbeispiele ausgeben
                               --model <Datei>         anderes Sprachmodell (Vorgabe: Assets/dict/<Sprache>.ngrams.bin)
+                              --neural <Datei>        anderes neuronales Sprachmodell (Vorgabe: Assets/lm/<Sprache>.lm.onnx,
+                                                      Vokabular daneben als <Sprache>.vocab.txt)
+                              --no-neural             ohne neuronales Sprachmodell messen (nur N-Gramme)
                               --root <Ordner>         zBoard-Ordner, falls nicht von dort gestartet
                             """);
                         return null;

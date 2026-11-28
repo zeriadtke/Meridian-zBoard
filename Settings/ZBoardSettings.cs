@@ -110,6 +110,16 @@ public sealed class ZBoardSettings
         set => PutBool("nextWordPrediction", value);
     }
 
+    /// <summary>
+    /// Kleines neuronales Sprachmodell für Vorhersage und Reihenfolge der Vorschläge nutzen (läuft auf dem Gerät, braucht
+    /// pro Sprache einige MB Arbeitsspeicher). Aus: nur das N-Gramm-Modell.
+    /// </summary>
+    public bool NeuralPrediction
+    {
+        get => _prefs.GetBoolean("neuralPrediction", true);
+        set => PutBool("neuralPrediction", value);
+    }
+
     /// <summary>Eigene Wörter und Wortfolgen lernen (nur auf dem Gerät).</summary>
     public bool LearnWords
     {

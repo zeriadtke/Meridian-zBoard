@@ -5,7 +5,7 @@ namespace ZBoard.Tools.SuggestionEval;
 
 /// <summary>Ein Wort des Testtexts mit dem, was die Tastatur an dieser Stelle über den Satz wüsste.</summary>
 /// <param name="Target">Das Wort, wie es im Text steht (so soll es am Ende dastehen).</param>
-/// <param name="Context">Die Wörter davor, gelesen wie im Tastaturdienst (<see cref="WordContext.FromText"/>).</param>
+/// <param name="Context">Die Wörter davor, gelesen wie im Tastaturdienst (<see cref="WordContext.FromTextWithSentence"/>).</param>
 public sealed record TestWord(string Target, WordContext Context)
 {
     /// <summary>Am Satzanfang schaltet die Tastatur von selbst auf Großschreibung.</summary>
@@ -54,7 +54,7 @@ public static class Corpus
             string word = line[start..pos];
             if (word.All(c => char.IsLetter(c) || c is '\'' or '-'))
             {
-                yield return new TestWord(word, WordContext.FromText(line[..start]));
+                yield return new TestWord(word, WordContext.FromTextWithSentence(line[..start]) with { Formal = WordContext.HasFormalAddress(line[..start]) });
             }
         }
     }

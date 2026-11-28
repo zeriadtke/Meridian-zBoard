@@ -248,9 +248,9 @@ jobs:
         run: >
           dotnet publish ZBoard.csproj -c Release -f net10.0-android -o store
           -p:AndroidSigningKeyStore="$RUNNER_TEMP/upload.keystore"
-          -p:AndroidSigningStorePass="$STORE_PASS"
+          -p:AndroidSigningStorePass=env:STORE_PASS
           -p:AndroidSigningKeyAlias="$KEY_ALIAS"
-          -p:AndroidSigningKeyPass="$KEY_PASS"
+          -p:AndroidSigningKeyPass=env:KEY_PASS
 
       # Plugin-App "zBoard DeepL" mit demselben Upload-Schlüssel, damit zBoard sie als "vom selben Entwickler" anzeigt
       - name: Plugin zBoard DeepL bauen (.aab und .apk)
@@ -262,9 +262,9 @@ jobs:
           dotnet publish plugin-apps/DeepL/ZBoard.DeepL.csproj -c Release -f net10.0-android -o store-deepl
           -p:AndroidKeyStore=true
           -p:AndroidSigningKeyStore="$RUNNER_TEMP/upload.keystore"
-          -p:AndroidSigningStorePass="$STORE_PASS"
+          -p:AndroidSigningStorePass=env:STORE_PASS
           -p:AndroidSigningKeyAlias="$KEY_ALIAS"
-          -p:AndroidSigningKeyPass="$KEY_PASS"
+          -p:AndroidSigningKeyPass=env:KEY_PASS
 
       - name: Plugin zBoard Sync bauen (.aab und .apk)
         env:
@@ -275,9 +275,9 @@ jobs:
           dotnet publish plugin-apps/Sync/ZBoard.Sync.csproj -c Release -f net10.0-android -o store-sync
           -p:AndroidKeyStore=true
           -p:AndroidSigningKeyStore="$RUNNER_TEMP/upload.keystore"
-          -p:AndroidSigningStorePass="$STORE_PASS"
+          -p:AndroidSigningStorePass=env:STORE_PASS
           -p:AndroidSigningKeyAlias="$KEY_ALIAS"
-          -p:AndroidSigningKeyPass="$KEY_PASS"
+          -p:AndroidSigningKeyPass=env:KEY_PASS
 
       - name: Plugin zBoard Pen bauen (.aab und .apk)
         env:
@@ -288,9 +288,9 @@ jobs:
           dotnet publish plugin-apps/Pen/ZBoard.Pen.csproj -c Release -f net10.0-android -o store-pen
           -p:AndroidKeyStore=true
           -p:AndroidSigningKeyStore="$RUNNER_TEMP/upload.keystore"
-          -p:AndroidSigningStorePass="$STORE_PASS"
+          -p:AndroidSigningStorePass=env:STORE_PASS
           -p:AndroidSigningKeyAlias="$KEY_ALIAS"
-          -p:AndroidSigningKeyPass="$KEY_PASS"
+          -p:AndroidSigningKeyPass=env:KEY_PASS
 
       - name: Dateien benennen
         run: |

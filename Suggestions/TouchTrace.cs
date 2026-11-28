@@ -18,6 +18,9 @@ public sealed class TouchTrace(IReadOnlyList<Vector2?> points, IReadOnlyDictiona
     /// </summary>
     public const float Sigma = 0.35f;
 
+    /// <summary>Untergrenze der Kosten einer Korrektur an einer Stelle.</summary>
+    public const float MinCost = 0.02f;
+
     public int Count => points.Count;
 
     /// <summary>
@@ -38,6 +41,8 @@ public sealed class TouchTrace(IReadOnlyList<Vector2?> points, IReadOnlyDictiona
 
         float extra = Vector2.DistanceSquared(point, candidateKey) - Vector2.DistanceSquared(point, typedKey);
         float cost = extra / (2 * Sigma * Sigma * (float)Math.Log(penaltyBase));
-        return Math.Clamp(cost, 0f, 1f);
+        // Mit dem persönlichen Tippmuster (TouchModel) kann der Finger näher an der gemeinten als an der getroffenen
+        // Taste liegen: dann fast kostenlos, aber nie 0 – sonst gälte die Korrektur als "kein Vertipper".
+        return Math.Clamp(cost, MinCost, 1f);
     }
 }

@@ -108,10 +108,41 @@ public sealed class SuggestionEngine
     /// </summary>
     public const double RareWordRatio = 3000.0;
 
+    /// <summary>
+    /// Untergrenze, wenn der Satz entscheidet: Ist die Korrektur ohne Kontext mindestens so viel wahrscheinlicher wie das
+    /// getippte Wörterbuchwort, reicht es, wenn sie <em>mit</em> Satzkontext <see cref="RareWordRatio"/>-mal
+    /// wahrscheinlicher ist ("sag mor" → "mir", "für ie" → "die"). Darunter bleibt das Wort immer stehen
+    /// ("ganz fettig": "fertig" ist nur etwa 30-mal wahrscheinlicher). Abgestimmt mit tools/SuggestionEval.
+    /// </summary>
+    public const double RareWordContextRatio = 300.0;
+
+    /// <summary>
+    /// Ein ähnliches Wort, das im Satz mindestens so viel (Faktor) wahrscheinlicher ist als das richtig getippte, kommt in die Leiste
+    /// ("ich wohne in Hamburg" bleibt, "ich bin in Urlaub" → "im" links). Abgestimmt mit tools/SuggestionEval.
+    /// </summary>
+    public const double RealWordBarRatio = 1.0;
+
+    const int BarSlots = 3;
+
+    /// <summary>
+    /// Anteil des neuronalen Sprachmodells (<see cref="INeuralLanguageModel"/>) am Satzkontext, gegenüber dem
+    /// N-Gramm-Modell: 0 = nur N-Gramme, 1 = nur das Netz. Der Kontextfaktor beider wird geometrisch gemittelt, die
+    /// Vorhersage des nächsten Worts linear. Abgestimmt mit tools/SuggestionEval (--neural).
+    /// </summary>
+    public const double NeuralWeight = 0.5;
+
+    /// <summary>
+    /// Das Netz darf ein Wort, das an dieser Stelle schlecht passt, höchstens um diesen Faktor abwerten (das
+    /// N-Gramm-Modell wertet nie ab). Nur die Reihenfolge ändert sich: Ob ein Wort aus dem Wörterbuch korrigiert wird,
+    /// entscheidet weiterhin die Bewertung ohne Satzkontext.
+    /// </summary>
+    public const double MinNeuralFactor = 0.1;
+
     readonly WordDictionary _dictionary;
     readonly KeyProximity _proximity;
     readonly NgramModel _model;
     readonly UserHistory _history;
+    readonly INeuralLanguageModel? _neural;
     readonly HashSet<string> _noCorrection = new(StringComparer.OrdinalIgnoreCase);
     GlideDecoder? _glide;
 
@@ -119,12 +150,36 @@ public sealed class SuggestionEngine
         WordDictionary dictionary,
         KeyProximity proximity,
         NgramModel? model = null,
-        UserHistory? history = null)
+        UserHistory? history = null,
+        INeuralLanguageModel? neural = null)
     {
         _dictionary = dictionary;
         _proximity = proximity;
         _model = model ?? NgramModel.Empty;
         _history = history ?? new UserHistory();
+        _neural = neural;
+    }
+
+    /// <summary>Das neuronale Sprachmodell dieser Sprache, falls vorhanden.</summary>
+    public INeuralLanguageModel? Neural => _neural;
+
+    /// <summary>Was das Netz über das nächste Wort an dieser Stelle sagt; null ohne Netz oder ohne Kontext.</summary>
+    NeuralDistribution? NeuralNext(WordContext context) =>
+        _neural == null || context.Previous == null ? null : _neural.Next(context.Tokens);
+
+    /// <summary>
+    /// Wie viel besser <paramref name="word"/> an diese Stelle passt als im Durchschnitt: N-Gramm-Modell und Netz
+    /// zusammen (siehe <see cref="NeuralWeight"/>), höchstens <see cref="MaxContextFactor"/>.
+    /// </summary>
+    double ContextFactor(WordContext context, string word, NeuralDistribution? neural)
+    {
+        double factor = _model.ContextFactor(context, word);
+        if (neural?.ContextFactor(word) is { } learned)
+        {
+            factor = Math.Exp((1 - NeuralWeight) * Math.Log(factor) + NeuralWeight * Math.Log(Math.Max(MinNeuralFactor, learned)));
+        }
+
+        return Math.Min(MaxContextFactor, factor);
     }
 
     public UserHistory History => _history;
@@ -153,7 +208,7 @@ public sealed class SuggestionEngine
         {
             if ((!analysis.TypedIsWord || analysis.CorrectionOverrides) && analysis.Correction is { } correction && typed.Length >= 2)
             {
-                autoCorrection = MatchCase(correction.Word, typed, _dictionary.Language);
+                autoCorrection = MatchCase(CaseInSentence(typed, correction.Word, context), typed, _dictionary.Language);
             }
             else if (analysis.NounForm is { } noun)
             {
@@ -161,9 +216,49 @@ public sealed class SuggestionEngine
             }
         }
 
+        autoCorrection = ApplyFormal(typed, autoCorrection, candidates, context, analysis.CorrectionSuppressed, max);
+
         if (autoCorrection == typed) autoCorrection = null;
         return new SuggestionResult(typed, candidates, autoCorrection, analysis.TypedIsWord);
     }
+
+    /// <summary>Eine Korrektur in der Schreibweise, die in den Satz passt: "das trwffen" → "Treffen".</summary>
+    public string CaseInSentence(string typed, string correction, WordContext context) =>
+        IsLowerCase(typed) && IsLowerCase(correction) && !correction.Contains(' ')
+            ? NounInContext(_dictionary.Lower(correction), context) ?? correction
+            : correction;
+
+    /// <summary>
+    /// Höflichkeitsform (nur Deutsch): Im förmlichen Feld (<see cref="WordContext.Formal"/>) wird "sie", "ihnen", "ihre" …
+    /// mitten im Satz großgeschrieben; sonst steht die großgeschriebene Form wenigstens in der Leiste.
+    /// </summary>
+    /// <returns>Die Autokorrektur, gegebenenfalls ersetzt; <paramref name="candidates"/> wird ergänzt.</returns>
+    public string? ApplyFormal(
+        string typed, string? autoCorrection, List<string> candidates, WordContext context, bool suppressed, int max)
+    {
+        if (!IsLowerCase(typed)) return autoCorrection;
+
+        string result = autoCorrection ?? typed;
+        if (context.Formal && !suppressed && context.Previous is not (null or NgramModel.SentenceStart)
+            && IsLowerCase(result) && FormalForm(_dictionary.Lower(result)) is { } formalResult)
+        {
+            autoCorrection = formalResult;
+        }
+
+        if (FormalForm(_dictionary.Lower(typed)) is { } formal && !candidates.Contains(formal))
+        {
+            candidates.Insert(Math.Min(candidates.Count, context.Formal ? 0 : 1), formal);
+            if (candidates.Count > max) candidates.RemoveAt(candidates.Count - 1);
+        }
+
+        return autoCorrection;
+    }
+
+    /// <summary>Großgeschriebene Höflichkeitsform eines Pronomens ("ihnen" → "Ihnen"), nur Deutsch.</summary>
+    string? FormalForm(string lower) =>
+        _dictionary.Language == "de" && lower is "sie" or "ihnen" or "ihr" or "ihre" or "ihren" or "ihrem" or "ihrer" or "ihres"
+            ? char.ToUpperInvariant(lower[0]) + lower[1..]
+            : null;
 
     /// <summary>
     /// Bewertete Vorschläge und Korrekturen für <paramref name="typed"/>, ohne sich schon zu entscheiden. Grundlage für
@@ -216,7 +311,7 @@ public sealed class SuggestionEngine
         float maxDistance = lower.Length switch
         {
             <= 1 => 0f,
-            2 => WordDictionary.MissingApostropheCost, // nur Umlaut, Akzent oder Apostroph: "im" → "I'm", "ol" → "Öl"
+            2 => 1f, // "ic" → "ich", "su" → "du"; echte Wörter schützt RareWordRatio
             <= 5 => 1f,
             _ => 2f,
         };
@@ -249,7 +344,8 @@ public sealed class SuggestionEngine
             {
                 if (distance <= 0) continue;
                 double score = freq / Math.Pow(DistancePenaltyBase, distance);
-                Offer(word, score);
+                // Nach zwei Buchstaben gehört die Leiste den Vervollständigungen; die Korrektur ("ic" → "ich") zählt trotzdem.
+                if (lower.Length > 2 || distance <= WordDictionary.MissingApostropheCost) Offer(word, score);
                 bool nearMiss = hasTouches && distance <= NearMissDistance && word.Length == lower.Length
                     && !KeyProximity.IsLazySpelling(lower, word);
                 corrections.Add((word, score, score, nearMiss));
@@ -263,9 +359,10 @@ public sealed class SuggestionEngine
             HashSet<string>? ownFollowers = context.PreviousWord is { } previousWord
                 ? new HashSet<string>(_history.Followers(previousWord).Select(f => f.Next), StringComparer.OrdinalIgnoreCase)
                 : null;
+            var neural = NeuralNext(context);
             double Factor(string word)
             {
-                double factor = Math.Min(MaxContextFactor, _model.ContextFactor(context, word));
+                double factor = ContextFactor(context, word, neural);
                 return ownFollowers?.Contains(word) == true ? Math.Max(factor, ContextBoost) : factor;
             }
 
@@ -303,7 +400,7 @@ public sealed class SuggestionEngine
         bool splitOverrides = false;
         if (compound == null && !learned && _history.CountOf(lower) == 0 && Split(lower, context) is { } split
             && (typedFrequency == 0 || split.Score >= LazySpellingRatio * typedFrequency)
-            && (best == null || split.Score > best.Value.InContext))
+            && (best == null || split.Score > best.Value.InContext || DropsSplitPart(best.Value.Word, split.Text)))
         {
             best = (split.Text, split.Score, split.Score, false);
             splitOverrides = typedFrequency > 0;
@@ -338,10 +435,15 @@ public sealed class SuggestionEngine
             }
             else
             {
-                // Großgeschriebene Einträge sind geprüfte Substantive und Namen ("Ost", "DDR") und bleiben stehen.
+                // Großgeschriebene Einträge sind geprüfte Substantive und Namen ("Ost", "DDR") und bleiben stehen –
+                // außer Abkürzungen in Großbuchstaben, wenn sie klein getippt wurden: "ic" ist kein "IC", sondern "ich".
+                string entry = _dictionary.Lookup(lower)?.Word ?? "A";
+                bool protectedEntry = char.IsUpper(entry[0]) && !(IsAcronym(entry) && !IsAcronym(typed));
                 overrides = best.Value.Word != bestLazySpelling?.Word
-                    && best.Value.Score >= RareWordRatio * typedFrequency
-                    && !char.IsUpper(_dictionary.Lookup(lower)?.Word[0] ?? 'A');
+                    && !protectedEntry
+                    && (best.Value.Score >= RareWordRatio * typedFrequency
+                        || (best.Value.Score >= RareWordContextRatio * typedFrequency
+                            && best.Value.InContext >= RareWordRatio * typedInContext));
             }
 
             // Der Finger lag fast auf der Grenze zur Nachbartaste, und das Wort mit dem Nachbarbuchstaben passt viel
@@ -349,6 +451,21 @@ public sealed class SuggestionEngine
             if (!overrides && bestNearMiss is { } near && near.InContext >= NearMissRatio * typedInContext)
             {
                 (best, overrides) = (near, true);
+            }
+        }
+
+        // Richtig geschrieben, aber im Satz passt ein ähnliches Wort besser ("in" → "im", "den" → "dem", "then" → "than"):
+        // nicht korrigieren (das Getippte ist ein echtes Wort), aber auf den linken Platz der Leiste.
+        if (typedIsWord && !overrides && context.Previous != null && best is { } alternative
+            && !alternative.Word.Contains(' ') && alternative.InContext >= RealWordBarRatio * typedInContext)
+        {
+            string form = MatchCase(CaseInSentence(typed, alternative.Word, context), typed, _dictionary.Language);
+            int index = candidates.FindIndex(c => c.Word == form);
+            if (index is < 0 or >= BarSlots && candidates.Count > 0)
+            {
+                if (index >= 0) candidates.RemoveAt(index);
+                candidates.Insert(1, (form, candidates[0].Score)); // gleich bewertet wie das Erste: bleibt auch mehrsprachig vorn
+                if (candidates.Count > max) candidates.RemoveAt(candidates.Count - 1);
             }
         }
 
@@ -427,6 +544,11 @@ public sealed class SuggestionEngine
         {
             followers = new HashSet<string>(
                 _model.Predict(context, GlideFollowers).Select(f => f.Word.ToLowerInvariant()), StringComparer.Ordinal);
+            if (NeuralNext(context) is { } neural)
+            {
+                followers.UnionWith(neural.Top(GlideFollowers).Select(f => f.Word.ToLowerInvariant()));
+            }
+
             if (context.PreviousWord is { } previousWord)
             {
                 followers.UnionWith(_history.Followers(previousWord).Select(f => f.Next.ToLowerInvariant()));
@@ -454,11 +576,23 @@ public sealed class SuggestionEngine
     {
         var scores = new Dictionary<string, double>(StringComparer.Ordinal);
 
+        // Beide Modelle auf 0..1 bringen (bestes Wort = 1) und nach NeuralWeight mischen.
+        var neural = NeuralNext(context);
+        double ngramShare = neural == null ? 1.0 : 1 - NeuralWeight;
         var seed = _model.Predict(context, Math.Max(max, 6));
         if (seed.Count > 0)
         {
             double top = seed[0].Probability;
-            foreach (var (next, probability) in seed) scores[next] = probability / top;
+            foreach (var (next, probability) in seed) scores[next] = ngramShare * probability / top;
+        }
+
+        if (neural?.Top(Math.Max(max, 6)) is { Count: > 0 } learned)
+        {
+            double top = learned[0].Probability;
+            foreach (var (next, probability) in learned)
+            {
+                scores[next] = scores.GetValueOrDefault(next) + NeuralWeight * probability / top;
+            }
         }
 
         if (context.PreviousWord is { } previousWord)
@@ -641,10 +775,11 @@ public sealed class SuggestionEngine
         if (firstIsWord && secondIsWord) return null;
 
         (string Word, double Score)? best = null;
+        NeuralDistribution? neural = null;
         void Consider(string joined)
         {
             if (_dictionary.Lookup(joined) is not { } entry || entry.Freq < minFrequency) return;
-            double score = entry.Freq * Math.Min(MaxContextFactor, _model.ContextFactor(context, entry.Word))
+            double score = entry.Freq * ContextFactor(context, entry.Word, neural ??= NeuralNext(context))
                 / Math.Pow(DistancePenaltyBase, MissingSpaceCost);
             if (best == null || score > best.Value.Score) best = (entry.Word, score);
         }
@@ -655,9 +790,16 @@ public sealed class SuggestionEngine
 
         // Die Alternative: Nur das Stück, das kein Wort ist, wird für sich korrigiert. Sind beide keine Wörter,
         // müssten beide korrigiert werden; das ist unwahrscheinlicher.
-        double aloneScore = secondIsWord
-            ? Analyze(previousTyped, context, proximity).Correction?.Score ?? 0
-            : Analyze(typed, new WordContext(previousTyped, context.Previous), proximity).Correction?.Score ?? 0;
+        string alone = secondIsWord ? previousTyped : typed;
+        var aloneCorrection = secondIsWord
+            ? Analyze(previousTyped, context, proximity).Correction
+            : Analyze(typed, new WordContext(previousTyped, context.Previous), proximity).Correction;
+        // Ein Stück aus zwei Buchstaben ist meist ein abgetrennter Wortteil ("th ink", "go ing"), kein Vertipper
+        // ("th" → "the"): Dafür zählen hier nur Umlaut, Akzent und Apostroph.
+        double aloneScore = aloneCorrection is { } c
+            && (alone.Length > 2 || KeyProximity.IsLazySpelling(_dictionary.Lower(alone), c.Word))
+            ? c.Score
+            : 0;
         if (!firstIsWord && !secondIsWord) aloneScore /= DistancePenaltyBase;
 
         return best.Value.Score > aloneScore ? (MatchCase(best.Value.Word, previousTyped, _dictionary.Language), best.Value.Score) : null;
@@ -687,18 +829,35 @@ public sealed class SuggestionEngine
         var forms = _dictionary.Forms(lower);
         if (forms.Count < 2 || !forms.Contains(lower)) return null;
 
+        // Nur das Sprachmodell: Das Netz schreibt mehrdeutige Wörter zu oft groß ("und liebe" → "Liebe"; tools/SuggestionEval).
+        double Probability(string form) => _model.FormProbability(context, form);
+
         string? best = null;
-        double bestProbability = _model.FormProbability(context, lower) * NounContextRatio;
+        double bestProbability = Probability(lower) * NounContextRatio;
         if (bestProbability <= 0) return null;
         foreach (var form in forms)
         {
             if (form == lower || !char.IsUpper(form[0])) continue;
-            double probability = _model.FormProbability(context, form);
+            double probability = Probability(form);
             if (probability >= bestProbability) (best, bestProbability) = (form, probability);
         }
 
         return best;
     }
+
+    /// <summary>
+    /// Die beste Korrektur lässt einfach eines der beiden Wörter weg ("fora" → "for" statt "for a", "isa" → "is"): Dann
+    /// ist das fehlende Leerzeichen die bessere Erklärung, auch wenn das eine Wort allein häufiger ist.
+    /// </summary>
+    static bool DropsSplitPart(string correction, string split)
+    {
+        int space = split.IndexOf(' ');
+        return space > 0 && (string.Equals(correction, split[..space], StringComparison.OrdinalIgnoreCase)
+            || string.Equals(correction, split[(space + 1)..], StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>"IC", "DDR", "UN": mindestens zwei Buchstaben, alle groß.</summary>
+    static bool IsAcronym(string word) => word.Count(char.IsLetter) >= 2 && word.Where(char.IsLetter).All(char.IsUpper);
 
     static bool IsLowerCase(string text) => text.Length > 0 && !text.Any(char.IsUpper);
 
