@@ -21,6 +21,7 @@
     <Compile Include="../../Suggestions/KeyProximity.cs" Link="Core/KeyProximity.cs" />
     <Compile Include="../../Suggestions/SuggestionEngine.cs" Link="Core/SuggestionEngine.cs" />
     <Compile Include="../../Suggestions/NgramModel.cs" Link="Core/NgramModel.cs" />
+    <Compile Include="../../Suggestions/NeuralModel.cs" Link="Core/NeuralModel.cs" />
     <Compile Include="../../Suggestions/TouchTrace.cs" Link="Core/TouchTrace.cs" />
     <Compile Include="../../Suggestions/UserHistory.cs" Link="Core/UserHistory.cs" />
     <Compile Include="../../Suggestions/GlideDecoder.cs" Link="Core/GlideDecoder.cs" />

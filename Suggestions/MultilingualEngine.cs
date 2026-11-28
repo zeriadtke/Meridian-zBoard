@@ -120,11 +120,12 @@ public sealed class MultilingualEngine
         if (!analyses.Any(a => a.CorrectionSuppressed))
         {
             (string Word, double Score)? best = null;
+            int bestLanguage = 0;
             for (int i = 0; i < analyses.Length; i++)
             {
                 if (analyses[i].Correction is not { } c) continue;
                 double score = c.Score * Weight(i, context);
-                if (best == null || score > best.Value.Score) best = (c.Word, score);
+                if (best == null || score > best.Value.Score) (best, bestLanguage) = ((c.Word, score), i);
             }
 
             // Richtig geschrieben ist das Getippte, wenn eine Sprache es kennt und es dort nicht nur ein seltener
@@ -132,7 +133,8 @@ public sealed class MultilingualEngine
             bool solid = analyses.Where((a, i) => a.TypedLearned || IsWordIn(a, i) && !a.CorrectionOverrides).Any();
             if (!solid && best is { } correction && typed.Length >= 2)
             {
-                autoCorrection = SuggestionEngine.MatchCase(correction.Word, typed, Primary.Language);
+                string word = _engines[bestLanguage].Engine.CaseInSentence(typed, correction.Word, sentence);
+                autoCorrection = SuggestionEngine.MatchCase(word, typed, Primary.Language);
             }
             else
             {
@@ -147,6 +149,9 @@ public sealed class MultilingualEngine
                 }
             }
         }
+
+        bool suppressed = analyses.Any(a => a.CorrectionSuppressed);
+        foreach (var (_, engine) in _engines) autoCorrection = engine.ApplyFormal(typed, autoCorrection, candidates, sentence, suppressed, max);
 
         if (autoCorrection == typed) autoCorrection = null;
         return new SuggestionResult(typed, candidates, autoCorrection, typedIsWord);

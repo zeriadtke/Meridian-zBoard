@@ -47,6 +47,9 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
 
     readonly StringBuilder _composing = new();
 
+    /// <summary>Wird in diesem Feld gesiezt? Null: noch nicht geprüft (siehe <see cref="WordContext.Formal"/>).</summary>
+    bool? _formalField;
+
     ZBoardSettings _settings = null!;
 
     KeyboardView? _keyboardView;
@@ -68,6 +71,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     readonly List<(char Char, Vector2? Point)> _touches = [];
     Correction? _lastCorrection;
     string? _restoredWord;      // per Rücktaste wiederhergestelltes Original; das nächste Leerzeichen übernimmt und lernt es
+    string? _resumedWord;       // per Rücktaste wieder aufgenommenes Wort; unverändert abgeschlossen: nicht korrigieren, nicht erneut lernen
     SuggestionResult _currentSuggestions = SuggestionResult.Empty;
 
     bool _glideActive;                          // das Wort in Bearbeitung kam aus der Wischeingabe
@@ -114,9 +118,44 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         ClearPinyinLearning();
+        foreach (var model in TouchModels.Values) model.Clear();
 
         var dir = Path.Combine(context.FilesDir!.AbsolutePath, "learning");
         if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+    }
+
+    // ---------- Persönliches Tippmuster ----------
+    // Je Ausrichtung ein Muster: Im Querformat sind die Tasten breiter und flacher, der Finger trifft anders.
+
+    static readonly ConcurrentDictionary<string, TouchModel> TouchModels = new();
+
+    static string TouchFile(Context context, string orientation) =>
+        Path.Combine(context.FilesDir!.AbsolutePath, "learning", $"touch-{orientation}.tsv");
+
+    string ScreenOrientation => Resources?.Configuration?.Orientation == Android.Content.Res.Orientation.Landscape ? "landscape" : "portrait";
+
+    TouchModel CurrentTouchModel => TouchModels.GetOrAdd(ScreenOrientation, orientation =>
+    {
+        try
+        {
+            string path = TouchFile(this, orientation);
+            return File.Exists(path) ? TouchModel.Load(File.ReadAllText(path)) : new TouchModel();
+        }
+        catch (IOException)
+        {
+            return new TouchModel();
+        }
+    });
+
+    /// <summary>Lernt aus dem eben abgeschlossenen Wort, wo dieser Finger die Tasten trifft (ohne Inhalte, siehe TouchModel).</summary>
+    void LearnTouches(string final)
+    {
+        if (_keyboardView == null || !_settings.LearnWords || !_profile.AllowLearning) return;
+        if (TouchPoints() is not { } points) return;
+
+        var model = CurrentTouchModel;
+        model.Learn(final, points, _keyboardView.KeyCenters);
+        _keyboardView.TouchShift = model.HitShift;
     }
 
     void SaveLearning()
@@ -131,6 +170,14 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         SavePinyinLearning();
+
+        foreach (var (orientation, model) in TouchModels)
+        {
+            if (!model.IsDirty) continue;
+            var path = TouchFile(this, orientation);
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, model.Save());
+        }
     }
 
     public override View? OnCreateInputView()
@@ -148,9 +195,11 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         MeridianStartInput(info); // Meridian: neue Messsitzung je Eingabefeld
 
         _profile = EditorProfile.From(info);
+        _formalField = null; // neu bestimmen: weiter vorn im Feld kann schon gesiezt sein
         _composing.Clear();
         _lastCorrection = null;
         _restoredWord = null;
+        _resumedWord = null;
         _autoSpaceInserted = false;
         _toolbarOpen = false;
         _glideActive = false;
@@ -240,6 +289,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             _composing.Clear();
             _glideActive = false;
             _restoredWord = null;
+            _resumedWord = null;
             Ic?.FinishComposingText();
             UpdateSuggestions();
         }
@@ -474,6 +524,10 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             }
             UpdateSuggestions();
         }
+        else if (TryDeleteIntoWord())
+        {
+            UpdateSuggestions(); // die Vorschläge des Worts erscheinen wieder
+        }
         else
         {
             SendDownUpKeyEvents(Keycode.Del);
@@ -481,6 +535,38 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         UpdateAutoShift();
+    }
+
+    /// <summary>
+    /// Wie Gboard: Löscht die Rücktaste bis an ein Wort heran ("Haste rene␣" → "Haste rene"), wird es wieder zum Wort
+    /// in Bearbeitung. Die Leiste zeigt dann dieselben Vorschläge wie beim Tippen, und Weitertippen oder Löschen
+    /// verändert dieses Wort. false: Zeichen nicht selbst gelöscht, das übernimmt wie bisher die Entf-Taste.
+    /// </summary>
+    bool TryDeleteIntoWord()
+    {
+        if (!_profile.AllowSuggestions || _profile.IsEmail || IsChinese || _emojiSearchActive || _voiceActive) return false;
+        var ic = Ic;
+        if (ic == null) return false;
+        if (ic.GetSelectedTextFormatted(0)?.ToString() is { Length: > 0 }) return false; // Markierung löscht der Editor
+
+        const int Window = 64;
+        string before = TextBeforeCursor(Window);
+        string after = ic.GetTextAfterCursorFormatted(1, 0)?.ToString() ?? string.Empty;
+        if (TextBoundaries.WordAfterDelete(before, after, windowFull: before.Length >= Window) is not { } word) return false;
+
+        // Zeichen und Wort in einem Schritt ersetzen: das Wort steht danach als Wort in Bearbeitung da.
+        ic.BeginBatchEdit();
+        ic.DeleteSurroundingText(1 + word.Length, 0);
+        ic.SetComposingText(J(word), 1);
+        ic.EndBatchEdit();
+
+        _composing.Clear().Append(word);
+        _touches.Clear(); // Fingerpunkte gehören zu einem früheren Wort
+        _resumedWord = word;
+        _restoredWord = null;
+        _lastSpaceCommit = null;
+        _glideActive = false;
+        return true;
     }
 
     void HandleEnter()
@@ -560,12 +646,14 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         string final = typed;
         bool restored = typed == _restoredWord; // wiederhergestelltes Original: nicht korrigieren, sondern lernen
         _restoredWord = null;
+        bool resumed = typed == _resumedWord;   // unverändert wieder aufgenommenes Wort: stand schon so da
+        _resumedWord = null;
 
         // Derselbe Kontext wie in der Vorschlagsleiste, damit eingesetzt wird, was dort hervorgehoben ist.
         string? previous = PreviousWord();
         var context = SentenceContext();
         bool inUrl = InUrlOrAddress();
-        bool mayCorrect = autocorrect && !restored && !inUrl && _settings.AutoCorrect && _profile.AllowAutocorrect;
+        bool mayCorrect = autocorrect && !restored && !resumed && !inUrl && _settings.AutoCorrect && _profile.AllowAutocorrect;
 
         // Leertaste mitten im Wort ("da ke", "ha llo"): Das Stück davor und dieses ergeben zusammen das gemeinte Wort.
         var before = _lastSpaceCommit;
@@ -611,11 +699,13 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         ic.CommitText(J(final + separator), 1);
+        if (!restored) LearnTouches(final); // vor dem Leeren: braucht die Fingerpunkte des Worts
         if (separator == " " && !_glideActive && !restored) _lastSpaceCommit = new SpaceCommit(typed, final, context, previous);
         _composing.Clear();
         _glideActive = false;
         _currentSuggestions = SuggestionResult.Empty;
-        if (!inUrl) Learn(previous, final, accepted: restored); // Teile von Links nicht als Wörter lernen
+        // Teile von Links nicht als Wörter lernen; ein unverändert wieder aufgenommenes Wort ist schon gelernt
+        if (!inUrl && !resumed) Learn(previous, final, accepted: restored);
     }
 
     /// <summary>
@@ -753,7 +843,10 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             before = before[..^current.Length];
         }
 
-        return WordContext.FromText(before, fromFieldStart);
+        // Einmal pro Feld weit zurückschauen (Antwort auf eine E-Mail), danach reicht das kleine Fenster beim Tippen.
+        _formalField ??= WordContext.HasFormalAddress(fromFieldStart ? before : TextBeforeCursor(2000));
+        if (_formalField != true && WordContext.HasFormalAddress(before)) _formalField = true;
+        return WordContext.FromTextWithSentence(before, fromFieldStart) with { Formal = _formalField == true };
     }
 
     /// <summary>Merkt sich zu den Zeichen, die gleich an das Wort in Bearbeitung angehängt werden, den Fingerpunkt.</summary>
@@ -771,7 +864,13 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
     /// Fingerpunkte zum Wort in Bearbeitung für die Autokorrektur; null, wenn keine bekannt sind. Punkte zählen nur,
     /// wo das gemerkte Zeichen noch an derselben Stelle steht.
     /// </summary>
-    TouchTrace? Touches()
+    TouchTrace? Touches() =>
+        _keyboardView != null && TouchPoints() is { } points
+            ? new TouchTrace(points, CurrentTouchModel.Shift(_keyboardView.KeyCenters))
+            : null;
+
+    /// <summary>Je Buchstabe des Worts in Bearbeitung der Fingerpunkt, oder null, wenn keiner bekannt ist.</summary>
+    Vector2?[]? TouchPoints()
     {
         if (_keyboardView == null || _glideActive || _composing.Length == 0 || _touches.Count < _composing.Length) return null;
 
@@ -784,7 +883,7 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
             any |= points[i] != null;
         }
 
-        return any ? new TouchTrace(points, _keyboardView.KeyCenters) : null;
+        return any ? points : null;
     }
 
     // ---------- Wischeingabe ----------
@@ -1143,10 +1242,44 @@ public sealed partial class ZBoardImeService : InputMethodService, IKeyboardActi
         }
 
         var proximity = KeyProximity.FromLayout(Layouts.Alphabet(language, showLanguageKey: false));
+        var neural = NeuralModel(language);
+        neural?.Preload(); // lädt im Hintergrund weiter; bis dahin sagt das N-Gramm-Modell allein vorher
         Perf.Log($"load-{language}", Perf.Since(started));
         Perf.Log($"ready-{language}-since-process-start", Perf.SinceProcessStart);
         Task.Run(() => WarmUp(language, new SuggestionEngine(dictionary, proximity, model))); // hält das Laden nicht auf
-        return new SuggestionEngine(dictionary, proximity, model, history);
+        return new SuggestionEngine(dictionary, proximity, model, history, neural);
+    }
+
+    /// <summary>
+    /// Das neuronale Sprachmodell einer Sprache (Assets/lm/&lt;Sprache&gt;.lm.onnx und .vocab.txt), oder null, wenn die
+    /// Sprache keins hat. Geladen wird erst beim ersten Gebrauch und nur, solange „KI-Vorhersage“ eingeschaltet ist.
+    /// </summary>
+    NeuralLanguageModel? NeuralModel(string language)
+    {
+        string modelAsset = $"lm/{language}.lm.onnx", vocabAsset = $"lm/{language}.vocab.txt";
+        var available = Assets!.List("lm") ?? [];
+        if (!available.Contains($"{language}.lm.onnx") || !available.Contains($"{language}.vocab.txt")) return null;
+
+        var assets = Assets!;
+        var settings = _settings;
+        return new NeuralLanguageModel(
+            () =>
+            {
+                long started = Perf.Now;
+                byte[] bytes;
+                using (var stream = assets.Open(modelAsset))
+                using (var buffer = new MemoryStream())
+                {
+                    stream.CopyTo(buffer);
+                    bytes = buffer.ToArray();
+                }
+
+                using var vocabulary = assets.Open(vocabAsset);
+                var loaded = OnnxLanguageModel.Load(bytes, vocabulary, language);
+                Perf.Log($"load-{language}-neural", Perf.Since(started));
+                return loaded;
+            },
+            enabled: () => settings.NeuralPrediction);
     }
 
     NgramModel LoadModel(string language)

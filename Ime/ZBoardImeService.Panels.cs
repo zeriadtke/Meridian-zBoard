@@ -69,7 +69,7 @@ public sealed partial class ZBoardImeService : IEmojiPanelListener, IClipboardPa
         _suggestionBar.EmojiPicked += InsertEmoji;
         _suggestionBar.CandidatePicked += OnCandidatePicked;
 
-        _keyboardView = new KeyboardView(this) { Listener = this };
+        _keyboardView = new KeyboardView(this) { Listener = this, TouchShift = CurrentTouchModel.HitShift };
         _emojiPanel = new EmojiPanelView(this) { Listener = this, Visibility = ViewStates.Gone };
         _clipboardPanel = new ClipboardPanelView(this) { Listener = this, Visibility = ViewStates.Gone };
         _textEditPanel = new TextEditPanelView(this) { Listener = this, Visibility = ViewStates.Gone };

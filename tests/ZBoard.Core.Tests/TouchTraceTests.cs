@@ -32,7 +32,7 @@ public class TouchTraceTests
         var border = Trace(new Vector2(5.5f, 1));   // genau zwischen g und h
         var center = Trace(new Vector2(5f, 1));     // mitten auf g
 
-        Assert.Equal(0f, border.Cost(0, 'g', 'h', 12)!.Value, 3);
+        Assert.Equal(TouchTrace.MinCost, border.Cost(0, 'g', 'h', 12)!.Value, 3); // fast kostenlos, nie ganz
         Assert.Equal(1f, center.Cost(0, 'g', 'h', 12)!.Value, 3);
         Assert.True(Trace(new Vector2(5.3f, 1)).Cost(0, 'g', 'h', 12) is > 0.3f and < 0.9f);
     }

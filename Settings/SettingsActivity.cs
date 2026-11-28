@@ -417,6 +417,9 @@ public sealed class SettingsActivity : Activity
         Section(L.T("Vorschläge", "Suggestions"));
         Toggle(L.T("Vorschlagsleiste: nächstes Wort", "Next-word suggestions"), L.T("Vorschläge, bevor du zu tippen beginnst", "Suggestions before you start typing"),
             _settings.NextWordPrediction, (_, v) => _settings.NextWordPrediction = v);
+        Toggle(L.T("KI-Vorhersage", "AI prediction"),
+            L.T("Kleines Sprachmodell auf dem Gerät berücksichtigt den ganzen Satz", "A small on-device language model looks at the whole sentence"),
+            _settings.NeuralPrediction, (_, v) => _settings.NeuralPrediction = v);
 
         Section(L.T("Korrekturen", "Corrections"));
         Toggle(L.T("Autokorrektur", "Auto-correction"), L.T("Tippfehler beim Drücken der Leertaste korrigieren", "Fix typos when you press the space bar"), _settings.AutoCorrect, (_, v) => _settings.AutoCorrect = v);
@@ -1041,7 +1044,9 @@ public sealed class SettingsActivity : Activity
                    + "Chinesisch: Lesungen der Schriftzeichen (Pinyin) nach pinyin-data und phrase-pinyin-data "
                    + "von mozillazg (MIT).\n\n"
                    + "Sprachmodelle für die Vorhersage: Wortfolgen aus der Satzsammlung von Mozilla Common Voice "
-                   + "(gemeinfrei, CC0), in der Schreibweise der Wortlisten.\n\n"
+                   + "(gemeinfrei, CC0), in der Schreibweise der Wortlisten; die KI-Vorhersage ist auf denselben Sätzen "
+                   + "trainiert, zusätzlich auf Texten der Leipzig Corpora Collection der Universität Leipzig "
+                   + "(CC BY 4.0), und läuft mit ONNX Runtime von Microsoft (MIT).\n\n"
                    + "Emoji-Daten: unicode-emoji-json von Mu-An Chiou (MIT); Namen und Suchbegriffe: Unicode CLDR "
                    + "(Unicode License v3), © Unicode, Inc.\n\n"
                    + "Symbole: Material Symbols von Google (Apache License 2.0).",
@@ -1051,7 +1056,9 @@ public sealed class SettingsActivity : Activity
                    + "Chinese: character readings (pinyin) from pinyin-data and phrase-pinyin-data "
                    + "by mozillazg (MIT).\n\n"
                    + "Language models for prediction: word sequences from the Mozilla Common Voice sentence "
-                   + "collection (public domain, CC0), spelled as in the word lists.\n\n"
+                   + "collection (public domain, CC0), spelled as in the word lists; AI prediction is trained on the "
+                   + "same sentences and on texts from the Leipzig Corpora Collection of Leipzig University "
+                   + "(CC BY 4.0), and runs with ONNX Runtime by Microsoft (MIT).\n\n"
                    + "Emoji data: unicode-emoji-json by Mu-An Chiou (MIT); names and keywords: Unicode CLDR "
                    + "(Unicode License v3), © Unicode, Inc.\n\n"
                    + "Icons: Material Symbols by Google (Apache License 2.0)."));

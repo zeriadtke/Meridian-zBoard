@@ -133,6 +133,13 @@ public sealed class KeyboardView : View
     /// </summary>
     public Vector2? TapPoint { get; private set; }
 
+    /// <summary>
+    /// Persönliches Tippmuster (<see cref="ZBoard.Suggestions.TouchModel.HitShift"/>): Um so viele Tastenbreiten landet
+    /// der Finger im Mittel daneben; die getroffene Taste wird am entsprechend zurückverschobenen Punkt bestimmt.
+    /// <see cref="TapPoint"/> bleibt der echte Punkt (daraus wird gelernt).
+    /// </summary>
+    public Vector2 TouchShift { get; set; }
+
     KeyboardLayout? _layout;
     Press? _press;
     Popup? _popup;
@@ -1162,6 +1169,8 @@ public sealed class KeyboardView : View
 
     PlacedKey? KeyAt(float x, float y)
     {
+        x -= TouchShift.X * _unit;
+        y -= TouchShift.Y * _unit;
         PlacedKey? nearest = null;
         float nearestDist = float.MaxValue;
         foreach (var pk in _keys)

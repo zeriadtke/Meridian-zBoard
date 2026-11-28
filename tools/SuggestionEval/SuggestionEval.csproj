@@ -2,7 +2,7 @@
 
   <!--
     Misst die Qualität von Wortvorschlägen und Autokorrektur mit simuliertem Tippen (Aufruf: siehe README.md).
-    Benutzt dieselben Quelltexte wie die App und die Unit-Tests, ohne weitere Pakete.
+    Benutzt dieselben Quelltexte wie die App und die Unit-Tests; ONNX Runtime für das neuronale Sprachmodell.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -20,9 +20,16 @@
     <Compile Include="../../Suggestions/KeyProximity.cs" Link="Core/KeyProximity.cs" />
     <Compile Include="../../Suggestions/SuggestionEngine.cs" Link="Core/SuggestionEngine.cs" />
     <Compile Include="../../Suggestions/NgramModel.cs" Link="Core/NgramModel.cs" />
+    <Compile Include="../../Suggestions/NeuralModel.cs" Link="Core/NeuralModel.cs" />
+    <Compile Include="../../Suggestions/OnnxLanguageModel.cs" Link="Core/OnnxLanguageModel.cs" />
     <Compile Include="../../Suggestions/TouchTrace.cs" Link="Core/TouchTrace.cs" />
+    <Compile Include="../../Suggestions/TouchModel.cs" Link="Core/TouchModel.cs" />
     <Compile Include="../../Suggestions/UserHistory.cs" Link="Core/UserHistory.cs" />
     <Compile Include="../../Suggestions/GlideDecoder.cs" Link="Core/GlideDecoder.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.29.0" />
   </ItemGroup>
 
 </Project>

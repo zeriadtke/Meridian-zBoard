@@ -25,6 +25,15 @@ public sealed class TypingNoise
     public double DoubleRate { get; init; } = 0.003;
     public double SwapRate { get; init; } = 0.004;
 
+    /// <summary>Systematische Abweichung jedes Treffers in Tastenbreiten (y positiv: zu tief).</summary>
+    public Vector2 Bias { get; init; }
+
+    /// <summary>Daumen ziehen zur Mitte: Am Rand landet der Finger um so viele Tastenbreiten zur Mitte hin daneben.</summary>
+    public float ThumbPull { get; init; }
+
+    /// <summary>Um so viel verschiebt die Tastatur den Treffer, bevor sie die Taste bestimmt (gelerntes Tippmuster).</summary>
+    public Func<Vector2>? HitShift { get; init; }
+
     /// <summary>Anteil der Umlaute und Akzentbuchstaben, die als Grundbuchstabe getippt werden.</summary>
     public double LazyAccentRate { get; init; } = 0.3;
 
@@ -71,8 +80,8 @@ public sealed class TypingNoise
             Vector2? point = null;
             if (_keys.TryGetValue(lower, out var center))
             {
-                point = Scatter(center);
-                char hit = NearestKey(point.Value);
+                point = Scatter(center) + Bias + Thumb(center);
+                char hit = NearestKey(point.Value - (HitShift?.Invoke() ?? Vector2.Zero));
                 c = char.IsUpper(c) ? char.ToUpperInvariant(hit) : hit;
             }
 
@@ -114,6 +123,13 @@ public sealed class TypingNoise
         }
 
         return points;
+    }
+
+    Vector2 Thumb(Vector2 center)
+    {
+        if (ThumbPull == 0 || _keys.Count == 0) return Vector2.Zero;
+        float left = _keys.Values.Min(k => k.X), right = _keys.Values.Max(k => k.X), middle = (left + right) / 2;
+        return new Vector2(-ThumbPull * (center.X - middle) / ((right - left) / 2), 0);
     }
 
     Vector2 Scatter(Vector2 center) =>

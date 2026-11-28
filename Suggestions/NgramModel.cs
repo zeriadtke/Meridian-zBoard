@@ -33,11 +33,69 @@ public readonly record struct WordContext(string? Previous, string? BeforePrevio
     /// </param>
     public static WordContext FromText(string before, bool startsAtFieldStart = true)
     {
-        if (before.Length > 0 && !char.IsWhiteSpace(before[^1])) return None;
+        var tokens = ReadTokens(before, startsAtFieldStart, 2);
+        return tokens.Count switch
+        {
+            0 => None,
+            1 => new WordContext(tokens[0]),
+            _ => new WordContext(tokens[0], tokens[1]),
+        };
+    }
 
-        string? first = null;
+    /// <summary>
+    /// Wie <see cref="FromText"/>, dazu der ganze Satz bis zur Schreibstelle (höchstens <paramref name="maxTokens"/>
+    /// Wörter, Satzanfang und Kommas) in <see cref="Sentence"/> – für das neuronale Sprachmodell, das mehr als zwei
+    /// Wörter Kontext nutzt.
+    /// </summary>
+    public static WordContext FromTextWithSentence(string before, bool startsAtFieldStart = true, int maxTokens = MaxSentenceTokens)
+    {
+        var tokens = ReadTokens(before, startsAtFieldStart, Math.Max(2, maxTokens));
+        if (tokens.Count == 0) return None;
+        tokens.Reverse(); // ältestes zuerst
+        string sentence = string.Join(' ', tokens);
+        return tokens.Count == 1
+            ? new WordContext(tokens[0]) { Sentence = sentence }
+            : new WordContext(tokens[^1], tokens[^2]) { Sentence = sentence };
+    }
+
+    /// <summary>
+    /// Im Eingabefeld wird gesiezt (Deutsch): "Sehr geehrte …" oder ein großgeschriebenes "Sie", "Ihnen", "Ihre" … mitten
+    /// im Satz. Dann schreibt zBoard diese Wörter groß ("erhalten sie" → "Sie"). Setzt der Tastaturdienst für das ganze Feld.
+    /// </summary>
+    public bool Formal { get; init; }
+
+    static readonly System.Text.RegularExpressions.Regex FormalAddress = new(
+        @"(?<![.!?…:]\s*)(?<=[\p{L},;]\s+)\b(Sie|Ihnen|Ihr|Ihre|Ihren|Ihrem|Ihrer|Ihres)\b|\b[Ss]ehr geehrte[rs]?\b",
+        System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+    /// <summary>Ob im Text gesiezt wird (siehe <see cref="Formal"/>). "Sie" am Satzanfang zählt nicht: Das könnte auch "sie" sein.</summary>
+    public static bool HasFormalAddress(string text) => text.Length > 0 && FormalAddress.IsMatch(text);
+
+    /// <summary>So viele Wörter (mit Satzanfang und Kommas) bekommt das neuronale Sprachmodell höchstens.</summary>
+    public const int MaxSentenceTokens = 24;
+
+    /// <summary>
+    /// Die Wörter vor der Schreibstelle, ältestes zuerst, durch Leerzeichen getrennt (Wörter enthalten keine
+    /// Leerzeichen); mit <see cref="NgramModel.SentenceStart"/> und <see cref="NgramModel.Comma"/>. Null, wenn nur die
+    /// beiden Wörter aus <see cref="Previous"/> und <see cref="BeforePrevious"/> bekannt sind.
+    /// </summary>
+    public string? Sentence { get; init; }
+
+    /// <summary>Der Satz bis zur Schreibstelle, ältestes Wort zuerst (mindestens die beiden Wörter davor).</summary>
+    public IReadOnlyList<string> Tokens =>
+        Sentence is { Length: > 0 } sentence ? sentence.Split(' ')
+        : BeforePrevious != null && Previous != null ? [BeforePrevious, Previous]
+        : Previous != null ? [Previous]
+        : [];
+
+    /// <summary>Liest bis zu <paramref name="max"/> Zeichen des Kontexts, das nächste an der Schreibstelle zuerst.</summary>
+    static List<string> ReadTokens(string before, bool startsAtFieldStart, int max)
+    {
+        var tokens = new List<string>(Math.Min(max, 8));
+        if (before.Length > 0 && !char.IsWhiteSpace(before[^1])) return tokens;
+
         int pos = before.Length;
-        for (int found = 0; found < 2; found++)
+        while (tokens.Count < max)
         {
             string? token = null;
             bool sawNewline = false;
@@ -74,12 +132,11 @@ public readonly record struct WordContext(string? Previous, string? BeforePrevio
             }
 
             if (token == null) break;
-            if (found == 0) first = token;
-            else return new WordContext(first, token);
+            tokens.Add(token);
             if (token == NgramModel.SentenceStart) break; // vor dem Satzanfang gibt es nichts
         }
 
-        return new WordContext(first);
+        return tokens;
     }
 }
 
